@@ -19,6 +19,8 @@ export const Button = forwardRef(
     ) => {
         return (
             <button
+                // oxlint-disable-next-line react/jsx-props-no-spreading
+                {...rest}
                 ref={ref}
                 type="button"
                 className={classNames(
@@ -27,7 +29,6 @@ export const Button = forwardRef(
                     small && "btn-sm",
                     className,
                 )}
-                {...rest}
             >
                 {children}
             </button>

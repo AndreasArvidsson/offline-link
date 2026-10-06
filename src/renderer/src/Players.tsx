@@ -1,11 +1,10 @@
 import type { JSX } from "preact/jsx-runtime";
 import { PlusCircle, Trash3 } from "react-bootstrap-icons";
-import { playerStatuses, type Player } from "../../tournament/models";
+import type { Player } from "../../common/models";
+import { Badge } from "./Badge";
 import { Button } from "./Button";
-import { IconError } from "./IconError";
 import { InputText } from "./InputText";
-import { Select } from "./Select";
-import { isEmptyString, statusToString } from "./utils";
+import { isEmptyString } from "./utils";
 
 interface Props {
     disabled: boolean;
@@ -18,14 +17,18 @@ export function Players({ disabled, players, onChange }: Props): JSX.Element {
         <section>
             <h2>
                 Players
-                {players.length < 3 && !disabled && (
-                    <small
-                        className="ms-2"
-                        title="At least 3 players are required"
-                    >
-                        <IconError />
-                    </small>
-                )}
+                <small className="ms-2">
+                    {players.length > 1 || disabled ? (
+                        <Badge>{players.length}</Badge>
+                    ) : (
+                        <Badge
+                            variant="danger"
+                            title="At least 2 players are required"
+                        >
+                            {players.length}
+                        </Badge>
+                    )}
+                </small>
             </h2>
 
             <Button

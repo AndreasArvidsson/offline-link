@@ -2,7 +2,7 @@ import { mkdir, readdir } from "node:fs/promises";
 import path from "node:path";
 import { app } from "electron";
 import { APP_NAME } from "./common/constants.ts";
-import type { Tournament } from "./tournament/models.ts";
+import type { Tournament } from "./common/models.ts";
 import { showErrorNotification } from "./util/notifications.ts";
 import { readJsonFile } from "./util/readJsonFile.ts";
 

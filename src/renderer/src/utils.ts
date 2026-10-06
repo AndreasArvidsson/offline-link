@@ -1,4 +1,4 @@
-import type { TournamentStatus } from "../../tournament/models";
+import type { TournamentStatus } from "../../common/models";
 
 export function statusToString(status: TournamentStatus): string {
     switch (status) {

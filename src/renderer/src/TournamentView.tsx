@@ -1,7 +1,9 @@
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
-import type { Tournament } from "../../tournament/models.ts";
-import { tournamentStatuses } from "../../tournament/models.ts";
+import type { Tournament } from "../../common/models.ts";
+import { tournamentStatuses } from "../../common/models.ts";
+import { Button } from "./Button.tsx";
+import { calculateNumberOfRounds } from "./calculateNumberOfRounds.ts";
 import { createNewTournament } from "./createNewTournament.ts";
 import type { DateFormatter } from "./DateFormatter.ts";
 import { GoBackButton } from "./GoBackButton.tsx";
@@ -41,6 +43,36 @@ export function TournamentView({
     }
 
     const disabled = tournament.status === "COMPLETED";
+
+    const renderRounds = () => {
+        if (tournament.roundCount > 0) {
+            return (
+                <Rounds
+                    disabled={disabled}
+                    totalRounds={tournament.roundCount}
+                    rounds={tournament.rounds}
+                    onChange={(rounds) => {
+                        setTournament({ ...tournament, rounds });
+                    }}
+                />
+            );
+        }
+
+        return (
+            <Button
+                variant="success"
+                disabled={disabled || tournament.players.length < 2}
+                onClick={() => {
+                    const roundCount = calculateNumberOfRounds(
+                        tournament.players.length,
+                    );
+                    setTournament({ ...tournament, roundCount });
+                }}
+            >
+                START!
+            </Button>
+        );
+    };
 
     return (
         <>
@@ -90,28 +122,18 @@ export function TournamentView({
                             />
                         </td>
                     </tr>
-                    <tr>
-                        <td># Rounds</td>
-                        <td>{tournament.roundCount}</td>
-                    </tr>
                 </tbody>
             </table>
 
             <Players
-                disabled={disabled}
+                disabled={disabled || tournament.roundCount > 0}
                 players={tournament.players}
                 onChange={(players) => {
                     setTournament({ ...tournament, players });
                 }}
             />
 
-            <Rounds
-                disabled={disabled}
-                rounds={tournament.rounds}
-                onChange={(rounds) => {
-                    setTournament({ ...tournament, rounds });
-                }}
-            />
+            {renderRounds()}
         </>
     );
 }

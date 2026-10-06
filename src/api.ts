@@ -1,4 +1,4 @@
-import type { Tournament, TournamentStatus } from "./tournament/models.ts";
+import type { Tournament, TournamentStatus } from "./common/models.ts";
 
 export interface RecentTournament {
     id: string;

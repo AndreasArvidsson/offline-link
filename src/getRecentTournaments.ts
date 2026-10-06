@@ -1,6 +1,6 @@
 import type { RecentTournament } from "./api";
+import type { Tournament } from "./common/models";
 import { storage } from "./storage";
-import type { Tournament } from "./tournament/models";
 
 export function getRecentTournaments(): RecentTournament[] {
     return storage.getTournaments().map(toRecentTournament);
