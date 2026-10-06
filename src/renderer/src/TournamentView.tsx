@@ -6,11 +6,12 @@ import { Button } from "./Button.tsx";
 import { calculateNumberOfRounds } from "./calculateNumberOfRounds.ts";
 import { createNewTournament } from "./createNewTournament.ts";
 import type { DateFormatter } from "./DateFormatter.ts";
+import { generateFirstRound } from "./generateFirstRound.ts";
 import { GoBackButton } from "./GoBackButton.tsx";
 import { handleError } from "./handleError.ts";
 import { InputText } from "./InputText.tsx";
 import { Loading } from "./Loading.tsx";
-import { Players } from "./Players.tsx";
+import { Players, playersAreValid } from "./Players.tsx";
 import { Rounds } from "./Rounds.tsx";
 import { Select } from "./Select.tsx";
 import type { View } from "./types.ts";
@@ -61,12 +62,17 @@ export function TournamentView({
         return (
             <Button
                 variant="success"
-                disabled={disabled || tournament.players.length < 2}
+                disabled={disabled || !playersAreValid(tournament.players)}
                 onClick={() => {
                     const roundCount = calculateNumberOfRounds(
                         tournament.players.length,
                     );
-                    setTournament({ ...tournament, roundCount });
+                    const firstRound = generateFirstRound(tournament.players);
+                    setTournament({
+                        ...tournament,
+                        roundCount,
+                        rounds: [firstRound],
+                    });
                 }}
             >
                 START!

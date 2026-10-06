@@ -130,3 +130,10 @@ function PlayerComponent({
         </tr>
     );
 }
+
+export function playersAreValid(players: Player[]): boolean {
+    return (
+        players.length > 1 &&
+        players.every((player) => !isEmptyString(player.name))
+    );
+}

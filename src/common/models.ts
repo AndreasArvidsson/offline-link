@@ -1,5 +1,6 @@
 export interface Tournament {
     version: 1;
+    // ISO timestamp. Also used as the filename.
     id: string;
     name: string;
     createdAt: number;
@@ -15,6 +16,7 @@ export const tournamentStatuses = ["IN_PROGRESS", "COMPLETED"] as const;
 export type TournamentStatus = (typeof tournamentStatuses)[number];
 
 export interface Player {
+    // Incrementing ID for the player.
     id: number;
     name: string;
 }
