@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "preserve",
+        "target": "ES2024",
+        "moduleResolution": "bundler",
+        "lib": ["ES2024"],
+        "types": ["node"],
+        "rootDir": "src",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "noEmit": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "allowImportingTsExtensions": true
+    },
+    "include": ["src"],
+    "exclude": ["src/renderer/**/*"]
+}
