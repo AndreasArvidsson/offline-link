@@ -1,6 +1,6 @@
 import path from "node:path";
 import { nativeTheme, BrowserWindow } from "electron";
-import { APP_NAME } from "./constants";
+import { APP_NAME } from "./common/constants";
 
 export function createWindow(): BrowserWindow {
     nativeTheme.themeSource = "system";
@@ -20,6 +20,8 @@ export function createWindow(): BrowserWindow {
         },
     });
 
+    window.removeMenu();
+
     // Set by electron-vite dev
     // oxlint-disable-next-line node/no-process-env
     const devUrl = process.env.ELECTRON_RENDERER_URL;
@@ -32,6 +34,8 @@ export function createWindow(): BrowserWindow {
     else {
         void window.loadFile(path.resolve(__dirname, "index.html"));
     }
+
+    window.webContents.openDevTools();
 
     return window;
 }

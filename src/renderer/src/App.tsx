@@ -1,0 +1,67 @@
+import { useEffect, useState } from "preact/hooks";
+import type { JSX } from "preact/jsx-runtime";
+import type { Parameters } from "../../api.ts";
+import { DateFormatter } from "./DateFormatter.ts";
+import { handleError } from "./handleError.ts";
+import { HomeView } from "./HomeView.tsx";
+import { Loading } from "./Loading.tsx";
+import { TournamentsView } from "./TournamentsView.tsx";
+import { TournamentView } from "./TournamentView.tsx";
+import type { View } from "./types.ts";
+
+export function App(): JSX.Element {
+    const [view, setView] = useState<View>({ type: "home" });
+    const [parameters, setParameters] = useState<Parameters>();
+
+    useEffect(() => {
+        window.api.getParameters().then(setParameters).catch(handleError);
+    }, []);
+
+    if (parameters == null) {
+        return <Loading />;
+    }
+
+    const dateFormatter = new DateFormatter(parameters.locale);
+
+    const renderView = () => {
+        const { type } = view;
+        switch (type) {
+            case "home":
+                return (
+                    <HomeView
+                        navigate={setView}
+                        dateFormatter={dateFormatter}
+                    />
+                );
+            case "tournaments":
+                return (
+                    <TournamentsView
+                        navigate={setView}
+                        dateFormatter={dateFormatter}
+                    />
+                );
+            case "tournament":
+                return (
+                    <TournamentView
+                        navigate={setView}
+                        id={view.id}
+                        dateFormatter={dateFormatter}
+                    />
+                );
+            case "tournamentNew":
+                return (
+                    <TournamentView
+                        navigate={setView}
+                        id={null}
+                        dateFormatter={dateFormatter}
+                    />
+                );
+            default: {
+                const _exhaustiveCheck: never = type;
+                throw new Error("Unhandled view type");
+            }
+        }
+    };
+
+    return <div className="container">{renderView()}</div>;
+}

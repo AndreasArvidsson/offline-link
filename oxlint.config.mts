@@ -61,7 +61,9 @@ const disabledRules = [
     "unicorn/no-array-for-each",
     "unicorn/no-negated-condition",
     "unicorn/no-null",
+    "unicorn/no-useless-undefined",
     "unicorn/prefer-at",
+    "unicorn/prefer-global-this",
     "unicorn/prefer-module",
     "unicorn/prefer-spread",
     "unicorn/prefer-ternary",
@@ -152,4 +154,17 @@ export default defineConfig({
             },
         ],
     },
+    overrides: [
+        {
+            files: ["src/renderer/**/*.{ts,tsx}"],
+            env: {
+                browser: true,
+                node: false,
+                mocha: false,
+            },
+            rules: {
+                "promise/prefer-await-to-then": "off",
+            },
+        },
+    ],
 });

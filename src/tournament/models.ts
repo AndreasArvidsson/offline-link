@@ -2,12 +2,17 @@ export interface Tournament {
     version: 1;
     id: string;
     name: string;
-    createdAt: string;
-    updatedAt: string;
-    status: "IN_PROGRESS" | "COMPLETED";
+    createdAt: number;
+    updatedAt: number;
+    roundCount: number;
+    status: TournamentStatus;
     players: Player[];
     rounds: Round[];
 }
+
+export const tournamentStatuses = ["IN_PROGRESS", "COMPLETED"] as const;
+
+export type TournamentStatus = (typeof tournamentStatuses)[number];
 
 export interface Player {
     id: string;
@@ -18,7 +23,7 @@ export interface Player {
 
 export interface Round {
     number: number;
-    createdAt: string;
+    createdAt: number;
     source: "MANUAL" | "AUTOMATIC" | "EVENTLINK";
     status: "IN_PROGRESS" | "COMPLETED";
     activePlayerIds: string[];

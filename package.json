@@ -6,7 +6,7 @@
     "version": "0.1.0",
     "author": "AndreasArvidsson",
     "license": "MIT",
-    "main": "out/main/index.js",
+    "main": "out/main.js",
     "private": true,
     "scripts": {
         "clean": "rm -rf out dist",
