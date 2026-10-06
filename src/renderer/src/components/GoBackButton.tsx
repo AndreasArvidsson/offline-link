@@ -1,7 +1,7 @@
-import type { JSX } from "preact/jsx-runtime";
+import type { JSX } from "preact";
 import { ArrowLeft } from "react-bootstrap-icons";
+import type { View } from "../types.ts";
 import { Button } from "./Button.tsx";
-import type { View } from "./types.ts";
 
 export function GoBackButton({
     navigate,

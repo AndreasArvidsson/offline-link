@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, Ref } from "preact";
 import { forwardRef } from "preact/compat";
-import { classNames } from "./classNames";
+import { classNames } from "../classNames";
 import type { Variant } from "./Variant";
 
 export type ButtonVariant = Variant | "link" | `outline-${Variant}`;

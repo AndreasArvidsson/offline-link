@@ -29,7 +29,7 @@ export interface Round {
     pairings: Pairing[];
 }
 
-interface PairingMatch {
+export interface PairingMatch {
     type: "MATCH";
     id: string;
     table: number;
@@ -38,7 +38,7 @@ interface PairingMatch {
     result?: MatchResult;
 }
 
-interface PairingBye {
+export interface PairingBye {
     type: "BYE";
     id: string;
     playerId: number;

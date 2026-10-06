@@ -7,15 +7,15 @@
  * {@link NodeJS.ErrnoException}, otherwise `false`.
  */
 export function isErrnoException(
-  error: unknown,
+    error: unknown,
 ): error is NodeJS.ErrnoException {
-  return error instanceof Error && "code" in error;
+    return error instanceof Error && "code" in error;
 }
 
 export function isEnoentError(error: unknown): error is NodeJS.ErrnoException {
-  return isErrnoException(error) && error.code === "ENOENT";
+    return isErrnoException(error) && error.code === "ENOENT";
 }
 
 export function isEexistError(error: unknown): error is NodeJS.ErrnoException {
-  return isErrnoException(error) && error.code === "EEXIST";
+    return isErrnoException(error) && error.code === "EEXIST";
 }

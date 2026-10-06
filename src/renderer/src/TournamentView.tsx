@@ -2,18 +2,18 @@ import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import type { Tournament } from "../../common/models.ts";
 import { tournamentStatuses } from "../../common/models.ts";
-import { Button } from "./Button.tsx";
 import { calculateNumberOfRounds } from "./calculateNumberOfRounds.ts";
+import { GoBackButton } from "./components/GoBackButton.tsx";
+import { InputText } from "./components/InputText.tsx";
+import { Loading } from "./components/Loading.tsx";
+import { NavItem } from "./components/NavItem.tsx";
+import { Select } from "./components/Select.tsx";
 import { createNewTournament } from "./createNewTournament.ts";
 import type { DateFormatter } from "./DateFormatter.ts";
 import { generateFirstRound } from "./generateFirstRound.ts";
-import { GoBackButton } from "./GoBackButton.tsx";
 import { handleError } from "./handleError.ts";
-import { InputText } from "./InputText.tsx";
-import { Loading } from "./Loading.tsx";
-import { Players, playersAreValid } from "./Players.tsx";
-import { Rounds } from "./Rounds.tsx";
-import { Select } from "./Select.tsx";
+import { Players } from "./Players.tsx";
+import { RoundComponent } from "./Round.tsx";
 import type { View } from "./types.ts";
 import { isEmptyString } from "./utils";
 import { statusToString } from "./utils.ts";
@@ -24,11 +24,23 @@ interface Props {
     navigate: (view: View) => void;
 }
 
+interface SimpleTab {
+    type: "players" | "standings";
+}
+
+interface RoundTab {
+    type: "round";
+    round: number;
+}
+
+type Tab = SimpleTab | RoundTab;
+
 export function TournamentView({
     id,
     dateFormatter,
     navigate,
 }: Props): JSX.Element {
+    const [tab, setTab] = useState<Tab>({ type: "players" });
     const [tournament, setTournament] = useState<Tournament>();
 
     useEffect(() => {
@@ -45,39 +57,68 @@ export function TournamentView({
 
     const disabled = tournament.status === "COMPLETED";
 
-    const renderRounds = () => {
-        if (tournament.roundCount > 0) {
-            return (
-                <Rounds
-                    disabled={disabled}
-                    totalRounds={tournament.roundCount}
-                    rounds={tournament.rounds}
-                    onChange={(rounds) => {
-                        setTournament({ ...tournament, rounds });
-                    }}
-                />
-            );
-        }
+    const renderTab = () => {
+        const { type } = tab;
+        switch (type) {
+            case "players":
+                return (
+                    <Players
+                        disabled={disabled || tournament.roundCount > 0}
+                        players={tournament.players}
+                        onChange={(players) => {
+                            setTournament({ ...tournament, players });
+                        }}
+                        onStart={() => {
+                            const roundCount = calculateNumberOfRounds(
+                                tournament.players.length,
+                            );
+                            const firstRound = generateFirstRound(
+                                tournament.players,
+                            );
+                            setTournament({
+                                ...tournament,
+                                roundCount,
+                                rounds: [firstRound],
+                            });
+                            setTab({ type: "round", round: firstRound.number });
+                        }}
+                    />
+                );
 
-        return (
-            <Button
-                variant="success"
-                disabled={disabled || !playersAreValid(tournament.players)}
-                onClick={() => {
-                    const roundCount = calculateNumberOfRounds(
-                        tournament.players.length,
-                    );
-                    const firstRound = generateFirstRound(tournament.players);
-                    setTournament({
-                        ...tournament,
-                        roundCount,
-                        rounds: [firstRound],
-                    });
-                }}
-            >
-                START!
-            </Button>
-        );
+            case "standings":
+                return <div>Standings content here</div>;
+
+            case "round": {
+                const round = tournament.rounds.find(
+                    (r) => r.number === tab.round,
+                );
+                if (round == null) {
+                    throw new Error("Round not found");
+                }
+                return (
+                    <RoundComponent
+                        disabled={disabled}
+                        round={round}
+                        players={tournament.players}
+                        onChange={(updatedRound) => {
+                            setTournament({
+                                ...tournament,
+                                rounds: tournament.rounds.map((r) =>
+                                    r.number === updatedRound.number
+                                        ? updatedRound
+                                        : r,
+                                ),
+                            });
+                        }}
+                    />
+                );
+            }
+
+            default: {
+                const _exhaustiveCheck: never = type;
+                throw new Error("Unhandled tab type");
+            }
+        }
     };
 
     return (
@@ -131,15 +172,48 @@ export function TournamentView({
                 </tbody>
             </table>
 
-            <Players
-                disabled={disabled || tournament.roundCount > 0}
-                players={tournament.players}
-                onChange={(players) => {
-                    setTournament({ ...tournament, players });
-                }}
-            />
+            {tournament.roundCount > 0 && (
+                <p>
+                    {tournament.players.length} players{" · "}
+                    {tournament.roundCount} rounds
+                </p>
+            )}
 
-            {renderRounds()}
+            <ul className="nav nav-tabs mb-3">
+                <NavItem
+                    active={tab.type === "players"}
+                    onClick={() => {
+                        setTab({ type: "players" });
+                    }}
+                >
+                    Players
+                </NavItem>
+                {tournament.rounds.map((round) => (
+                    <NavItem
+                        key={round.number}
+                        active={
+                            tab.type === "round" && tab.round === round.number
+                        }
+                        onClick={() => {
+                            setTab({ type: "round", round: round.number });
+                        }}
+                    >
+                        Round {round.number}
+                    </NavItem>
+                ))}
+                {tournament.roundCount > 0 && (
+                    <NavItem
+                        active={tab.type === "standings"}
+                        onClick={() => {
+                            setTab({ type: "standings" });
+                        }}
+                    >
+                        Standings
+                    </NavItem>
+                )}
+            </ul>
+
+            {renderTab()}
         </>
     );
 }

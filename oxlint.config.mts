@@ -76,7 +76,8 @@ export default defineConfig({
     ignorePatterns: ["*.d.ts"],
     options: {
         typeAware: true,
-        typeCheck: true,
+        // Use the separate tsc checks.
+        typeCheck: false,
     },
     env: {
         node: true,
@@ -152,6 +153,12 @@ export default defineConfig({
             "warn",
             {
                 allowNullableBoolean: true,
+            },
+        ],
+        "typescript/no-confusing-void-expression": [
+            "warn",
+            {
+                ignoreArrowShorthand: true,
             },
         ],
     },

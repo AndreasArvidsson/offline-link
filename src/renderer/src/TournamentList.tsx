@@ -1,6 +1,6 @@
 import type { JSX } from "preact/jsx-runtime";
 import type { RecentTournament } from "../../api.ts";
-import { Button } from "./Button.tsx";
+import { Button } from "./components/Button.tsx";
 import type { DateFormatter } from "./DateFormatter.ts";
 import type { View } from "./types.ts";
 import { statusToString } from "./utils.ts";
