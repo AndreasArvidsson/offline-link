@@ -15,18 +15,15 @@ export const tournamentStatuses = ["IN_PROGRESS", "COMPLETED"] as const;
 export type TournamentStatus = (typeof tournamentStatuses)[number];
 
 export interface Player {
-    id: string;
+    id: number;
     name: string;
-    status: "ACTIVE" | "DROPPED";
-    droppedAfterRound?: number;
 }
 
 export interface Round {
     number: number;
     createdAt: number;
-    source: "MANUAL" | "AUTOMATIC" | "EVENTLINK";
     status: "IN_PROGRESS" | "COMPLETED";
-    activePlayerIds: string[];
+    droppedPlayerIds: number[];
     pairings: Pairing[];
 }
 
@@ -34,15 +31,15 @@ interface PairingMatch {
     type: "MATCH";
     id: string;
     table: number;
-    player1Id: string;
-    player2Id: string;
+    player1Id: number;
+    player2Id: number;
     result?: MatchResult;
 }
 
 interface PairingBye {
     type: "BYE";
     id: string;
-    playerId: string;
+    playerId: number;
 }
 
 export type Pairing = PairingMatch | PairingBye;

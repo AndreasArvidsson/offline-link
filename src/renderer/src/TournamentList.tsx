@@ -31,22 +31,24 @@ export function TournamentList({
                             navigate({ type: "tournament", id: item.id });
                         }}
                     >
-                        <span>
-                            <strong>{item.name}</strong>
-                            <span>
-                                {dateFormatter.format(item.updatedAt)} ·{" "}
-                                {item.playerCount} players · {item.roundCount}{" "}
-                                rounds
-                            </span>
-                            <span>{item.name}</span>
-                        </span>
-                        <span>
-                            {statusToString(item.status)}
-                            <span aria-hidden="true"> →</span>
-                        </span>
+                        <strong>{item.name}</strong>
+                        {getText(item, dateFormatter)}
                     </Button>
                 ))}
             </div>
         </section>
     );
+}
+
+function getText(
+    tournament: RecentTournament,
+    dateFormatter: DateFormatter,
+): string {
+    return [
+        "",
+        dateFormatter.format(tournament.updatedAt),
+        `${tournament.playerCount} players`,
+        `${tournament.roundCount} rounds`,
+        statusToString(tournament.status),
+    ].join(" · ");
 }

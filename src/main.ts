@@ -4,6 +4,7 @@ import { channels } from "./api.ts";
 import { APP_ID } from "./common/constants.ts";
 import { createWindow } from "./createWindow.ts";
 import { getRecentTournaments } from "./getRecentTournaments.ts";
+import { getTournament } from "./getTournament.ts";
 import { storage } from "./storage.ts";
 import { isWindows } from "./util/isOS.ts";
 
@@ -34,5 +35,9 @@ void (async () => {
 
     ipcMain.handle(channels.getRecentTournaments, () => {
         return getRecentTournaments();
+    });
+
+    ipcMain.handle(channels.getTournament, (_, id: string) => {
+        return getTournament(id);
     });
 })();

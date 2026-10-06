@@ -30,7 +30,8 @@
     },
     "dependencies": {
         "bootstrap": "^5.3.8",
-        "preact": "^11.0.0"
+        "preact": "^11.0.0",
+        "react-bootstrap-icons": "^1.11.6"
     },
     "devDependencies": {
         "@electron/packager": "^20.3.0",

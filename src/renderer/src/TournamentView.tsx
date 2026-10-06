@@ -8,8 +8,11 @@ import { GoBackButton } from "./GoBackButton.tsx";
 import { handleError } from "./handleError.ts";
 import { InputText } from "./InputText.tsx";
 import { Loading } from "./Loading.tsx";
+import { Players } from "./Players.tsx";
+import { Rounds } from "./Rounds.tsx";
 import { Select } from "./Select.tsx";
 import type { View } from "./types.ts";
+import { isEmptyString } from "./utils";
 import { statusToString } from "./utils.ts";
 
 interface Props {
@@ -37,6 +40,8 @@ export function TournamentView({
         return <Loading />;
     }
 
+    const disabled = tournament.status === "COMPLETED";
+
     return (
         <>
             <h1>Edit tournament</h1>
@@ -54,18 +59,6 @@ export function TournamentView({
                         <td>{dateFormatter.format(tournament.updatedAt)}</td>
                     </tr>
                     <tr>
-                        <td>Name</td>
-                        <td>
-                            <InputText
-                                placeholder="Tournament name"
-                                value={tournament.name}
-                                onChange={(name) => {
-                                    setTournament({ ...tournament, name });
-                                }}
-                            />
-                        </td>
-                    </tr>
-                    <tr>
                         <td>Status</td>
                         <td>
                             <Select
@@ -81,174 +74,44 @@ export function TournamentView({
                             </Select>
                         </td>
                     </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>
+                            <InputText
+                                placeholder="Tournament name"
+                                value={tournament.name}
+                                disabled={disabled}
+                                invalid={
+                                    !disabled && isEmptyString(tournament.name)
+                                }
+                                onChange={(name) => {
+                                    setTournament({ ...tournament, name });
+                                }}
+                            />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td># Rounds</td>
+                        <td>{tournament.roundCount}</td>
+                    </tr>
                 </tbody>
             </table>
 
-            <section>
-                <div>
-                    <h1>{tournament.name}</h1>
-                    <p>
-                        {tournament.status === "COMPLETED"
-                            ? "Completed · reopen to make corrections"
-                            : "In progress"}{" "}
-                        · {tournament.players.length} players ·{" "}
-                        {tournament.rounds.length} rounds
-                    </p>
-                </div>
-            </section>
+            <Players
+                disabled={disabled}
+                players={tournament.players}
+                onChange={(players) => {
+                    setTournament({ ...tournament, players });
+                }}
+            />
 
-            {/* <section>
-                <div>
-                    <h2>Players</h2>
-                    <span>
-                        {
-                            tournament.players.filter(
-                                (p) => p.status === "ACTIVE",
-                            ).length
-                        }{" "}
-                        active
-                    </span>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col">Player</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tournament.players.map((player) => (
-                            <tr key={player.id}>
-                                <th scope="row">
-                                    {player.name}
-                                    <span class="player-id" title={player.id}>
-                                        ID: {player.id.slice(0, 8)}
-                                    </span>
-                                </th>
-                                <td>
-                                    {player.status === "ACTIVE"
-                                        ? "Active"
-                                        : `Dropped after round ${player.droppedAfterRound}`}
-                                </td>
-                                <td>
-                                    <Button
-                                        variant="secondary"
-                                        disabled={
-                                            tournament.status === "COMPLETED"
-                                        }
-                                        aria-label={`${player.status === "ACTIVE" ? "Drop" : "Reactivate"} ${player.name}, ID ${player.id.slice(0, 8)}`}
-                                        onClick={() =>
-                                            void onChange({
-                                                type: "SET_PLAYER_STATUS",
-                                                playerId: player.id,
-                                                status:
-                                                    player.status === "ACTIVE"
-                                                        ? "DROPPED"
-                                                        : "ACTIVE",
-                                            })
-                                        }
-                                    >
-                                        {player.status === "ACTIVE"
-                                            ? "Drop"
-                                            : "Reactivate"}
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {!t.players.length && <p class="empty">No players recorded.</p>}
-                <form
-                    class="add-player"
-                    onSubmit={async (event) => {
-                        event.preventDefault();
-                        if (
-                            await onChange({
-                                type: "ADD_PLAYER",
-                                name: playerName,
-                            })
-                        ) {
-                            setPlayerName("");
-                        }
-                    }}
-                >
-                    <fieldset disabled={busy || completed}>
-                        <label for="player-name">Add player</label>
-                        <div class="input-action">
-                            <input
-                                id="player-name"
-                                value={playerName}
-                                onInput={(event) =>
-                                    setPlayerName(event.currentTarget.value)
-                                }
-                                required
-                                maxLength={200}
-                            />
-                            <Button variant="primary" type="submit">
-                                Add & save
-                            </Button>
-                        </div>
-                    </fieldset>
-                </form>
-            </section>
-            <section class="panel" aria-labelledby="details-title">
-                <h2 id="details-title">Event details</h2>
-                <form
-                    onSubmit={(event) => {
-                        event.preventDefault();
-                        void onChange({
-                            type: "RENAME",
-                            name: title,
-                        });
-                    }}
-                >
-                    <fieldset disabled={busy || completed}>
-                        <label for="event-name">Tournament name</label>
-                        <div class="input-action">
-                            <input
-                                id="event-name"
-                                value={title}
-                                onInput={(event) =>
-                                    setTitle(event.currentTarget.value)
-                                }
-                                required
-                                maxLength={200}
-                            />
-                            <Button variant="secondary" type="submit">
-                                Save name
-                            </Button>
-                        </div>
-                    </fieldset>
-                </form>
-                <p class="muted">
-                    Changing the name keeps the same file and tournament ID.
-                </p>
-                <Button
-                    variant="secondary"
-                    onClick={() => {
-                        if (
-                            window.confirm(
-                                completed
-                                    ? "Reopen this event to allow corrections?"
-                                    : "Mark this event completed? You can reopen it to make corrections.",
-                            )
-                        ) {
-                            void onChange({
-                                type: "SET_EVENT_STATUS",
-                                status: completed ? "IN_PROGRESS" : "COMPLETED",
-                            });
-                        }
-                    }}
-                >
-                    {completed ? "Reopen tournament" : "Complete tournament"}
-                </Button>
-            </section>
-            <aside class="phase-note">
-                This first implementation records event details and players.
-                Round recording, takeover, Swiss pairings, standings, and
-                EventLink re-entry are upcoming phases.
-            </aside> */}
+            <Rounds
+                disabled={disabled}
+                rounds={tournament.rounds}
+                onChange={(rounds) => {
+                    setTournament({ ...tournament, rounds });
+                }}
+            />
         </>
     );
 }

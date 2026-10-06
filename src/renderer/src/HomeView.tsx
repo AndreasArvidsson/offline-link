@@ -1,5 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
+import { PlusCircle } from "react-bootstrap-icons";
 import type { RecentTournament } from "../../api.ts";
 import { APP_NAME } from "../../common/constants.ts";
 import { Button } from "./Button.tsx";
@@ -24,20 +25,20 @@ export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
     }, []);
 
     return (
-        <>
+        <div className="d-flex flex-column min-vh-100">
             <header>
                 <h1>{APP_NAME}</h1>
                 <p>Your local tournament notebook</p>
             </header>
 
-            <main>
+            <main className="flex-grow-1">
                 <Button
                     variant="primary"
                     onClick={() => {
                         navigate({ type: "tournamentNew" });
                     }}
                 >
-                    + New Tournament
+                    <PlusCircle /> New Tournament
                 </Button>
 
                 <Button
@@ -61,10 +62,10 @@ export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
                 />
             </main>
 
-            <footer>
+            <footer className="p-3">
                 Unofficial software. {APP_NAME} is not affiliated with Wizards
                 of the Coast. Official event reporting remains in EventLink.
             </footer>
-        </>
+        </div>
     );
 }

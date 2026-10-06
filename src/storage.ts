@@ -9,6 +9,31 @@ import { readJsonFile } from "./util/readJsonFile.ts";
 const directoryPath = path.join(app.getPath("documents"), APP_NAME);
 let _tournaments: Tournament[] = [];
 
+const testTournament: Tournament = {
+    version: 1,
+    id: "test",
+    name: "Test Tournament",
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    roundCount: 0,
+    status: "IN_PROGRESS",
+    players: [
+        {
+            id: 1,
+            name: "Player 1",
+        },
+        {
+            id: 2,
+            name: "Player 2",
+        },
+        {
+            id: 3,
+            name: "Player 3",
+        },
+    ],
+    rounds: [],
+};
+
 export const storage = {
     async init(): Promise<void> {
         await mkdir(directoryPath, { recursive: true });
@@ -16,7 +41,9 @@ export const storage = {
     },
 
     getTournaments(): Tournament[] {
-        return _tournaments;
+        // TODO: Replace with actual storage retrieval
+        // return _tournaments;
+        return [testTournament];
     },
 };
 

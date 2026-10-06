@@ -59,6 +59,7 @@ const disabledRules = [
     "unicorn/import-style",
     "unicorn/no-array-callback-reference",
     "unicorn/no-array-for-each",
+    "unicorn/no-array-reduce",
     "unicorn/no-negated-condition",
     "unicorn/no-null",
     "unicorn/no-useless-undefined",

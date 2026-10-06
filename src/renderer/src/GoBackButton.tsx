@@ -1,4 +1,5 @@
 import type { JSX } from "preact/jsx-runtime";
+import { ArrowLeft } from "react-bootstrap-icons";
 import { Button } from "./Button.tsx";
 import type { View } from "./types.ts";
 
@@ -14,7 +15,7 @@ export function GoBackButton({
                 navigate({ type: "home" });
             }}
         >
-            Go back
+            <ArrowLeft /> Go back
         </Button>
     );
 }

@@ -35,7 +35,7 @@ export function createWindow(): BrowserWindow {
         void window.loadFile(path.resolve(__dirname, "index.html"));
     }
 
-    window.webContents.openDevTools();
+    // window.webContents.openDevTools();
 
     return window;
 }
