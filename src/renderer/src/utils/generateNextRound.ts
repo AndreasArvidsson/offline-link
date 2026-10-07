@@ -35,7 +35,7 @@ export function generateNextRound(tournament: Tournament): Round {
     }
 
     const players = calculateStandings(tournament).filter(
-        (standing) => !standing.dropped,
+        (standing) => standing.participationChange == null,
     );
 
     const byeCandidates = getByeCandidates(players, tournament.rounds);
@@ -102,7 +102,7 @@ export function generateNextRound(tournament: Tournament): Round {
         number: tournament.rounds.length + 1,
         createdAt: Date.now(),
         status: "IN_PROGRESS",
-        droppedPlayerIds: [],
+        participationChanges: [],
         pairings,
     };
 }

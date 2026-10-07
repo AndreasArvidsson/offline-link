@@ -33,7 +33,10 @@ function round(pairings: Pairing[], droppedPlayerIds: number[] = []): Round {
         createdAt: 0,
         status: "COMPLETED",
         pairings,
-        droppedPlayerIds,
+        participationChanges: droppedPlayerIds.map((playerId) => ({
+            playerId,
+            type: "DROPPED",
+        })),
     };
 }
 
@@ -107,11 +110,14 @@ function tournamentWithManyDrops(): Tournament {
         event.rounds.push({
             ...round(pairings),
             number: roundIndex + 1,
-            droppedPlayerIds:
+            participationChanges:
                 roundIndex === 6
                     ? event.players
                           .filter((player) => player.id > 16)
-                          .map((player) => player.id)
+                          .map((player) => ({
+                              playerId: player.id,
+                              type: "DROPPED",
+                          }))
                     : [],
         });
         lowPlayers.splice(1, 0, ...lowPlayers.splice(-1));
@@ -264,7 +270,7 @@ describe("generateNextRound", () => {
         );
         assert.equal(next.number, 2);
         assert.equal(next.status, "IN_PROGRESS");
-        assert.deepEqual(next.droppedPlayerIds, []);
+        assert.deepEqual(next.participationChanges, []);
         assert.deepEqual(event, before);
         assert.equal(
             new Set(next.pairings.map((pairing) => pairing.id)).size,
@@ -508,5 +514,67 @@ describe("generateNextRound", () => {
             () => generateNextRound(tournament(2, [pending])),
             /Complete the current round/u,
         );
+    });
+    it("excludes disqualified players from matches and byes in ordinary and final rounds", () => {
+        for (const roundCount of [2, 5]) {
+            for (const playerId of [1, 4]) {
+                const event = tournament(4, [
+                    round([match(1, 2), match(3, 4)]),
+                ]);
+                event.roundCount = roundCount;
+                event.rounds[0].participationChanges = [
+                    { playerId, type: "DISQUALIFIED" },
+                ];
+                const before = structuredClone(event);
+                const next = generateNextRound(event);
+                const participants = next.pairings.flatMap((pairing) =>
+                    pairing.type === "MATCH"
+                        ? [pairing.player1Id, pairing.player2Id]
+                        : [pairing.playerId],
+                );
+                assert.deepEqual(
+                    participants.toSorted((a, b) => a - b),
+                    event.players
+                        .filter((player) => player.id !== playerId)
+                        .map((player) => player.id),
+                );
+                assert.equal(
+                    next.pairings.filter((pairing) => pairing.type === "BYE")
+                        .length,
+                    1,
+                );
+                assert.deepEqual(event, before);
+            }
+        }
+    });
+
+    it("allows corrected disqualifications to pair again while preserving separate drops", () => {
+        const event = tournament(4, [round([match(1, 2), match(3, 4)])]);
+        event.rounds[0].participationChanges = [
+            { playerId: 1, type: "DISQUALIFIED" },
+        ];
+        event.rounds[0].participationChanges = [];
+        assert.deepEqual(matchIds(generateNextRound(event)), [
+            [1, 3],
+            [2, 4],
+        ]);
+        event.rounds[0].participationChanges = [
+            { playerId: 1, type: "DROPPED" },
+        ];
+        assert.ok(!matchIds(generateNextRound(event)).flat().includes(1));
+        assert.ok(
+            !generateNextRound(event).pairings.some(
+                (pairing) => pairing.type === "BYE" && pairing.playerId === 1,
+            ),
+        );
+    });
+
+    it("generates no pairings when every player is disqualified", () => {
+        const event = tournament(2, [round([match(1, 2)])]);
+        event.rounds[0].participationChanges = [1, 2].map((playerId) => ({
+            playerId,
+            type: "DISQUALIFIED",
+        }));
+        assert.deepEqual(generateNextRound(event).pairings, []);
     });
 });

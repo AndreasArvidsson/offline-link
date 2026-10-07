@@ -1,7 +1,8 @@
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
+import { NA } from "../../common/constants";
 import type { PlayerStanding, Tournament } from "../../common/models";
-import { IconDropped } from "./components/IconDropped";
+import { IconParticipationChange } from "./components/IconParticipationChange";
 import { calculateStandings } from "./utils/calculateStandings";
 import { formatRecord } from "./utils/formatRecord";
 
@@ -43,12 +44,14 @@ export function Standings({ tournament }: Props): JSX.Element {
                     </tr>
                 </thead>
                 <tbody>
-                    {standings?.map((standing, index) => (
+                    {standings?.map((standing) => (
                         <tr key={standing.player.id}>
-                            <td>{index + 1}</td>
+                            <td>{standing.rank ?? NA}</td>
                             <td>
                                 {standing.player.name}
-                                {standing.dropped && <IconDropped />}
+                                <IconParticipationChange
+                                    type={standing.participationChange}
+                                />
                             </td>
                             <td>{standing.matchPoints}</td>
                             <td>

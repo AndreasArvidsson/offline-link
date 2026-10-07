@@ -21,11 +21,18 @@ export interface Player {
     name: string;
 }
 
+export type ParticipationType = "DROPPED" | "DISQUALIFIED";
+
+export interface PlayerParticipationChange {
+    playerId: number;
+    type: ParticipationType;
+}
+
 export interface Round {
     number: number;
     createdAt: number;
     status: "IN_PROGRESS" | "COMPLETED";
-    droppedPlayerIds: number[];
+    participationChanges: PlayerParticipationChange[];
     pairings: Pairing[];
 }
 
@@ -58,8 +65,10 @@ export interface MatchResult {
 }
 
 export interface PlayerStanding {
+    // Disqualified players remain visible but have no place in the standings.
+    rank: number | null;
+    participationChange?: ParticipationType;
     player: Player;
-    dropped: boolean;
     matchPoints: number;
 
     wins: number;

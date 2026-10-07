@@ -1,13 +1,13 @@
 import type { PlayerStanding, Round, Tournament } from "../../../common/models";
 import { comparePercentages } from "./comparePercentages";
-import { getDroppedPlayers } from "./getDroppedPlayers";
+import { getPlayerParticipations } from "./getPlayerParticipations";
 import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
 
 // Magic Tournament Rules, section 3.1 and Appendix C:
 // https://media.wizards.com/ContentResources/WPN/MTG_MTR_2026_Feb27_EN.pdf
 
 export function calculateStandings(tournament: Tournament): PlayerStanding[] {
-    const droppedPlayerIds = getDroppedPlayers(tournament);
+    const participation = getPlayerParticipations(tournament.rounds);
     const records = new Map(
         tournament.players.map((player) => [
             player.id,
@@ -42,8 +42,9 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
             }
 
             return {
+                rank: null,
+                participationChange: participation.get(player.id),
                 player,
-                dropped: droppedPlayerIds.has(player.id),
                 matchPoints: record.matchPoints,
                 wins: record.wins,
                 losses: record.losses,
@@ -55,6 +56,8 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
         })
         .toSorted(
             (a, b) =>
+                Number(a.participationChange === "DISQUALIFIED") -
+                    Number(b.participationChange === "DISQUALIFIED") ||
                 b.matchPoints - a.matchPoints ||
                 comparePercentages(
                     b.opponentMatchWinPercentage,
@@ -65,7 +68,14 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
                     b.opponentGameWinPercentage,
                     a.opponentGameWinPercentage,
                 ),
-        );
+        )
+        .map((standing, index) => {
+            standing.rank =
+                standing.participationChange === "DISQUALIFIED"
+                    ? null
+                    : index + 1;
+            return standing;
+        });
 }
 
 function calculateRecord(playerId: number, rounds: Round[]) {

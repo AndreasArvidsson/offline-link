@@ -31,7 +31,7 @@ function round(
         number: 1,
         createdAt: 0,
         status,
-        droppedPlayerIds: [],
+        participationChanges: [],
         pairings,
     };
 }

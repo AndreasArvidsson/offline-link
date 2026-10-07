@@ -1,14 +1,17 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
+import { NA } from "../../common/constants";
 import type {
     MatchResult,
     PairingBye,
     PairingMatch,
+    ParticipationType,
     Player,
+    PlayerParticipationChange,
     Round,
 } from "../../common/models";
 import { Button } from "./components/Button";
-import { IconDropped } from "./components/IconDropped";
+import { IconParticipationChange } from "./components/IconParticipationChange";
 import { PlayersDropped } from "./PlayersDropped";
 import { formatMatchResult } from "./utils/formatMatchResult";
 import { formatRecord } from "./utils/formatRecord";
@@ -57,14 +60,15 @@ export function RoundComponent({
 
     const playerName = (id: number): string | JSX.Element => {
         const name = players.find((p) => p.id === id)?.name ?? "Unknown player";
-        if (round.droppedPlayerIds.includes(id)) {
-            return (
-                <>
-                    {name} <IconDropped />
-                </>
-            );
-        }
-        return name;
+        const participationType = round.participationChanges.find(
+            (change) => change.playerId === id,
+        );
+        return (
+            <>
+                {name}{" "}
+                <IconParticipationChange type={participationType?.type} />
+            </>
+        );
     };
 
     const applySelected = (selected: SelectedMatch) => {
@@ -204,10 +208,10 @@ export function RoundComponent({
     const renderBye = (bye: PairingBye) => {
         return (
             <tr key={bye.id}>
-                <td>-</td>
+                <td>{NA}</td>
                 <td>{playerName(bye.playerId)}</td>
                 <td>BYE</td>
-                <td>-</td>
+                <td>{NA}</td>
             </tr>
         );
     };
@@ -240,15 +244,16 @@ export function RoundComponent({
                 <div className="col">
                     <PlayersDropped
                         disabled={disabled}
-                        players={players}
+                        players={getActivePlayers(players, matches, byes)}
                         round={round}
-                        onChange={(id, dropped) => {
+                        onChange={(id, type) => {
                             updateRound({
-                                droppedPlayerIds: dropped
-                                    ? [...round.droppedPlayerIds, id]
-                                    : round.droppedPlayerIds.filter(
-                                          (pid) => pid !== id,
-                                      ),
+                                participationChanges:
+                                    getUpdatedParticipationChanges(
+                                        round.participationChanges,
+                                        id,
+                                        type,
+                                    ),
                             });
                         }}
                     />
@@ -269,6 +274,17 @@ export function RoundComponent({
             </div>
         </>
     );
+}
+
+function getUpdatedParticipationChanges(
+    changes: PlayerParticipationChange[],
+    playerId: number,
+    type: ParticipationType | undefined,
+) {
+    const otherChanges = changes.filter(
+        (change) => change.playerId !== playerId,
+    );
+    return type == null ? otherChanges : [...otherChanges, { playerId, type }];
 }
 
 function getResultString(result: MatchResult | undefined): string {
@@ -352,4 +368,16 @@ function isMatchResultValid(result: MatchResult) {
 
 function roundIsValid(round: Round): boolean {
     return round.pairings.every((p) => p.type === "BYE" || p.result != null);
+}
+
+function getActivePlayers(
+    players: Player[],
+    matches: PairingMatch[],
+    byes: PairingBye[],
+) {
+    const playerIds = new Set([
+        ...matches.flatMap((m) => [m.player1Id, m.player2Id]),
+        ...byes.map((b) => b.playerId),
+    ]);
+    return players.filter((p) => playerIds.has(p.id));
 }

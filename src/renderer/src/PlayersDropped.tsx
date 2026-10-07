@@ -1,15 +1,21 @@
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
-import type { Player, Round } from "../../common/models";
-import { InputCheckboxLabel } from "./components/InputCheckboxLabel";
+import type { Player, ParticipationType, Round } from "../../common/models";
+import { Select } from "./components/Select";
 
 interface Props {
     disabled: boolean;
     round: Round;
     players: Player[];
-    onChange: (playerId: number, dropped: boolean) => void;
+    onChange: (playerId: number, status: ParticipationType | undefined) => void;
 }
+
+const choices = [
+    { value: "", label: "Active" },
+    { value: "DROPPED", label: "Dropped" },
+    { value: "DISQUALIFIED", label: "Disqualified" },
+] as const;
 
 export function PlayersDropped({
     disabled,
@@ -25,28 +31,39 @@ export function PlayersDropped({
                 className="card-header pointer"
                 onClick={() => setExpanded(!expanded)}
             >
-                Dropped players
+                Player participation
                 <span className="float-end">
                     {expanded ? <ChevronDown /> : <ChevronRight />}
                 </span>
             </div>
-
             {expanded && (
                 <div className="card-body">
-                    {players.map((p) => {
-                        const dropped = round.droppedPlayerIds.includes(p.id);
+                    {players.map((player) => {
+                        const participationChange =
+                            round.participationChanges.find(
+                                (item) => item.playerId === player.id,
+                            );
                         return (
-                            <div key={p.id}>
-                                <InputCheckboxLabel
-                                    checked={dropped}
+                            <label
+                                key={player.id}
+                                className="d-flex align-items-center justify-content-between gap-2 mb-2"
+                            >
+                                <span>{player.name}</span>
+                                <Select
+                                    small
+                                    className="w-auto"
+                                    value={participationChange?.type ?? ""}
                                     disabled={disabled}
-                                    onChange={(checked) => {
-                                        onChange(p.id, checked);
-                                    }}
+                                    onChange={(value) =>
+                                        onChange(player.id, value || undefined)
+                                    }
                                 >
-                                    {p.name}
-                                </InputCheckboxLabel>
-                            </div>
+                                    {choices.map((choice) => ({
+                                        value: choice.value,
+                                        children: choice.label,
+                                    }))}
+                                </Select>
+                            </label>
                         );
                     })}
                 </div>

@@ -31,7 +31,10 @@ function round(pairings: Pairing[], droppedPlayerIds: number[] = []): Round {
         number: 1,
         createdAt: 0,
         status: "COMPLETED",
-        droppedPlayerIds,
+        participationChanges: droppedPlayerIds.map((playerId) => ({
+            playerId,
+            type: "DROPPED",
+        })),
         pairings,
     };
 }
@@ -74,8 +77,9 @@ describe("calculateStandings", () => {
             [1, 2, 3],
         );
         assert.deepEqual(standings[0], {
+            rank: 1,
+            participationChange: undefined,
             player: { id: 1, name: "Player 1" },
-            dropped: false,
             matchPoints: 0,
             wins: 0,
             losses: 0,
@@ -114,7 +118,7 @@ describe("calculateStandings", () => {
         close(byePlayer.gameWinPercentage, 10 / 15);
         close(byePlayer.opponentMatchWinPercentage, 4 / 6);
         close(byePlayer.opponentGameWinPercentage, 11 / 21);
-        assert.equal(standing(standings, 2).dropped, true);
+        assert.equal(standing(standings, 2).participationChange, "DROPPED");
     });
 
     it("ignores in-progress rounds and missing results", () => {
@@ -179,7 +183,7 @@ describe("calculateStandings", () => {
             [opponent.wins, opponent.losses, opponent.draws],
             [3, 2, 0],
         );
-        assert.equal(opponent.dropped, true);
+        assert.equal(opponent.participationChange, "DROPPED");
         close(standing(standings, 1).opponentMatchWinPercentage, 9 / 15);
         close(standing(standings, 1).opponentGameWinPercentage, 24 / 39);
     });
@@ -280,7 +284,7 @@ describe("calculateStandings", () => {
                 [result.wins, result.losses, result.draws],
                 [1, 1, 0],
             );
-            assert.equal(result.dropped, true);
+            assert.equal(result.participationChange, "DROPPED");
             assert.equal(
                 result.gameWinPercentage,
                 standing(before, playerId).gameWinPercentage,
@@ -451,8 +455,9 @@ describe("calculateStandings", () => {
             1,
         );
         assert.deepEqual(result, {
+            rank: 1,
+            participationChange: undefined,
             player: { id: 1, name: "Player 1" },
-            dropped: false,
             matchPoints: 3,
             wins: 1,
             losses: 0,
@@ -461,5 +466,117 @@ describe("calculateStandings", () => {
             gameWinPercentage: 1,
             opponentGameWinPercentage: 0,
         });
+    });
+
+    it("moves a disqualified winner below ranked players without changing records or tiebreakers", () => {
+        const event = tournament([round([match(1, 2, 2, 0)])]);
+        const before = calculateStandings(event);
+        event.rounds[0].participationChanges = [
+            { playerId: 1, type: "DISQUALIFIED" },
+        ];
+        const snapshot = structuredClone(event);
+        const after = calculateStandings(event);
+
+        assert.deepEqual(
+            after.map((item) => [item.player.id, item.rank]),
+            [
+                [2, 1],
+                [3, 2],
+                [1, null],
+            ],
+        );
+        for (const previous of before) {
+            const current = standing(after, previous.player.id);
+            const {
+                player: _previousPlayer,
+                rank: _previousRank,
+                participationChange: _previousParticipation,
+                ...previousRecord
+            } = previous;
+            const {
+                player: _currentPlayer,
+                rank: _currentRank,
+                participationChange: _currentParticipation,
+                ...currentRecord
+            } = current;
+            assert.deepEqual(currentRecord, previousRecord);
+        }
+        close(standing(after, 2).opponentMatchWinPercentage, 1);
+        close(standing(after, 2).opponentGameWinPercentage, 1);
+        assert.equal(standing(after, 1).matchPoints, 3);
+        assert.deepEqual(event, snapshot);
+    });
+
+    it("keeps ordinary drops ranked and restores rank when disqualification is corrected", () => {
+        const event = tournament([round([match(1, 2, 2, 0)], [1])]);
+        event.rounds.push({ ...round([]), number: 2 });
+        event.rounds[1].participationChanges = [
+            { playerId: 1, type: "DISQUALIFIED" },
+        ];
+        event.rounds[1].participationChanges.push({
+            playerId: 3,
+            type: "DISQUALIFIED",
+        });
+        // oxlint-disable-next-line unicorn/prefer-structured-clone -- Verify the saved JSON retains disqualification state.
+        const persisted: unknown = JSON.parse(JSON.stringify(event));
+        assert.deepEqual(persisted, event);
+        const saved = structuredClone(event);
+        assert.deepEqual(
+            calculateStandings(saved).map((item) => [
+                item.player.id,
+                item.rank,
+            ]),
+            [
+                [2, 1],
+                [1, null],
+                [3, null],
+            ],
+        );
+
+        saved.rounds[1].participationChanges = [
+            { playerId: 3, type: "DISQUALIFIED" },
+        ];
+        const restored = calculateStandings(saved);
+        assert.deepEqual(
+            restored.map((item) => [item.player.id, item.rank]),
+            [
+                [1, 1],
+                [2, 2],
+                [3, null],
+            ],
+        );
+        assert.equal(standing(restored, 1).participationChange, "DROPPED");
+        assert.deepEqual(event.rounds[1].participationChanges, [
+            { playerId: 1, type: "DISQUALIFIED" },
+            { playerId: 3, type: "DISQUALIFIED" },
+        ]);
+    });
+
+    it("assigns no ranks when every player is disqualified", () => {
+        const event = tournament([round([])]);
+        event.rounds[0].participationChanges = [1, 2, 3].map((playerId) => ({
+            playerId,
+            type: "DISQUALIFIED",
+        }));
+        assert.deepEqual(
+            calculateStandings(event).map((item) => item.rank),
+            [null, null, null],
+        );
+    });
+    it("removes rank immediately for a disqualification in the current round while preserving completed results", () => {
+        const event = tournament([round([match(1, 2, 2, 0)])]);
+        const current = round([match(1, 3, 0, 2)]);
+        current.number = 2;
+        current.status = "IN_PROGRESS";
+        current.participationChanges = [{ playerId: 1, type: "DISQUALIFIED" }];
+        event.rounds.push(current);
+        const standings = calculateStandings(event);
+        const disqualified = standing(standings, 1);
+        assert.equal(disqualified.rank, null);
+        assert.equal(disqualified.participationChange, "DISQUALIFIED");
+        assert.equal(disqualified.matchPoints, 3);
+        assert.equal(disqualified.losses, 0);
+        close(standing(standings, 2).opponentMatchWinPercentage, 1);
+        assert.equal(standings.at(-1)?.player.id, 1);
     });
 });

@@ -29,7 +29,7 @@ export function generateFirstRound(
         number: 1,
         createdAt: Date.now(),
         status: "IN_PROGRESS",
-        droppedPlayerIds: [],
+        participationChanges: [],
         pairings,
     };
 }
