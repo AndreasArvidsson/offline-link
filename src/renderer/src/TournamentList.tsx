@@ -22,11 +22,10 @@ export function TournamentList({
                 <div>Your saved tournaments will appear here.</div>
             )}
 
-            <div>
-                {tournaments.map((item) => (
+            {tournaments.map((item) => (
+                <div key={item.id} className="mb-2">
                     <Button
                         variant="outline-secondary"
-                        key={item.id}
                         onClick={() => {
                             navigate({ type: "tournament", id: item.id });
                         }}
@@ -34,8 +33,8 @@ export function TournamentList({
                         <strong>{item.name}</strong>
                         {getText(item, dateFormatter)}
                     </Button>
-                ))}
-            </div>
+                </div>
+            ))}
         </section>
     );
 }

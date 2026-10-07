@@ -8,20 +8,35 @@ import { showErrorNotification } from "./util/notifications.ts";
 
 const directoryPath = path.join(app.getPath("documents"), APP_NAME);
 
-let _tournaments: Tournament[] = [];
+interface Storage {
+    tournaments: Tournament[];
+    usedIds: Set<string>;
+}
+
+let _storage: Storage = {
+    tournaments: [],
+    usedIds: new Set<string>(),
+};
 
 export const storage = {
     async init(): Promise<void> {
         await mkdir(directoryPath, { recursive: true });
-        _tournaments = await readItemsFromDisk();
+        const tournaments = await readItemsFromDisk();
+        _storage = {
+            tournaments,
+            usedIds: new Set(tournaments.map((t) => t.id)),
+        };
     },
 
     getTournaments(): Tournament[] {
-        return _tournaments;
+        return _storage.tournaments;
     },
 
     async saveTournament(tournament: Tournament): Promise<void> {
-        _tournaments.push(tournament);
+        if (!_storage.usedIds.has(tournament.id)) {
+            _storage.usedIds.add(tournament.id);
+            _storage.tournaments.push(tournament);
+        }
         await writeItemToDisk(tournament);
     },
 };
