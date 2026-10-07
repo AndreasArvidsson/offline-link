@@ -23,9 +23,9 @@ export function Standings({ tournament }: Props): JSX.Element {
 
     return (
         <>
-            <strong>Standings</strong> - After round{" "}
-            {lastCompletedRound ?? "N/A"}
-            <table className="table">
+            <p>Standings after round {lastCompletedRound ?? NA}</p>
+
+            <table className="table table-striped">
                 <thead>
                     <tr>
                         <th>Rank</th>

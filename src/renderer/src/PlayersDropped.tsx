@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
+import { NA } from "../../common/constants";
 import type { Player, ParticipationType, Round } from "../../common/models";
 import { Select } from "./components/Select";
 
@@ -12,7 +13,7 @@ interface Props {
 }
 
 const choices = [
-    { value: "", label: "Active" },
+    { value: "", label: NA },
     { value: "DROPPED", label: "Dropped" },
     { value: "DISQUALIFIED", label: "Disqualified" },
 ] as const;

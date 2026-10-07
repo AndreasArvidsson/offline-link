@@ -218,12 +218,12 @@ export function RoundComponent({
 
     return (
         <>
-            <div>
+            <p>
                 <span>Round {round.number}</span>
                 <span className="float-end">
                     {countResult} / {matches.length} reported
                 </span>
-            </div>
+            </p>
 
             <table className="table table-striped">
                 <thead>
