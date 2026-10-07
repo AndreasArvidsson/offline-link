@@ -18,6 +18,8 @@ let _storage: Storage = {
     usedIds: new Map(),
 };
 
+let writeQueue: Promise<void> = Promise.resolve();
+
 export const storage = {
     async init(): Promise<void> {
         await mkdir(directoryPath, { recursive: true });
@@ -33,13 +35,25 @@ export const storage = {
     },
 
     async saveTournament(tournament: Tournament): Promise<void> {
-        await writeItemToDisk(tournament);
-        const existingTournament = _storage.usedIds.get(tournament.id);
-        if (existingTournament == null) {
-            _storage.usedIds.set(tournament.id, tournament);
-            _storage.tournaments.push(tournament);
-        } else {
-            Object.assign(existingTournament, tournament);
+        const previousSave = writeQueue;
+        // oxlint-disable-next-line typescript/no-invalid-void-type
+        const { promise, resolve } = Promise.withResolvers<void>();
+        writeQueue = promise;
+
+        try {
+            await previousSave;
+            await writeItemToDisk(tournament);
+
+            const existingTournament = _storage.usedIds.get(tournament.id);
+
+            if (existingTournament == null) {
+                _storage.usedIds.set(tournament.id, tournament);
+                _storage.tournaments.push(tournament);
+            } else {
+                Object.assign(existingTournament, tournament);
+            }
+        } finally {
+            resolve();
         }
     },
 };
