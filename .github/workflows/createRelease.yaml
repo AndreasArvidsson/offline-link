@@ -86,14 +86,14 @@ jobs:
         shell: pwsh
         run: >
           Compress-Archive -Path 'dist/*'
-          -DestinationPath "OfflineLink-${{ needs.create-release.outputs.version }}-${{ runner.os }}.zip"
+          -DestinationPath "OfflineLink-${{ runner.os }}.zip"
         if: runner.os == 'Windows'
 
       - name: Compress artifact (macOS and Linux)
         shell: bash
         run: |
           cd dist
-          zip -r "../OfflineLink-${{ needs.create-release.outputs.version }}-${{ runner.os }}.zip" *
+          zip -r "../OfflineLink-${{ runner.os }}.zip" *
         if: runner.os != 'Windows'
 
       - name: Upload release asset
@@ -102,4 +102,4 @@ jobs:
         run: >
           gh release upload
           "v${{ needs.create-release.outputs.version }}"
-          "OfflineLink-${{ needs.create-release.outputs.version }}-${{ runner.os }}.zip"
+          "OfflineLink-${{ runner.os }}.zip"
