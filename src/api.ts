@@ -18,6 +18,7 @@ export interface OfflineLinkApi {
     getRecentTournaments: () => Promise<RecentTournament[]>;
     getTournament: (id: string) => Promise<Tournament>;
     saveTournament: (tournament: Tournament) => Promise<void>;
+    toggleDevTools: () => Promise<void>;
 }
 
 export const channels: Record<keyof OfflineLinkApi, string> = {
@@ -25,4 +26,5 @@ export const channels: Record<keyof OfflineLinkApi, string> = {
     getRecentTournaments: "getRecentTournaments",
     getTournament: "getTournament",
     saveTournament: "saveTournament",
+    toggleDevTools: "toggleDevTools",
 };

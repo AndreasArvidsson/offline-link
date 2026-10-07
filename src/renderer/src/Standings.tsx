@@ -15,13 +15,14 @@ export function Standings({ tournament }: Props): JSX.Element {
         setStandings(calculateStandings(tournament));
     }, [tournament]);
 
-    const lastCompletedRound =
-        tournament.rounds.findLast((r) => r.status === "COMPLETED")?.number ??
-        0;
+    const lastCompletedRound = tournament.rounds.findLast(
+        (r) => r.status === "COMPLETED",
+    )?.number;
 
     return (
         <>
-            <strong>Standings</strong> - After round {lastCompletedRound}
+            <strong>Standings</strong> - After round{" "}
+            {lastCompletedRound ?? "N/A"}
             <table className="table">
                 <thead>
                     <tr>

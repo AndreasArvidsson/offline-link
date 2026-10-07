@@ -43,17 +43,13 @@ export function TournamentView({
     navigate,
 }: Props): JSX.Element {
     const [tab, setTab] = useState<Tab>({ type: "players" });
-    // oxlint-disable-next-line react/hook-use-state
-    const [tournament, setTournamentRaw] = useState<Tournament>();
+    const [tournament, setTournament] = useState<Tournament>();
 
     useEffect(() => {
         if (id != null) {
-            window.api
-                .getTournament(id)
-                .then(setTournamentRaw)
-                .catch(handleError);
+            window.api.getTournament(id).then(setTournament).catch(handleError);
         } else {
-            setTournamentRaw(createNewTournament());
+            setTournament(createNewTournament());
         }
     }, [id]);
 
@@ -61,10 +57,16 @@ export function TournamentView({
         return <Loading />;
     }
 
-    const setTournament = (t: Tournament) => {
+    const updateTournament = (partial: Partial<Tournament>) => {
+        const updated: Tournament = {
+            ...tournament,
+            ...partial,
+            // oxlint-disable-next-line react/purity
+            updatedAt: Date.now(),
+        };
         window.api
-            .saveTournament(t)
-            .then(() => setTournamentRaw(t))
+            .saveTournament(updated)
+            .then(() => setTournament(updated))
             .catch(handleError);
     };
 
@@ -73,8 +75,7 @@ export function TournamentView({
     const startFirstRound = () => {
         const roundCount = calculateNumberOfRounds(tournament.players.length);
         const firstRound = generateFirstRound(tournament.players);
-        setTournament({
-            ...tournament,
+        updateTournament({
             roundCount,
             rounds: [firstRound],
         });
@@ -91,13 +92,11 @@ export function TournamentView({
             const nextRound = generateNextRound({ ...tournament, rounds });
             rounds.push(nextRound);
             setTab({ type: "round", round: nextRound.number });
-            setTournament({ ...tournament, rounds, updatedAt: Date.now() });
+            updateTournament({ rounds });
         } else {
-            setTournament({
-                ...tournament,
+            updateTournament({
                 rounds,
                 status: "COMPLETED",
-                updatedAt: Date.now(),
             });
             setTab({ type: "standings" });
         }
@@ -112,9 +111,7 @@ export function TournamentView({
                         disabled={disabled || tournament.roundCount > 0}
                         players={tournament.players}
                         startFirstRound={startFirstRound}
-                        onChange={(players) =>
-                            setTournament({ ...tournament, players })
-                        }
+                        onChange={(players) => updateTournament({ players })}
                     />
                 );
 
@@ -136,8 +133,7 @@ export function TournamentView({
                         isLastRound={round.number === tournament.roundCount}
                         startNextRound={startNextRound}
                         onChange={(updatedRound) => {
-                            setTournament({
-                                ...tournament,
+                            updateTournament({
                                 rounds: tournament.rounds.map((r) =>
                                     r.number === updatedRound.number
                                         ? updatedRound
@@ -158,9 +154,9 @@ export function TournamentView({
 
     return (
         <>
-            <h1>Edit tournament</h1>
-
             <GoBackButton navigate={navigate} />
+
+            <h1>Tournament</h1>
 
             <table className="table">
                 <tbody>
@@ -178,7 +174,7 @@ export function TournamentView({
                             <Select
                                 value={tournament.status}
                                 onChange={(status) => {
-                                    setTournament({ ...tournament, status });
+                                    updateTournament({ status });
                                 }}
                             >
                                 {tournamentStatuses.map((status) => ({
@@ -199,7 +195,7 @@ export function TournamentView({
                                     !disabled && isEmptyString(tournament.name)
                                 }
                                 onChange={(name) => {
-                                    setTournament({ ...tournament, name });
+                                    updateTournament({ name });
                                 }}
                             />
                         </td>

@@ -10,6 +10,7 @@ const api: OfflineLinkApi = {
         ipcRenderer.invoke(channels.getTournament, id),
     saveTournament: (tournament) =>
         ipcRenderer.invoke(channels.saveTournament, tournament),
+    toggleDevTools: () => ipcRenderer.invoke(channels.toggleDevTools),
 };
 
 contextBridge.exposeInMainWorld("api", api);

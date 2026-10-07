@@ -24,7 +24,7 @@ void (async () => {
 
     await storage.init();
 
-    createWindow();
+    const window = createWindow();
 
     const parameters: Parameters = {
         locale: app.getSystemLocale(),
@@ -44,5 +44,9 @@ void (async () => {
 
     ipcMain.handle(channels.saveTournament, (_, tournament: Tournament) => {
         return storage.saveTournament(tournament);
+    });
+
+    ipcMain.handle(channels.toggleDevTools, (_, __) => {
+        window.webContents.toggleDevTools();
     });
 })();

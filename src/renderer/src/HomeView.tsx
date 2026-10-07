@@ -9,6 +9,8 @@ import type { View } from "./types.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
 import { handleError } from "./utils/handleError.ts";
 
+const RECENT_LIMIT = 10;
+
 interface Props {
     dateFormatter: DateFormatter;
     navigate: (view: View) => void;
@@ -53,10 +55,10 @@ export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
 
                 <hr />
 
-                <h2>Recent Tournaments</h2>
+                <h2>Recent tournaments</h2>
 
                 <TournamentList
-                    tournaments={tournaments.slice(0, 5)}
+                    tournaments={tournaments.slice(0, RECENT_LIMIT)}
                     dateFormatter={dateFormatter}
                     navigate={navigate}
                 />
