@@ -12,10 +12,6 @@ await packager({
     overwrite: true,
     icon: "images/icon",
     appBundleId: APP_ID,
-    asar: {
-        // Keep native binaries outside app.asar.
-        unpack: "**/*.{node,dll,so,dylib}",
-    },
     ignore: [
         whitelistToIgnore(["out", "node_modules", "package.json"]),
         ".map$",
