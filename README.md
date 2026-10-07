@@ -7,7 +7,7 @@ An unofficial, offline desktop tournament notebook for Magic: The Gathering orga
 1. Download zip-file from [GitHub](https://github.com/AndreasArvidsson/offline-link/releases/latest)
     - [Windows](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-Windows.zip)
     - [Linux](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-Linux.zip)
-    - [MacOs](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-macOS.zip)
+    - [macOS](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-macOS.zip)
 2. Unpack zip-file
 3. Run OfflineLink executable (eg `OfflineLink.exe`)
 4. If prompted if you want to run this unrecognized application: press run/continue.
