@@ -8,6 +8,7 @@ import { getRecentTournaments } from "./getRecentTournaments.ts";
 import { getTournament } from "./getTournament.ts";
 import { storage } from "./storage.ts";
 import { isWindows } from "./util/isOS.ts";
+import { showErrorNotification } from "./util/notifications.ts";
 
 // Ensure single instance of the application
 if (!app.requestSingleInstanceLock()) {
@@ -21,7 +22,12 @@ if (isWindows) {
 // oxlint-disable-next-line unicorn/prefer-top-level-await
 void (async () => {
     await app.whenReady();
-    await storage.init();
+
+    try {
+        await storage.init();
+    } catch (error) {
+        showErrorNotification("Failed to initialize storage", error);
+    }
 
     const window = createWindow();
 
