@@ -10,12 +10,12 @@ const directoryPath = path.join(app.getPath("documents"), APP_NAME);
 
 interface Storage {
     tournaments: Tournament[];
-    usedIds: Set<string>;
+    usedIds: Map<string, Tournament>;
 }
 
 let _storage: Storage = {
     tournaments: [],
-    usedIds: new Set<string>(),
+    usedIds: new Map(),
 };
 
 export const storage = {
@@ -24,7 +24,7 @@ export const storage = {
         const tournaments = await readItemsFromDisk();
         _storage = {
             tournaments,
-            usedIds: new Set(tournaments.map((t) => t.id)),
+            usedIds: new Map(tournaments.map((t) => [t.id, t])),
         };
     },
 
@@ -33,11 +33,14 @@ export const storage = {
     },
 
     async saveTournament(tournament: Tournament): Promise<void> {
-        if (!_storage.usedIds.has(tournament.id)) {
-            _storage.usedIds.add(tournament.id);
-            _storage.tournaments.push(tournament);
-        }
         await writeItemToDisk(tournament);
+        const existingTournament = _storage.usedIds.get(tournament.id);
+        if (existingTournament == null) {
+            _storage.usedIds.set(tournament.id, tournament);
+            _storage.tournaments.push(tournament);
+        } else {
+            Object.assign(existingTournament, tournament);
+        }
     },
 };
 
@@ -46,6 +49,9 @@ async function readItemsFromDisk(): Promise<Tournament[]> {
     const items: Tournament[] = [];
 
     for (const file of files) {
+        if (!file.endsWith(".json")) {
+            continue;
+        }
         const filepath = path.join(directoryPath, file);
         // oxlint-disable-next-line no-await-in-loop
         const item = await readItemFromDisk(filepath);

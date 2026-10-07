@@ -5,12 +5,14 @@ import type { Player, Round } from "../../common/models";
 import { InputCheckboxLabel } from "./components/InputCheckboxLabel";
 
 interface Props {
+    disabled: boolean;
     round: Round;
     players: Player[];
     onChange: (playerId: number, dropped: boolean) => void;
 }
 
 export function PlayersDropped({
+    disabled,
     players,
     round,
     onChange,
@@ -37,9 +39,10 @@ export function PlayersDropped({
                             <div key={p.id}>
                                 <InputCheckboxLabel
                                     checked={dropped}
-                                    onChange={(checked) =>
-                                        onChange(p.id, checked)
-                                    }
+                                    disabled={disabled}
+                                    onChange={(checked) => {
+                                        onChange(p.id, checked);
+                                    }}
                                 >
                                     {p.name}
                                 </InputCheckboxLabel>

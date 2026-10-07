@@ -231,6 +231,7 @@ export function RoundComponent({
             <div className="row mt-4">
                 <div className="col">
                     <PlayersDropped
+                        disabled={disabled}
                         players={players}
                         round={round}
                         onChange={(id, dropped) => {
