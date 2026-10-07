@@ -15,7 +15,7 @@ const testTournament: Tournament = {
     name: "Test Tournament",
     createdAt: Date.now(),
     updatedAt: Date.now(),
-    roundCount: 0,
+    roundCount: 3,
     status: "IN_PROGRESS",
     players: [
         {
@@ -31,7 +31,60 @@ const testTournament: Tournament = {
             name: "Player C",
         },
     ],
-    rounds: [],
+    rounds: [
+        {
+            number: 1,
+            createdAt: Date.now(),
+            status: "COMPLETED",
+            droppedPlayerIds: [1],
+            pairings: [
+                {
+                    type: "MATCH",
+                    id: "match1",
+                    table: 1,
+                    player1Id: 1,
+                    player2Id: 2,
+                    result: { player1Wins: 1, player2Wins: 1, draws: 1 },
+                },
+                {
+                    type: "BYE",
+                    id: "match2",
+                    playerId: 3,
+                },
+            ],
+        },
+        {
+            number: 2,
+            createdAt: Date.now(),
+            status: "COMPLETED",
+            droppedPlayerIds: [],
+            pairings: [
+                {
+                    type: "MATCH",
+                    id: "match1",
+                    table: 1,
+                    player1Id: 2,
+                    player2Id: 3,
+                    result: { player1Wins: 2, player2Wins: 0, draws: 0 },
+                },
+            ],
+        },
+        {
+            number: 3,
+            createdAt: Date.now(),
+            status: "IN_PROGRESS",
+            droppedPlayerIds: [],
+            pairings: [
+                {
+                    type: "MATCH",
+                    id: "match1",
+                    table: 1,
+                    player1Id: 2,
+                    player2Id: 3,
+                },
+            ],
+        },
+    ],
 };
 
 export const storage = {

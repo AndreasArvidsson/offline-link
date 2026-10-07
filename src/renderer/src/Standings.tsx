@@ -1,0 +1,79 @@
+import type { JSX } from "preact";
+import { useEffect, useState } from "preact/hooks";
+import { PersonFillDash } from "react-bootstrap-icons";
+import type { PlayerStanding, Tournament } from "../../common/models";
+import { calculateStandings } from "./calculateStandings";
+
+interface Props {
+    tournament: Tournament;
+}
+
+export function Standings({ tournament }: Props): JSX.Element {
+    const [standings, setStandings] = useState<PlayerStanding[]>();
+
+    useEffect(() => {
+        setStandings(calculateStandings(tournament));
+    }, [tournament]);
+
+    const lastCompletedRound =
+        tournament.rounds.findLast((r) => r.status === "COMPLETED")?.number ??
+        0;
+
+    return (
+        <>
+            <strong>Standings</strong> - After round {lastCompletedRound}
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th title="Match Points">Points</th>
+                        <th title="Win-Loss-Draw Record">Record</th>
+                        <th title="Opponent Match Win Percentage: How well your opponents performed in their matches, averaged once per match you played against them. Each opponent's percentage is their match points divided by the maximum possible points, excluding their byes, with a minimum of 33%. Byes add no opponent. Higher is better; this is the first tiebreaker after match points.">
+                            OMW%
+                        </th>
+                        <th title="Game Win Percentage: The share of possible game points you earned across individual games. A game win earns 3 points, a draw earns 1, and a loss earns 0. Divide your game points by 3 times the number of games played, with a minimum of 33% after a reported match. A bye counts as two game wins. Higher is better; this is the second tiebreaker.">
+                            GW%
+                        </th>
+                        <th title="Opponent Game Win Percentage: How well your opponents performed in their individual games, averaged once per match you played against them. Each opponent's game win percentage excludes their byes and has a minimum of 33% for this calculation. Byes add no opponent. Higher is better; this is the third tiebreaker.">
+                            OGW%
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {standings?.map((standing, index) => (
+                        <tr key={standing.player.id}>
+                            <td>{index + 1}</td>
+                            <td>
+                                {standing.player.name}
+                                {standing.dropped && (
+                                    <PersonFillDash title="Dropped from the tournament" />
+                                )}
+                            </td>
+                            <td>{standing.matchPoints}</td>
+                            <td>{getRecord(standing)}</td>
+                            <td>
+                                {format(standing.opponentMatchWinPercentage)}
+                            </td>
+                            <td>{format(standing.gameWinPercentage)}</td>
+                            <td>
+                                {format(standing.opponentGameWinPercentage)}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </>
+    );
+}
+
+function getRecord(standing: PlayerStanding) {
+    if (standing.draws > 0) {
+        return `${standing.wins}-${standing.losses}-${standing.draws}`;
+    }
+    return `${standing.wins}-${standing.losses}`;
+}
+
+function format(value: number, decimals = 1): string {
+    return (value * 100).toFixed(decimals);
+}

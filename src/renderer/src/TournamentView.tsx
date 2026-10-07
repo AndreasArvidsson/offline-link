@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
-import type { Tournament } from "../../common/models.ts";
+import type { Round, Tournament } from "../../common/models.ts";
 import { tournamentStatuses } from "../../common/models.ts";
 import { calculateNumberOfRounds } from "./calculateNumberOfRounds.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
@@ -11,9 +11,11 @@ import { Select } from "./components/Select.tsx";
 import { createNewTournament } from "./createNewTournament.ts";
 import type { DateFormatter } from "./DateFormatter.ts";
 import { generateFirstRound } from "./generateFirstRound.ts";
+import { generateNextRound } from "./generateNextRound.ts";
 import { handleError } from "./handleError.ts";
 import { Players } from "./Players.tsx";
 import { RoundComponent } from "./Round.tsx";
+import { Standings } from "./Standings.tsx";
 import type { View } from "./types.ts";
 import { isEmptyString } from "./utils";
 import { statusToString } from "./utils.ts";
@@ -57,6 +59,39 @@ export function TournamentView({
 
     const disabled = tournament.status === "COMPLETED";
 
+    const startFirstRound = () => {
+        const roundCount = calculateNumberOfRounds(tournament.players.length);
+        const firstRound = generateFirstRound(tournament.players);
+        setTournament({
+            ...tournament,
+            roundCount,
+            rounds: [firstRound],
+        });
+        setTab({ type: "round", round: firstRound.number });
+    };
+
+    const startNextRound = () => {
+        const rounds = tournament.rounds.map((round, index): Round =>
+            index === tournament.rounds.length - 1
+                ? { ...round, status: "COMPLETED" }
+                : round,
+        );
+        if (rounds.length < tournament.roundCount) {
+            const nextRound = generateNextRound({ ...tournament, rounds });
+            rounds.push(nextRound);
+            setTab({ type: "round", round: nextRound.number });
+            setTournament({ ...tournament, rounds, updatedAt: Date.now() });
+        } else {
+            setTournament({
+                ...tournament,
+                rounds,
+                status: "COMPLETED",
+                updatedAt: Date.now(),
+            });
+            setTab({ type: "standings" });
+        }
+    };
+
     const renderTab = () => {
         const { type } = tab;
         switch (type) {
@@ -65,28 +100,15 @@ export function TournamentView({
                     <Players
                         disabled={disabled || tournament.roundCount > 0}
                         players={tournament.players}
-                        onChange={(players) => {
-                            setTournament({ ...tournament, players });
-                        }}
-                        onStart={() => {
-                            const roundCount = calculateNumberOfRounds(
-                                tournament.players.length,
-                            );
-                            const firstRound = generateFirstRound(
-                                tournament.players,
-                            );
-                            setTournament({
-                                ...tournament,
-                                roundCount,
-                                rounds: [firstRound],
-                            });
-                            setTab({ type: "round", round: firstRound.number });
-                        }}
+                        startFirstRound={startFirstRound}
+                        onChange={(players) =>
+                            setTournament({ ...tournament, players })
+                        }
                     />
                 );
 
             case "standings":
-                return <div>Standings content here</div>;
+                return <Standings tournament={tournament} />;
 
             case "round": {
                 const round = tournament.rounds.find(
@@ -97,9 +119,11 @@ export function TournamentView({
                 }
                 return (
                     <RoundComponent
-                        disabled={disabled}
+                        disabled={disabled || round.status === "COMPLETED"}
                         round={round}
                         players={tournament.players}
+                        isLastRound={round.number === tournament.roundCount}
+                        startNextRound={startNextRound}
                         onChange={(updatedRound) => {
                             setTournament({
                                 ...tournament,

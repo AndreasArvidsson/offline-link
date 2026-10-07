@@ -7,11 +7,14 @@ import type {
     Player,
     Round,
 } from "../../common/models";
+import { Button } from "./components/Button";
 
 interface Props {
     disabled: boolean;
     round: Round;
     players: Player[];
+    isLastRound: boolean;
+    startNextRound: (() => void) | undefined;
     onChange: (rounds: Round) => void;
 }
 
@@ -24,6 +27,8 @@ export function RoundComponent({
     disabled,
     round,
     players,
+    isLastRound,
+    startNextRound,
     onChange,
 }: Props): JSX.Element {
     const [selectedMatch, setSelectedMatch] = useState<SelectedMatch>();
@@ -151,6 +156,19 @@ export function RoundComponent({
                     {byes.map(renderBye)}
                 </tbody>
             </table>
+
+            <div className="mt-3">
+                <Button
+                    variant="success"
+                    className="float-end"
+                    disabled={disabled || !roundIsValid(round)}
+                    onClick={startNextRound}
+                >
+                    {isLastRound
+                        ? "Complete tournament"
+                        : `Start round ${round.number + 1}`}
+                </Button>
+            </div>
         </>
     );
 }
@@ -236,4 +254,8 @@ function matchToSelected(match: PairingMatch): SelectedMatch {
 
 function isMatchResultValid(result: MatchResult) {
     return result.player1Wins + result.player2Wins + result.draws < 4;
+}
+
+function roundIsValid(round: Round): boolean {
+    return round.pairings.every((p) => p.type === "BYE" || p.result != null);
 }

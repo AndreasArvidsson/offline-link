@@ -9,14 +9,14 @@ interface Props {
     disabled: boolean;
     players: Player[];
     onChange: (players: Player[]) => void;
-    onStart: () => void;
+    startFirstRound: () => void;
 }
 
 export function Players({
     disabled,
     players,
     onChange,
-    onStart,
+    startFirstRound,
 }: Props): JSX.Element {
     return (
         <>
@@ -62,9 +62,9 @@ export function Players({
                     variant="success"
                     className="float-end"
                     disabled={disabled || !playersAreValid(players)}
-                    onClick={onStart}
+                    onClick={startFirstRound}
                 >
-                    Start first round
+                    Start round 1
                 </Button>
             </div>
         </>
