@@ -44,16 +44,22 @@ export const storage = {
             await previousSave;
             await writeItemToDisk(tournament);
 
-            // Move the tournament to the start of the list if it already exists
             if (_storage.usedIds.has(tournament.id)) {
-                if (_storage.tournaments[0].id !== tournament.id) {
+                // Tournament is already at the start of the list, just update it.
+                if (_storage.tournaments[0].id === tournament.id) {
+                    Object.assign(_storage.tournaments[0], tournament);
+                }
+                // Tournament already exists, but it's not at the start of the list.
+                else {
                     const index = _storage.tournaments.findIndex(
                         (t) => t.id === tournament.id,
                     );
                     _storage.tournaments.splice(index, 1);
                     _storage.tournaments.unshift(tournament);
                 }
-            } else {
+            }
+            // Tournament does not exist yet, add it to the start of the list.
+            else {
                 _storage.usedIds.add(tournament.id);
                 _storage.tournaments.unshift(tournament);
             }
