@@ -7,7 +7,7 @@ import type {
     Round,
     Tournament,
 } from "../common/models.ts";
-import { generateNextRound } from "../renderer/src/generateNextRound.ts";
+import { generateNextRound } from "../renderer/src/utils/generateNextRound.ts";
 
 function tournament(playerCount: number, rounds: Round[] = []): Tournament {
     return {

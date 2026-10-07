@@ -1,4 +1,4 @@
-import type { TournamentStatus } from "../../common/models";
+import type { TournamentStatus } from "../../../common/models";
 
 export function statusToString(status: TournamentStatus): string {
     switch (status) {
@@ -11,8 +11,4 @@ export function statusToString(status: TournamentStatus): string {
             throw new Error("Unhandled status");
         }
     }
-}
-
-export function isEmptyString(value: string): boolean {
-    return value.trim() === "";
 }

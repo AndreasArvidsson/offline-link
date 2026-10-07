@@ -9,13 +9,6 @@ export interface RecentTournament {
     status: TournamentStatus;
 }
 
-export const channels = {
-    getParameters: "getParameters",
-    getRecentTournaments: "getRecentTournaments",
-    getTournament: "getTournament",
-    saveTournament: "saveTournament",
-};
-
 export interface Parameters {
     locale: string;
 }
@@ -26,3 +19,10 @@ export interface OfflineLinkApi {
     getTournament: (id: string) => Promise<Tournament>;
     saveTournament: (tournament: Tournament) => Promise<void>;
 }
+
+export const channels: Record<keyof OfflineLinkApi, string> = {
+    getParameters: "getParameters",
+    getRecentTournaments: "getRecentTournaments",
+    getTournament: "getTournament",
+    saveTournament: "saveTournament",
+};

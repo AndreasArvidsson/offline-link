@@ -1,4 +1,4 @@
-import type { PlayerStanding, Round, Tournament } from "../../common/models";
+import type { PlayerStanding, Round, Tournament } from "../../../common/models";
 import { comparePercentages } from "./comparePercentages";
 import { getDroppedPlayers } from "./getDroppedPlayers";
 

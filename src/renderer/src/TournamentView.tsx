@@ -2,23 +2,23 @@ import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import type { Round, Tournament } from "../../common/models.ts";
 import { tournamentStatuses } from "../../common/models.ts";
-import { calculateNumberOfRounds } from "./calculateNumberOfRounds.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
 import { InputText } from "./components/InputText.tsx";
 import { Loading } from "./components/Loading.tsx";
 import { NavItem } from "./components/NavItem.tsx";
 import { Select } from "./components/Select.tsx";
-import { createNewTournament } from "./createNewTournament.ts";
-import type { DateFormatter } from "./DateFormatter.ts";
-import { generateFirstRound } from "./generateFirstRound.ts";
-import { generateNextRound } from "./generateNextRound.ts";
-import { handleError } from "./handleError.ts";
 import { Players } from "./Players.tsx";
 import { RoundComponent } from "./Round.tsx";
 import { Standings } from "./Standings.tsx";
 import type { View } from "./types.ts";
-import { isEmptyString } from "./utils";
-import { statusToString } from "./utils.ts";
+import { calculateNumberOfRounds } from "./utils/calculateNumberOfRounds.ts";
+import { createNewTournament } from "./utils/createNewTournament.ts";
+import type { DateFormatter } from "./utils/DateFormatter.ts";
+import { generateFirstRound } from "./utils/generateFirstRound.ts";
+import { generateNextRound } from "./utils/generateNextRound.ts";
+import { handleError } from "./utils/handleError.ts";
+import { isEmptyString } from "./utils/isEmptyString.ts";
+import { statusToString } from "./utils/statusToString.ts";
 
 interface Props {
     id: string | null;
@@ -43,19 +43,30 @@ export function TournamentView({
     navigate,
 }: Props): JSX.Element {
     const [tab, setTab] = useState<Tab>({ type: "players" });
-    const [tournament, setTournament] = useState<Tournament>();
+    // oxlint-disable-next-line react/hook-use-state
+    const [tournament, setTournamentRaw] = useState<Tournament>();
 
     useEffect(() => {
         if (id != null) {
-            window.api.getTournament(id).then(setTournament).catch(handleError);
+            window.api
+                .getTournament(id)
+                .then(setTournamentRaw)
+                .catch(handleError);
         } else {
-            setTournament(createNewTournament());
+            setTournamentRaw(createNewTournament());
         }
     }, [id]);
 
     if (tournament == null) {
         return <Loading />;
     }
+
+    const setTournament = (t: Tournament) => {
+        window.api
+            .saveTournament(t)
+            .then(() => setTournamentRaw(t))
+            .catch(handleError);
+    };
 
     const disabled = tournament.status === "COMPLETED";
 

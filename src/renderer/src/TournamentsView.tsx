@@ -4,10 +4,10 @@ import type { RecentTournament } from "../../api.ts";
 import { APP_NAME } from "../../common/constants.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
 import { Loading } from "./components/Loading.tsx";
-import type { DateFormatter } from "./DateFormatter.ts";
-import { handleError } from "./handleError.ts";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";
+import type { DateFormatter } from "./utils/DateFormatter.ts";
+import { handleError } from "./utils/handleError.ts";
 
 interface Props {
     dateFormatter: DateFormatter;
@@ -33,11 +33,14 @@ export function TournamentsView({
 
     return (
         <>
-            <h1>Tournaments</h1>
-
             <GoBackButton navigate={navigate} />
 
-            <p>All tournaments saved in Documents/{APP_NAME}.</p>
+            <h1>Tournaments</h1>
+
+            <p>
+                All {tournaments.length} tournaments saved in Documents/
+                {APP_NAME}.
+            </p>
 
             <TournamentList
                 tournaments={tournaments}

@@ -1,4 +1,4 @@
-import type { Round } from "../../common/models";
+import type { Round } from "../../../common/models";
 
 export function hasReceivedBye(playerId: number, rounds: Round[]): boolean {
     return rounds.some((round) =>

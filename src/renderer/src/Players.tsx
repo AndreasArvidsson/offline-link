@@ -3,7 +3,7 @@ import { PlusCircle, Trash3 } from "react-bootstrap-icons";
 import type { Player } from "../../common/models";
 import { Button } from "./components/Button";
 import { InputText } from "./components/InputText";
-import { isEmptyString } from "./utils";
+import { isEmptyString } from "./utils/isEmptyString";
 
 interface Props {
     disabled: boolean;

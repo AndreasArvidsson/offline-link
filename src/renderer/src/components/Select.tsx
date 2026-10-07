@@ -1,5 +1,5 @@
 import type { ComponentChildren, JSX, SelectHTMLAttributes } from "preact";
-import { classNames } from "../classNames";
+import { classNames } from "../utils/classNames";
 
 const UNDEFINED_VALUE = "__SELECT_UNDEFINED__";
 

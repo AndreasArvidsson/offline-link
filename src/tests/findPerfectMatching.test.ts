@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "mocha";
-import { findPerfectMatching } from "../renderer/src/findPerfectMatching.ts";
+import { findPerfectMatching } from "../renderer/src/utils/findPerfectMatching.ts";
 
 function graph(vertexCount: number, edges: [number, number][]): number[][] {
     const adjacency = Array.from({ length: vertexCount }, () => [] as number[]);

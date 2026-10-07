@@ -2,7 +2,7 @@ import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { PersonFillDash } from "react-bootstrap-icons";
 import type { PlayerStanding, Tournament } from "../../common/models";
-import { calculateStandings } from "./calculateStandings";
+import { calculateStandings } from "./utils/calculateStandings";
 
 interface Props {
     tournament: Tournament;

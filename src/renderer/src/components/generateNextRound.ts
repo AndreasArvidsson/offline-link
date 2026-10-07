@@ -3,11 +3,11 @@ import type {
     PlayerStanding,
     Round,
     Tournament,
-} from "../../common/models";
-import { calculateStandings } from "./calculateStandings";
-import { findPerfectMatching } from "./findPerfectMatching";
-import { hasReceivedBye } from "./hasReceivedBye";
-import { havePlayed } from "./havePlayed";
+} from "../../../common/models";
+import { calculateStandings } from "../utils/calculateStandings.ts";
+import { findPerfectMatching } from "../utils/findPerfectMatching.ts";
+import { hasReceivedBye } from "../utils/hasReceivedBye.ts";
+import { havePlayed } from "../utils/havePlayed.ts";
 
 const MAX_PAIRING_ATTEMPTS = 100_000;
 

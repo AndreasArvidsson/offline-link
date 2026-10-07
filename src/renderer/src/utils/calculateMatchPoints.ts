@@ -1,4 +1,4 @@
-import type { Round } from "../../common/models";
+import type { Round } from "../../../common/models";
 
 export function calculateMatchPoints(
     playerId: number,

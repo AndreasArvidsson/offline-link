@@ -2,12 +2,12 @@ import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import type { Parameters } from "../../api.ts";
 import { Loading } from "./components/Loading.tsx";
-import { DateFormatter } from "./DateFormatter.ts";
-import { handleError } from "./handleError.ts";
 import { HomeView } from "./HomeView.tsx";
 import { TournamentsView } from "./TournamentsView.tsx";
 import { TournamentView } from "./TournamentView.tsx";
 import type { View } from "./types.ts";
+import { DateFormatter } from "./utils/DateFormatter.ts";
+import { handleError } from "./utils/handleError.ts";
 
 export function App(): JSX.Element {
     const [view, setView] = useState<View>({ type: "home" });
@@ -63,5 +63,5 @@ export function App(): JSX.Element {
         }
     };
 
-    return <div className="container">{renderView()}</div>;
+    return <div className="container pt-3">{renderView()}</div>;
 }

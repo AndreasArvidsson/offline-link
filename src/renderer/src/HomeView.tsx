@@ -4,10 +4,10 @@ import { PlusCircle } from "react-bootstrap-icons";
 import type { RecentTournament } from "../../api.ts";
 import { APP_NAME } from "../../common/constants.ts";
 import { Button } from "./components/Button.tsx";
-import type { DateFormatter } from "./DateFormatter.ts";
-import { handleError } from "./handleError.ts";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";
+import type { DateFormatter } from "./utils/DateFormatter.ts";
+import { handleError } from "./utils/handleError.ts";
 
 interface Props {
     dateFormatter: DateFormatter;

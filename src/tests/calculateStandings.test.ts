@@ -8,7 +8,7 @@ import type {
     Round,
     Tournament,
 } from "../common/models.ts";
-import { calculateStandings } from "../renderer/src/calculateStandings.ts";
+import { calculateStandings } from "../renderer/src/utils/calculateStandings.ts";
 
 function tournament(rounds: Round[] = []): Tournament {
     return {

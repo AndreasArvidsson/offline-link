@@ -1,5 +1,5 @@
 import type { ComponentChildren, JSX } from "preact";
-import { classNames } from "../classNames";
+import { classNames } from "../utils/classNames";
 
 interface Props {
     active: boolean;

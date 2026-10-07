@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes, JSX, Ref, TargetedEvent } from "preact";
 import { forwardRef } from "preact/compat";
-import { classNames } from "../classNames";
+import { classNames } from "../utils/classNames";
 
 export interface InputTextProps extends Omit<
     InputHTMLAttributes,

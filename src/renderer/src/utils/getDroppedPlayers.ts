@@ -1,4 +1,4 @@
-import type { Tournament } from "../../common/models";
+import type { Tournament } from "../../../common/models";
 
 export function getDroppedPlayers(tournament: Tournament): Set<number> {
     return new Set(

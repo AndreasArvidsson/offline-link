@@ -1,9 +1,9 @@
 import type { JSX } from "preact/jsx-runtime";
 import type { RecentTournament } from "../../api.ts";
 import { Button } from "./components/Button.tsx";
-import type { DateFormatter } from "./DateFormatter.ts";
 import type { View } from "./types.ts";
-import { statusToString } from "./utils.ts";
+import type { DateFormatter } from "./utils/DateFormatter.ts";
+import { statusToString } from "./utils/statusToString.ts";
 
 interface Props {
     tournaments: RecentTournament[];

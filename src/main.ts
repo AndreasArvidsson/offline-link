@@ -2,6 +2,7 @@ import { app, ipcMain } from "electron";
 import type { Parameters } from "./api.ts";
 import { channels } from "./api.ts";
 import { APP_ID } from "./common/constants.ts";
+import type { Tournament } from "./common/models.ts";
 import { createWindow } from "./createWindow.ts";
 import { getRecentTournaments } from "./getRecentTournaments.ts";
 import { getTournament } from "./getTournament.ts";
@@ -39,5 +40,9 @@ void (async () => {
 
     ipcMain.handle(channels.getTournament, (_, id: string) => {
         return getTournament(id);
+    });
+
+    ipcMain.handle(channels.saveTournament, (_, tournament: Tournament) => {
+        return storage.saveTournament(tournament);
     });
 })();

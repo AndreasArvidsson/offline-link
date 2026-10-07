@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "mocha";
-import { calculateNumberOfRounds } from "../renderer/src/calculateNumberOfRounds.ts";
+import { calculateNumberOfRounds } from "../renderer/src/utils/calculateNumberOfRounds.ts";
 
 describe("calculateNumberOfRounds", () => {
     const cases: [number, number][] = [
