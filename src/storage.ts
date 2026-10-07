@@ -10,12 +10,12 @@ const directoryPath = path.join(app.getPath("documents"), APP_NAME);
 
 interface Storage {
     tournaments: Tournament[];
-    usedIds: Map<string, Tournament>;
+    usedIds: Set<string>;
 }
 
 let _storage: Storage = {
     tournaments: [],
-    usedIds: new Map(),
+    usedIds: new Set(),
 };
 
 let writeQueue: Promise<void> = Promise.resolve();
@@ -26,7 +26,7 @@ export const storage = {
         const tournaments = await readItemsFromDisk();
         _storage = {
             tournaments,
-            usedIds: new Map(tournaments.map((t) => [t.id, t])),
+            usedIds: new Set(tournaments.map((t) => t.id)),
         };
     },
 
@@ -44,13 +44,18 @@ export const storage = {
             await previousSave;
             await writeItemToDisk(tournament);
 
-            const existingTournament = _storage.usedIds.get(tournament.id);
-
-            if (existingTournament == null) {
-                _storage.usedIds.set(tournament.id, tournament);
-                _storage.tournaments.push(tournament);
+            // Move the tournament to the start of the list if it already exists
+            if (_storage.usedIds.has(tournament.id)) {
+                if (_storage.tournaments[0].id !== tournament.id) {
+                    const index = _storage.tournaments.findIndex(
+                        (t) => t.id === tournament.id,
+                    );
+                    _storage.tournaments.splice(index, 1);
+                    _storage.tournaments.unshift(tournament);
+                }
             } else {
-                Object.assign(existingTournament, tournament);
+                _storage.usedIds.add(tournament.id);
+                _storage.tournaments.unshift(tournament);
             }
         } finally {
             resolve();
@@ -74,7 +79,8 @@ async function readItemsFromDisk(): Promise<Tournament[]> {
         }
     }
 
-    items.sort((a, b) => b.createdAt - a.createdAt);
+    // Sort tournaments by update date in descending order
+    items.sort((a, b) => b.updatedAt - a.updatedAt);
 
     return items;
 }
