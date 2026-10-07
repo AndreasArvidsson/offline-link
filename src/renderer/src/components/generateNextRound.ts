@@ -51,7 +51,7 @@ export function generateNextRound(tournament: Tournament): Round {
 
             const solution = findBestPairing(remaining, tournament.rounds);
 
-            if (solution !== undefined) {
+            if (solution != null) {
                 bye = candidate;
                 matches = solution;
                 break;
@@ -59,26 +59,38 @@ export function generateNextRound(tournament: Tournament): Round {
         }
     }
 
-    if (matches === undefined) {
+    if (matches == null) {
         throw new Error(
             "Unable to generate a valid Swiss pairing without rematches",
         );
     }
 
+    const highestPairingId = tournament.rounds.reduce(
+        (highest, round) =>
+            round.pairings.reduce(
+                (highestInRound, pairing) =>
+                    Math.max(highestInRound, pairing.id),
+                highest,
+            ),
+        0,
+    );
+
+    let nextPairingId = highestPairingId + 1;
+
     const pairings: Pairing[] = matches.map(
         ([player1Id, player2Id], index) => ({
             type: "MATCH",
-            id: crypto.randomUUID(),
+            id: nextPairingId++,
             table: index + 1,
             player1Id,
             player2Id,
         }),
     );
 
-    if (bye !== undefined) {
+    if (bye != null) {
         pairings.push({
             type: "BYE",
-            id: crypto.randomUUID(),
+            id: nextPairingId++,
             playerId: bye.player.id,
         });
     }

@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import type {
     MatchResult,
@@ -8,6 +8,9 @@ import type {
     Round,
 } from "../../common/models";
 import { Button } from "./components/Button";
+import { IconDropped } from "./components/IconDropped";
+import { PlayersDropped } from "./PlayersDropped";
+import { formatRecord } from "./utils/formatRecord";
 
 interface Props {
     disabled: boolean;
@@ -19,7 +22,7 @@ interface Props {
 }
 
 interface SelectedMatch {
-    id: string;
+    id: number;
     scores: number[];
 }
 
@@ -32,12 +35,70 @@ export function RoundComponent({
     onChange,
 }: Props): JSX.Element {
     const [selectedMatch, setSelectedMatch] = useState<SelectedMatch>();
+    const selectedMatchRef = useRef<HTMLTableRowElement>(null);
+
+    useLayoutEffect(() => {
+        if (!disabled) {
+            selectedMatchRef.current?.focus();
+        }
+    }, [selectedMatch?.id, disabled]);
+
     const matches = round.pairings.filter((p) => p.type === "MATCH");
     const countResult = matches.filter((p) => p.result != null).length;
     const byes = round.pairings.filter((p) => p.type === "BYE");
 
-    const playerName = (id: number): string => {
-        return players.find((p) => p.id === id)?.name ?? "Unknown player";
+    const updateRound = (partialRound: Partial<Round>) => {
+        onChange({
+            ...round,
+            ...partialRound,
+        });
+    };
+
+    const playerName = (id: number): string | JSX.Element => {
+        const name = players.find((p) => p.id === id)?.name ?? "Unknown player";
+        if (round.droppedPlayerIds.includes(id)) {
+            return (
+                <>
+                    {name} <IconDropped />
+                </>
+            );
+        }
+        return name;
+    };
+
+    const applySelected = (selected: SelectedMatch) => {
+        const result = selectedToResults(selected);
+        if (!isMatchResultValid(result)) {
+            setSelectedMatch({ id: selected.id, scores: [] });
+            return;
+        }
+        updateRound({
+            pairings: round.pairings.map((p) =>
+                p.id === selected.id ? { ...p, result } : p,
+            ),
+        });
+        const currentIndex = matches.findIndex((m) => m.id === selected.id);
+        const nextIndex = matches.findIndex(
+            (m, i) => i > currentIndex && m.result == null,
+        );
+        if (nextIndex === -1) {
+            setSelectedMatch(undefined);
+        } else {
+            const nextMatch = matches[nextIndex];
+            setSelectedMatch(matchToSelected(nextMatch));
+        }
+    };
+
+    const navigate = (selected: SelectedMatch, direction: "up" | "down") => {
+        const currentIndex = matches.findIndex((m) => m.id === selected.id);
+        const nextIndex =
+            direction === "up"
+                ? matches.findLastIndex((m, i) => i < currentIndex)
+                : matches.findIndex((m, i) => i > currentIndex);
+        if (nextIndex !== -1) {
+            const nextMatch = matches[nextIndex];
+            setSelectedMatch(matchToSelected(nextMatch));
+        }
     };
 
     const matchOnKey = (selected: SelectedMatch, key: string) => {
@@ -50,28 +111,38 @@ export function RoundComponent({
                     selected.scores.length === 3
                         ? [score]
                         : [...selected.scores, score];
-                setSelectedMatch({ id: selected.id, scores });
+                const updatedMatch = { id: selected.id, scores };
+                setSelectedMatch(updatedMatch);
+                if (scores.length === 3) {
+                    applySelected(updatedMatch);
+                }
                 break;
             }
             case "Enter": {
                 if (selected.scores.length > 1) {
-                    const result = selectedToResults(selected);
-                    if (isMatchResultValid(result)) {
-                        onChange({
-                            ...round,
-                            pairings: round.pairings.map((p) =>
-                                p.id === selected.id ? { ...p, result } : p,
-                            ),
-                        });
-                        setSelectedMatch(undefined);
-                    }
+                    applySelected(selected);
                 }
+                break;
+            }
+            case "Delete": {
+                updateRound({
+                    pairings: round.pairings.map((p) =>
+                        p.id === selected.id ? { ...p, result: undefined } : p,
+                    ),
+                });
+                setSelectedMatch(undefined);
                 break;
             }
             case "Escape": {
                 setSelectedMatch(undefined);
                 break;
             }
+            case "ArrowUp":
+                navigate(selected, "up");
+                break;
+            case "ArrowDown":
+                navigate(selected, "down");
+                break;
             default:
                 break;
         }
@@ -81,7 +152,7 @@ export function RoundComponent({
         if (selectedMatch?.id === match.id && !disabled) {
             return (
                 <tr
-                    autoFocus
+                    ref={selectedMatchRef}
                     key={match.id}
                     className="selected-match pointer"
                     tabIndex={0}
@@ -157,17 +228,35 @@ export function RoundComponent({
                 </tbody>
             </table>
 
-            <div className="mt-3">
-                <Button
-                    variant="success"
-                    className="float-end"
-                    disabled={disabled || !roundIsValid(round)}
-                    onClick={startNextRound}
-                >
-                    {isLastRound
-                        ? "Complete tournament"
-                        : `Start round ${round.number + 1}`}
-                </Button>
+            <div className="row mt-4">
+                <div className="col">
+                    <PlayersDropped
+                        players={players}
+                        round={round}
+                        onChange={(id, dropped) => {
+                            updateRound({
+                                droppedPlayerIds: dropped
+                                    ? [...round.droppedPlayerIds, id]
+                                    : round.droppedPlayerIds.filter(
+                                          (pid) => pid !== id,
+                                      ),
+                            });
+                        }}
+                    />
+                </div>
+
+                <div className="col">
+                    <Button
+                        variant="success"
+                        className="float-end"
+                        disabled={disabled || !roundIsValid(round)}
+                        onClick={startNextRound}
+                    >
+                        {isLastRound
+                            ? "Complete tournament"
+                            : `Start round ${round.number + 1}`}
+                    </Button>
+                </div>
             </div>
         </>
     );
@@ -216,15 +305,12 @@ function getResultStringHelper(
     draws: number | undefined,
 ): string {
     if (player1Wins != null && player2Wins != null) {
-        if (draws != null && draws > 0) {
-            return `[ ${player1Wins} ] [ ${player2Wins} ] (${draws} draw)`;
-        }
-        return `[ ${player1Wins} ] [ ${player2Wins} ]`;
+        return formatRecord(player1Wins, player2Wins, draws ?? 0);
     }
     if (player1Wins != null) {
-        return `[ ${player1Wins} ] [   ]`.replaceAll(" ", "\u00A0");
+        return `${player1Wins} - [   ]`.replaceAll(" ", "\u00A0");
     }
-    return "[   ] [   ]".replaceAll(" ", "\u00A0");
+    return "[   ] - [   ]".replaceAll(" ", "\u00A0");
 }
 
 function selectedToResults(result: SelectedMatch): MatchResult {

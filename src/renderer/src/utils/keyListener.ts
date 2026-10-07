@@ -1,4 +1,4 @@
-import type { Disposable } from "../../common/types";
+import type { Disposable } from "../../../common/types";
 
 let initialized = false;
 

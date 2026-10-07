@@ -21,7 +21,6 @@ if (isWindows) {
 // oxlint-disable-next-line unicorn/prefer-top-level-await
 void (async () => {
     await app.whenReady();
-
     await storage.init();
 
     const window = createWindow();
@@ -46,7 +45,7 @@ void (async () => {
         return storage.saveTournament(tournament);
     });
 
-    ipcMain.handle(channels.toggleDevTools, (_, __) => {
+    ipcMain.handle(channels.toggleDevTools, () => {
         window.webContents.toggleDevTools();
     });
 })();

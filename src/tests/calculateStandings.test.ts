@@ -10,6 +10,8 @@ import type {
 } from "../common/models.ts";
 import { calculateStandings } from "../renderer/src/utils/calculateStandings.ts";
 
+let nextPairingId = 1;
+
 function tournament(rounds: Round[] = []): Tournament {
     return {
         version: 1,
@@ -43,7 +45,7 @@ function match(
 ): PairingMatch {
     return {
         type: "MATCH",
-        id: "match",
+        id: nextPairingId++,
         table: 1,
         player1Id,
         player2Id,
@@ -93,7 +95,7 @@ describe("calculateStandings", () => {
             tournament([
                 round([
                     match(1, 2, 2, 1, 1),
-                    { type: "BYE", id: "bye", playerId: 3 },
+                    { type: "BYE", id: nextPairingId++, playerId: 3 },
                 ]),
                 round([match(3, 1, 1, 1, 1)], [2]),
             ]),
@@ -119,7 +121,10 @@ describe("calculateStandings", () => {
         const missing = match(1, 2, 2, 0);
         delete missing.result;
         const pending = round(
-            [match(1, 2, 2, 0), { type: "BYE", id: "bye", playerId: 3 }],
+            [
+                match(1, 2, 2, 0),
+                { type: "BYE", id: nextPairingId++, playerId: 3 },
+            ],
             [1],
         );
         pending.status = "IN_PROGRESS";
@@ -134,11 +139,11 @@ describe("calculateStandings", () => {
             tournament([
                 round([
                     match(1, 3, 2, 0),
-                    { type: "BYE", id: "bye2", playerId: 2 },
+                    { type: "BYE", id: nextPairingId++, playerId: 2 },
                 ]),
                 round([
                     match(1, 2, 2, 0),
-                    { type: "BYE", id: "bye3", playerId: 3 },
+                    { type: "BYE", id: nextPairingId++, playerId: 3 },
                 ]),
             ]),
         );
@@ -303,7 +308,9 @@ describe("calculateStandings", () => {
     it("gives a bye-only player a win and game points without inventing an opponent", () => {
         const result = standing(
             calculateStandings(
-                tournament([round([{ type: "BYE", id: "bye", playerId: 1 }])]),
+                tournament([
+                    round([{ type: "BYE", id: nextPairingId++, playerId: 1 }]),
+                ]),
             ),
             1,
         );

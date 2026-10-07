@@ -1,8 +1,9 @@
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import { PersonFillDash } from "react-bootstrap-icons";
 import type { PlayerStanding, Tournament } from "../../common/models";
+import { IconDropped } from "./components/IconDropped";
 import { calculateStandings } from "./utils/calculateStandings";
+import { formatRecord } from "./utils/formatRecord";
 
 interface Props {
     tournament: Tournament;
@@ -47,12 +48,16 @@ export function Standings({ tournament }: Props): JSX.Element {
                             <td>{index + 1}</td>
                             <td>
                                 {standing.player.name}
-                                {standing.dropped && (
-                                    <PersonFillDash title="Dropped from the tournament" />
-                                )}
+                                {standing.dropped && <IconDropped />}
                             </td>
                             <td>{standing.matchPoints}</td>
-                            <td>{getRecord(standing)}</td>
+                            <td>
+                                {formatRecord(
+                                    standing.wins,
+                                    standing.losses,
+                                    standing.draws,
+                                )}
+                            </td>
                             <td>
                                 {format(standing.opponentMatchWinPercentage)}
                             </td>
@@ -66,13 +71,6 @@ export function Standings({ tournament }: Props): JSX.Element {
             </table>
         </>
     );
-}
-
-function getRecord(standing: PlayerStanding) {
-    if (standing.draws > 0) {
-        return `${standing.wins}-${standing.losses}-${standing.draws}`;
-    }
-    return `${standing.wins}-${standing.losses}`;
 }
 
 function format(value: number, decimals = 1): string {

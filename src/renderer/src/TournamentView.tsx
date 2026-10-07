@@ -1,12 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import type { Round, Tournament } from "../../common/models.ts";
-import { tournamentStatuses } from "../../common/models.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
 import { InputText } from "./components/InputText.tsx";
 import { Loading } from "./components/Loading.tsx";
 import { NavItem } from "./components/NavItem.tsx";
-import { Select } from "./components/Select.tsx";
 import { Players } from "./Players.tsx";
 import { RoundComponent } from "./Round.tsx";
 import { Standings } from "./Standings.tsx";
@@ -42,18 +40,27 @@ export function TournamentView({
     dateFormatter,
     navigate,
 }: Props): JSX.Element {
-    const [tab, setTab] = useState<Tab>({ type: "players" });
     const [tournament, setTournament] = useState<Tournament>();
+    const [tab, setTab] = useState<Tab>();
 
     useEffect(() => {
         if (id != null) {
-            window.api.getTournament(id).then(setTournament).catch(handleError);
+            window.api
+                .getTournament(id)
+                .then((t) => {
+                    setTournament(t);
+                    setTab(calculateTab(t));
+                    return undefined;
+                })
+                .catch(handleError);
         } else {
-            setTournament(createNewTournament());
+            const t = createNewTournament();
+            setTournament(t);
+            setTab(calculateTab(t));
         }
     }, [id]);
 
-    if (tournament == null) {
+    if (tournament == null || tab == null) {
         return <Loading />;
     }
 
@@ -169,22 +176,6 @@ export function TournamentView({
                         <td>{dateFormatter.format(tournament.updatedAt)}</td>
                     </tr>
                     <tr>
-                        <td>Status</td>
-                        <td>
-                            <Select
-                                value={tournament.status}
-                                onChange={(status) => {
-                                    updateTournament({ status });
-                                }}
-                            >
-                                {tournamentStatuses.map((status) => ({
-                                    value: status,
-                                    children: statusToString(status),
-                                }))}
-                            </Select>
-                        </td>
-                    </tr>
-                    <tr>
                         <td>Name</td>
                         <td>
                             <InputText
@@ -203,12 +194,18 @@ export function TournamentView({
                 </tbody>
             </table>
 
-            {tournament.roundCount > 0 && (
-                <p>
-                    {tournament.players.length} players{" · "}
-                    {tournament.roundCount} rounds
-                </p>
-            )}
+            <p>
+                {tournament.roundCount > 0 && (
+                    <span>
+                        {tournament.players.length} players{" · "}
+                        {tournament.roundCount} rounds
+                    </span>
+                )}
+
+                <span className="float-end">
+                    {statusToString(tournament.status)}
+                </span>
+            </p>
 
             <ul className="nav nav-tabs mb-3">
                 <NavItem
@@ -247,4 +244,17 @@ export function TournamentView({
             {renderTab()}
         </>
     );
+}
+
+function calculateTab(tournament: Tournament): Tab {
+    if (tournament.rounds.length > 0) {
+        if (tournament.status === "COMPLETED") {
+            return { type: "standings" };
+        }
+        return {
+            type: "round",
+            round: tournament.rounds[tournament.rounds.length - 1].number,
+        };
+    }
+    return { type: "players" };
 }

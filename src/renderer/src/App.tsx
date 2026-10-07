@@ -3,12 +3,12 @@ import type { JSX } from "preact/jsx-runtime";
 import type { Parameters } from "../../api.ts";
 import { Loading } from "./components/Loading.tsx";
 import { HomeView } from "./HomeView.tsx";
-import { initializeKeyListener } from "./keyListener.ts";
 import { TournamentsView } from "./TournamentsView.tsx";
 import { TournamentView } from "./TournamentView.tsx";
 import type { View } from "./types.ts";
 import { DateFormatter } from "./utils/DateFormatter.ts";
 import { handleError } from "./utils/handleError.ts";
+import { initializeKeyListener } from "./utils/keyListener.ts";
 
 export function App(): JSX.Element {
     const [view, setView] = useState<View>({ type: "home" });

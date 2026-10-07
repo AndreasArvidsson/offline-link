@@ -36,14 +36,17 @@ function round(pairings: Pairing[], droppedPlayerIds: number[] = []): Round {
     };
 }
 
+let nextFixturePairingId = 1;
+
 function match(
     player1Id: number,
     player2Id: number,
     result?: MatchResult,
+    id: number = nextFixturePairingId++,
 ): Pairing {
     return {
         type: "MATCH",
-        id: `${player1Id}-${player2Id}`,
+        id,
         table: 1,
         player1Id,
         player2Id,
@@ -118,13 +121,19 @@ function tournamentWithManyDrops(): Tournament {
 
 describe("generateNextRound", () => {
     it("pairs by points, avoids previous opponents, and leaves the input unchanged", () => {
-        const event = tournament(4, [round([match(1, 2), match(3, 4)])]);
+        const event = tournament(4, [
+            round([match(1, 2, undefined, 1), match(3, 4, undefined, 2)]),
+        ]);
         const before = structuredClone(event);
         const next = generateNextRound(event);
         assert.deepEqual(matchIds(next), [
             [1, 3],
             [2, 4],
         ]);
+        assert.deepEqual(
+            next.pairings.map((pairing) => pairing.id),
+            [3, 4],
+        );
         assert.equal(next.number, 2);
         assert.equal(next.status, "IN_PROGRESS");
         assert.deepEqual(next.droppedPlayerIds, []);
@@ -144,6 +153,42 @@ describe("generateNextRound", () => {
                 (pairing) => pairing.type === "BYE" || pairing.result == null,
             ),
         );
+    });
+
+    it("continues after the highest earlier pairing ID, including byes and gaps", () => {
+        const event = tournament(3, [
+            round([
+                match(1, 2, undefined, 4),
+                { type: "BYE", id: 20, playerId: 3 },
+            ]),
+            {
+                ...round([
+                    match(1, 3, undefined, 7),
+                    { type: "BYE", id: 9, playerId: 2 },
+                ]),
+                number: 2,
+            },
+        ]);
+        const before = structuredClone(event);
+
+        const next = generateNextRound(event);
+
+        assert.deepEqual(
+            next.pairings.map((pairing) => pairing.id),
+            [21, 22],
+        );
+        assert.equal(next.pairings.at(-1)?.type, "BYE");
+        assert.deepEqual(event, before);
+    });
+
+    it("starts pairing IDs at one when there is no round history", () => {
+        const next = generateNextRound(tournament(3));
+
+        assert.deepEqual(
+            next.pairings.map((pairing) => pairing.id),
+            [1, 2],
+        );
+        assert.equal(next.pairings.at(-1)?.type, "BYE");
     });
 
     it("backtracks when the first choice would force a rematch", () => {
@@ -186,7 +231,13 @@ describe("generateNextRound", () => {
 
     it("excludes dropped players and awards the lowest-ranked eligible player a bye", () => {
         const event = tournament(4, [
-            round([match(1, 2), { type: "BYE", id: "bye", playerId: 3 }], [4]),
+            round(
+                [
+                    match(1, 2),
+                    { type: "BYE", id: nextFixturePairingId++, playerId: 3 },
+                ],
+                [4],
+            ),
         ]);
         const next = generateNextRound(event);
         assert.deepEqual(matchIds(next), [[1, 3]]);
@@ -201,7 +252,11 @@ describe("generateNextRound", () => {
                 generateNextRound(
                     tournament(3, [
                         round([
-                            { type: "BYE", id: "bye", playerId: 3 },
+                            {
+                                type: "BYE",
+                                id: nextFixturePairingId++,
+                                playerId: 3,
+                            },
                             match(1, 2),
                         ]),
                         round([match(1, 3)]),
@@ -284,7 +339,7 @@ describe("generateNextRound", () => {
         // Player 5 has played everyone, so only a repeat bye for 5 would permit fresh matches.
         const event = tournament(5, [
             round([
-                { type: "BYE", id: "bye", playerId: 5 },
+                { type: "BYE", id: nextFixturePairingId++, playerId: 5 },
                 match(5, 1),
                 match(5, 2),
                 match(5, 3),
@@ -298,9 +353,9 @@ describe("generateNextRound", () => {
         const next = generateNextRound(
             tournament(3, [
                 round([
-                    { type: "BYE", id: "bye1", playerId: 1 },
-                    { type: "BYE", id: "bye2", playerId: 2 },
-                    { type: "BYE", id: "bye3", playerId: 3 },
+                    { type: "BYE", id: nextFixturePairingId++, playerId: 1 },
+                    { type: "BYE", id: nextFixturePairingId++, playerId: 2 },
+                    { type: "BYE", id: nextFixturePairingId++, playerId: 3 },
                 ]),
             ]),
         );

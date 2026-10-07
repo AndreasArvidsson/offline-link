@@ -31,7 +31,8 @@ export interface Round {
 
 export interface PairingMatch {
     type: "MATCH";
-    id: string;
+    // Incrementing ID across all pairings in the tournament.
+    id: number;
     table: number;
     player1Id: number;
     player2Id: number;
@@ -40,7 +41,8 @@ export interface PairingMatch {
 
 export interface PairingBye {
     type: "BYE";
-    id: string;
+    // Incrementing ID across all pairings in the tournament.
+    id: number;
     playerId: number;
 }
 

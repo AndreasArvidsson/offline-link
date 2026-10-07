@@ -10,7 +10,7 @@ export function generateFirstRound(
     for (let i = 0; i + 1 < shuffledPlayers.length; i += 2) {
         pairings.push({
             type: "MATCH",
-            id: crypto.randomUUID(),
+            id: pairings.length + 1,
             table: pairings.length + 1,
             player1Id: shuffledPlayers[i].id,
             player2Id: shuffledPlayers[i + 1].id,
@@ -20,7 +20,7 @@ export function generateFirstRound(
     if (shuffledPlayers.length % 2 !== 0) {
         pairings.push({
             type: "BYE",
-            id: crypto.randomUUID(),
+            id: pairings.length + 1,
             playerId: shuffledPlayers[shuffledPlayers.length - 1].id,
         });
     }
