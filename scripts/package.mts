@@ -1,5 +1,6 @@
 import path from "node:path";
 import { packager } from "@electron/packager";
+import { APP_ID } from "../src/common/constants";
 
 const __dirname = import.meta.dirname;
 
@@ -9,7 +10,8 @@ await packager({
     dir: path.join(__dirname, ".."),
     out: "dist",
     overwrite: true,
-    appBundleId: "com.github.andreasarvidsson.offline-link",
+    icon: "images/icon",
+    appBundleId: APP_ID,
     asar: {
         // Keep native binaries outside app.asar.
         unpack: "**/*.{node,dll,so,dylib}",
