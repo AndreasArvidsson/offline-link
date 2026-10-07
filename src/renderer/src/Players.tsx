@@ -3,7 +3,6 @@ import { PlusCircle, Trash3 } from "react-bootstrap-icons";
 import type { Player } from "../../common/models";
 import { Button } from "./components/Button";
 import { InputText } from "./components/InputText";
-import { isEmptyString } from "./utils/isEmptyString";
 
 interface Props {
     disabled: boolean;
@@ -144,14 +143,11 @@ function getPlayersMap(players: Player[]): Map<string, Set<number>> {
 }
 
 function playersAreValid(players: Player[]): boolean {
-    if (
-        players.length < 2 ||
-        players.some((player) => isEmptyString(player.name))
-    ) {
+    if (players.length < 2) {
         return false;
     }
     const names = new Set(players.map((player) => normalizeName(player.name)));
-    return names.size === players.length;
+    return names.size === players.length && !names.has("");
 }
 
 function normalizeName(name: string): string {

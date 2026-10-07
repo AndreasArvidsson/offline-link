@@ -82,6 +82,10 @@ export function TournamentView({
         const firstRound = generateFirstRound(tournament.players);
         updateTournament({
             roundCount,
+            players: tournament.players.map((player) => ({
+                ...player,
+                name: player.name.trim(),
+            })),
             rounds: [firstRound],
         });
         setTab({ type: "round", round: firstRound.number });
