@@ -71,10 +71,8 @@ export function TournamentView({
             // oxlint-disable-next-line react/purity
             updatedAt: Date.now(),
         };
-        window.api
-            .saveTournament(updated)
-            .then(() => setTournament(updated))
-            .catch(handleError);
+        setTournament(updated);
+        window.api.saveTournament(updated).catch(handleError);
     };
 
     const disabled = tournament.status === "COMPLETED";
