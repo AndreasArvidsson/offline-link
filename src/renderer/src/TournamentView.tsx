@@ -76,6 +76,7 @@ export function TournamentView({
     };
 
     const disabled = tournament.status === "COMPLETED";
+    const invalidName = !disabled && isEmptyString(tournament.name);
 
     const startFirstRound = () => {
         const roundCount = calculateNumberOfRounds(tournament.players.length);
@@ -112,6 +113,10 @@ export function TournamentView({
     };
 
     const renderTab = () => {
+        if (invalidName) {
+            return null;
+        }
+
         const { type } = tab;
         switch (type) {
             case "players":
@@ -184,9 +189,7 @@ export function TournamentView({
                                 placeholder="Tournament name"
                                 value={tournament.name}
                                 disabled={disabled}
-                                invalid={
-                                    !disabled && isEmptyString(tournament.name)
-                                }
+                                invalid={invalidName}
                                 onChange={(name) => {
                                     updateTournament({ name });
                                 }}
@@ -209,39 +212,42 @@ export function TournamentView({
                 </span>
             </p>
 
-            <ul className="nav nav-tabs mb-3">
-                <NavItem
-                    active={tab.type === "players"}
-                    onClick={() => {
-                        setTab({ type: "players" });
-                    }}
-                >
-                    Players
-                </NavItem>
-                {tournament.rounds.map((round) => (
+            {!invalidName && (
+                <ul className="nav nav-tabs mb-3">
                     <NavItem
-                        key={round.number}
-                        active={
-                            tab.type === "round" && tab.round === round.number
-                        }
+                        active={tab.type === "players"}
                         onClick={() => {
-                            setTab({ type: "round", round: round.number });
+                            setTab({ type: "players" });
                         }}
                     >
-                        Round {round.number}
+                        Players
                     </NavItem>
-                ))}
-                {tournament.roundCount > 0 && (
-                    <NavItem
-                        active={tab.type === "standings"}
-                        onClick={() => {
-                            setTab({ type: "standings" });
-                        }}
-                    >
-                        Standings
-                    </NavItem>
-                )}
-            </ul>
+                    {tournament.rounds.map((round) => (
+                        <NavItem
+                            key={round.number}
+                            active={
+                                tab.type === "round" &&
+                                tab.round === round.number
+                            }
+                            onClick={() => {
+                                setTab({ type: "round", round: round.number });
+                            }}
+                        >
+                            Round {round.number}
+                        </NavItem>
+                    ))}
+                    {tournament.roundCount > 0 && (
+                        <NavItem
+                            active={tab.type === "standings"}
+                            onClick={() => {
+                                setTab({ type: "standings" });
+                            }}
+                        >
+                            Standings
+                        </NavItem>
+                    )}
+                </ul>
+            )}
 
             {renderTab()}
         </>
