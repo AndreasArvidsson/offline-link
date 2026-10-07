@@ -18,13 +18,16 @@ export function Players({
     onChange,
     startFirstRound,
 }: Props): JSX.Element {
+    const playersMap = getPlayersMap(players);
+
     return (
         <>
             {players.map((player) => (
                 <PlayerComponent
                     key={player.id}
-                    player={player}
                     disabled={disabled}
+                    player={player}
+                    playersMap={playersMap}
                     onChange={(updatedPlayer) => {
                         onChange(
                             players.map((p) =>
@@ -41,7 +44,6 @@ export function Players({
             <div className="mt-4">
                 <Button
                     variant="primary"
-
                     disabled={disabled}
                     onClick={() => {
                         const highest = players.reduce(
@@ -74,12 +76,14 @@ export function Players({
 interface PlayerProps {
     disabled: boolean;
     player: Player;
+    playersMap: Map<string, Set<number>>;
     onChange: (player: Player) => void;
     onRemove: (player: Player) => void;
 }
 
 function PlayerComponent({
     player,
+    playersMap,
     onChange,
     onRemove,
     disabled,
@@ -90,7 +94,7 @@ function PlayerComponent({
                 placeholder="Player name"
                 value={player.name}
                 disabled={disabled}
-                invalid={!disabled && isEmptyString(player.name)}
+                invalid={!disabled && !validatePlayer(player, playersMap)}
                 onChange={(name) => {
                     onChange({ ...player, name });
                 }}
@@ -110,9 +114,46 @@ function PlayerComponent({
     );
 }
 
+function validatePlayer(
+    player: Player,
+    playersMap: Map<string, Set<number>>,
+): boolean {
+    const normalized = normalizeName(player.name);
+    if (normalized === "") {
+        return false;
+    }
+    const existing = playersMap.get(normalized);
+    if (existing != null && (existing.size > 1 || !existing.has(player.id))) {
+        return false;
+    }
+    return true;
+}
+
+function getPlayersMap(players: Player[]): Map<string, Set<number>> {
+    const playersMap = new Map<string, Set<number>>();
+    for (const player of players) {
+        const normalized = normalizeName(player.name);
+        const existing = playersMap.get(normalized);
+        if (existing != null) {
+            existing.add(player.id);
+        } else {
+            playersMap.set(normalized, new Set([player.id]));
+        }
+    }
+    return playersMap;
+}
+
 function playersAreValid(players: Player[]): boolean {
-    return (
-        players.length > 1 &&
-        players.every((player) => !isEmptyString(player.name))
-    );
+    if (
+        players.length < 2 ||
+        players.some((player) => isEmptyString(player.name))
+    ) {
+        return false;
+    }
+    const names = new Set(players.map((player) => normalizeName(player.name)));
+    return names.size === players.length;
+}
+
+function normalizeName(name: string): string {
+    return name.trim().toLocaleLowerCase();
 }
