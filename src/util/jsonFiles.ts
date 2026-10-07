@@ -1,4 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { readFile, rename, rm, writeFile } from "node:fs/promises";
 
 export async function readJsonFile<T>(filePath: string): Promise<T> {
     const data = await readFile(filePath, "utf8");
@@ -11,5 +12,17 @@ export async function writeJsonFile(
     data: unknown,
 ): Promise<void> {
     const json = JSON.stringify(data, null, 2);
-    await writeFile(filePath, json, "utf8");
+    const temporaryPath = `${filePath}.${randomUUID()}.tmp`;
+
+    try {
+        await writeFile(temporaryPath, json, {
+            encoding: "utf8",
+            flag: "wx",
+            flush: true,
+        });
+        await rename(temporaryPath, filePath);
+    } catch (error) {
+        await rm(temporaryPath, { force: true });
+        throw error;
+    }
 }
