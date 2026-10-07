@@ -1,4 +1,5 @@
 import type { Round } from "../../../common/models";
+import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
 
 export function calculateMatchPoints(
     playerId: number,
@@ -20,7 +21,7 @@ export function calculateMatchPoints(
                 continue;
             }
 
-            if (pairing.result == null) {
+            if (pairing.result == null || isDoubleMatchLoss(pairing.result)) {
                 continue;
             }
 

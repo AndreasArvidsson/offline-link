@@ -10,6 +10,7 @@ import type {
 import { Button } from "./components/Button";
 import { IconDropped } from "./components/IconDropped";
 import { PlayersDropped } from "./PlayersDropped";
+import { formatMatchResult } from "./utils/formatMatchResult";
 import { formatRecord } from "./utils/formatRecord";
 
 interface Props {
@@ -271,11 +272,9 @@ export function RoundComponent({
 }
 
 function getResultString(result: MatchResult | undefined): string {
-    return getResultStringHelper(
-        result?.player1Wins,
-        result?.player2Wins,
-        result?.draws,
-    );
+    return result == null
+        ? getResultStringHelper(undefined, undefined, undefined)
+        : formatMatchResult(result);
 }
 
 function getSelectedResultString(result: SelectedMatch): string {
@@ -296,11 +295,7 @@ function getSelectedResultString(result: SelectedMatch): string {
                 undefined,
             );
         case 3:
-            return getResultStringHelper(
-                result.scores[0],
-                result.scores[1],
-                result.scores[2],
-            );
+            return getResultString(selectedToResults(result));
         default: {
             throw new Error("Unhandled case");
         }

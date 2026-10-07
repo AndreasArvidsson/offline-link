@@ -48,7 +48,9 @@ export interface PairingBye {
 
 export type Pairing = PairingMatch | PairingBye;
 
-// Recording facts only. Official result legality and scoring belong to Phase 3.
+// A reported 0-0-0 result represents a double match loss. Unplayed intentional
+// draws are recorded as 0-0-3; an unreported match has no result.
+// A double match loss can happen when both players are absent.
 export interface MatchResult {
     player1Wins: number;
     player2Wins: number;

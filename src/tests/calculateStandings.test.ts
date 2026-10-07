@@ -247,12 +247,75 @@ describe("calculateStandings", () => {
         close(standing(standings, 2).opponentGameWinPercentage, 0.33);
     });
 
-    it("floors own and opponent percentages for a reported zero-game draw", () => {
+    it("scores a 0-0-0 result as a match loss for both players", () => {
         const standings = calculateStandings(
             tournament([round([match(1, 2, 0, 0)])]),
         );
-        assert.equal(standing(standings, 1).gameWinPercentage, 0.33);
-        assert.equal(standing(standings, 2).opponentGameWinPercentage, 0.33);
+        for (const playerId of [1, 2]) {
+            const result = standing(standings, playerId);
+            assert.equal(result.matchPoints, 0);
+            assert.deepEqual(
+                [result.wins, result.losses, result.draws],
+                [0, 1, 0],
+            );
+            assert.equal(result.opponentMatchWinPercentage, 0.33);
+            assert.equal(result.gameWinPercentage, 0.33);
+            assert.equal(result.opponentGameWinPercentage, 0.33);
+        }
+    });
+
+    it("includes double match losses in match records and opponent tiebreakers without adding games", () => {
+        const firstRound = round([match(1, 3, 2, 1), match(2, 4, 2, 0)]);
+        const event = tournament([firstRound]);
+        event.players.push({ id: 4, name: "Player 4" });
+        const before = calculateStandings(event);
+        event.rounds.push(
+            round([match(1, 2, 0, 0), match(3, 4, 2, 1)], [1, 2]),
+        );
+        const after = calculateStandings(event);
+        for (const playerId of [1, 2]) {
+            const result = standing(after, playerId);
+            assert.equal(result.matchPoints, 3);
+            assert.deepEqual(
+                [result.wins, result.losses, result.draws],
+                [1, 1, 0],
+            );
+            assert.equal(result.dropped, true);
+            assert.equal(
+                result.gameWinPercentage,
+                standing(before, playerId).gameWinPercentage,
+            );
+        }
+        close(standing(after, 1).gameWinPercentage, 2 / 3);
+        close(standing(after, 2).gameWinPercentage, 1);
+        close(standing(after, 1).opponentMatchWinPercentage, 1 / 2);
+        close(standing(after, 1).opponentGameWinPercentage, 3 / 4);
+        close(
+            standing(after, 2).opponentMatchWinPercentage,
+            (0.33 + 1 / 2) / 2,
+        );
+        close(standing(after, 2).opponentGameWinPercentage, (0.33 + 2 / 3) / 2);
+        close(
+            standing(after, 3).opponentMatchWinPercentage,
+            (1 / 2 + 0.33) / 2,
+        );
+    });
+
+    it("scores a 0-0-1 result as an actual game and match draw", () => {
+        const standings = calculateStandings(
+            tournament([round([match(1, 2, 0, 0, 1)])]),
+        );
+        for (const playerId of [1, 2]) {
+            const result = standing(standings, playerId);
+            assert.equal(result.matchPoints, 1);
+            assert.deepEqual(
+                [result.wins, result.losses, result.draws],
+                [0, 0, 1],
+            );
+            close(result.opponentMatchWinPercentage, 1 / 3);
+            close(result.gameWinPercentage, 1 / 3);
+            close(result.opponentGameWinPercentage, 1 / 3);
+        }
     });
 
     it("scores an intentional 0-0-3 draw using its reported game draws", () => {
@@ -272,9 +335,9 @@ describe("calculateStandings", () => {
         }
     });
 
-    it("ignores partially reported rounds after a completed round", () => {
+    it("ignores pending double match losses after a completed round", () => {
         const completed = round([match(1, 2, 2, 1)], [2]);
-        const pending = round([match(3, 1, 2, 0)], [1]);
+        const pending = round([match(3, 1, 0, 0)], [1]);
         pending.status = "IN_PROGRESS";
         assert.deepEqual(
             calculateStandings(tournament([completed, pending])),

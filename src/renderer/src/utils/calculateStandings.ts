@@ -1,6 +1,7 @@
 import type { PlayerStanding, Round, Tournament } from "../../../common/models";
 import { comparePercentages } from "./comparePercentages";
 import { getDroppedPlayers } from "./getDroppedPlayers";
+import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
 
 // Magic Tournament Rules, section 3.1 and Appendix C:
 // https://media.wizards.com/ContentResources/WPN/MTG_MTR_2026_Feb27_EN.pdf
@@ -107,7 +108,9 @@ function calculateRecord(playerId: number, rounds: Round[]) {
             gameWins += ownWins;
             gameLosses += opponentWins;
             gameDraws += pairing.result.draws;
-            if (ownWins > opponentWins) {
+            if (isDoubleMatchLoss(pairing.result)) {
+                losses++;
+            } else if (ownWins > opponentWins) {
                 wins++;
             } else if (ownWins < opponentWins) {
                 losses++;
