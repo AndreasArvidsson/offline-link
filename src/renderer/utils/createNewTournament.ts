@@ -1,4 +1,4 @@
-import type { Tournament } from "../../../common/models.ts";
+import type { Tournament } from "../../common/models.ts";
 
 export function createNewTournament(): Tournament {
     const timestamp = Date.now();

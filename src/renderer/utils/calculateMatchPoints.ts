@@ -1,4 +1,4 @@
-import type { Round } from "../../../common/models";
+import type { Round } from "../../common/models";
 import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
 
 export function calculateMatchPoints(

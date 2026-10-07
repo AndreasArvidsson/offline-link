@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
-import type { Round, Tournament } from "../../common/models.ts";
+import type { Round, Tournament } from "../common/models.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
 import { InputText } from "./components/InputText.tsx";
 import { Loading } from "./components/Loading.tsx";

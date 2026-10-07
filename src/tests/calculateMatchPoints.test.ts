@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "mocha";
 import type { Pairing, PairingMatch, Round } from "../common/models.ts";
-import { calculateMatchPoints } from "../renderer/src/utils/calculateMatchPoints.ts";
+import { calculateMatchPoints } from "../renderer/utils/calculateMatchPoints.ts";
 
 let nextPairingId = 1;
 

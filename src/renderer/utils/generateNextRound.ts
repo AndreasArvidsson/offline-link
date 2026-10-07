@@ -3,7 +3,7 @@ import type {
     PlayerStanding,
     Round,
     Tournament,
-} from "../../../common/models";
+} from "../../common/models";
 import { calculateStandings } from "./calculateStandings";
 import { findPerfectMatching } from "./findPerfectMatching";
 import { hasReceivedBye } from "./hasReceivedBye";

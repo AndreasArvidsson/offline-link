@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "mocha";
-import { formatMatchResult } from "../renderer/src/utils/formatMatchResult.ts";
+import { formatMatchResult } from "../renderer/utils/formatMatchResult.ts";
 
 describe("formatMatchResult", () => {
     it("labels a reported 0-0-0 result as a double match loss", () => {

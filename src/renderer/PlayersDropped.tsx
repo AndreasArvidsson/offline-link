@@ -1,8 +1,8 @@
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
-import { NA } from "../../common/constants";
-import type { Player, ParticipationType, Round } from "../../common/models";
+import { NA } from "../common/constants";
+import type { Player, ParticipationType, Round } from "../common/models";
 import { Select } from "./components/Select";
 
 interface Props {

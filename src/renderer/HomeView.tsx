@@ -1,8 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import { PlusCircle } from "react-bootstrap-icons";
-import type { RecentTournament } from "../../api.ts";
-import { APP_NAME } from "../../common/constants.ts";
+import type { RecentTournament } from "../api.ts";
+import { APP_NAME } from "../common/constants.ts";
 import { Button } from "./components/Button.tsx";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";

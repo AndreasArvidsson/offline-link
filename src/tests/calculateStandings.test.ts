@@ -8,7 +8,7 @@ import type {
     Round,
     Tournament,
 } from "../common/models.ts";
-import { calculateStandings } from "../renderer/src/utils/calculateStandings.ts";
+import { calculateStandings } from "../renderer/utils/calculateStandings.ts";
 
 let nextPairingId = 1;
 

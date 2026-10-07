@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
-import { NA } from "../../common/constants";
+import { NA } from "../common/constants";
 import type {
     MatchResult,
     PairingBye,
@@ -9,7 +9,7 @@ import type {
     Player,
     PlayerParticipationChange,
     Round,
-} from "../../common/models";
+} from "../common/models";
 import { Button } from "./components/Button";
 import { IconParticipationChange } from "./components/IconParticipationChange";
 import { PlayersDropped } from "./PlayersDropped";

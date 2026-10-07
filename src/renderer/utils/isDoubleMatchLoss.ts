@@ -1,4 +1,4 @@
-import type { MatchResult } from "../../../common/models";
+import type { MatchResult } from "../../common/models";
 
 export function isDoubleMatchLoss(result: MatchResult): boolean {
     return (

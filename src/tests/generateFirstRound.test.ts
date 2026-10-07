@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "mocha";
 import type { Player } from "../common/models.ts";
-import { generateFirstRound } from "../renderer/src/utils/generateFirstRound.ts";
+import { generateFirstRound } from "../renderer/utils/generateFirstRound.ts";
 
 describe("generateFirstRound", () => {
     it("pairs every entrant exactly once and gives a bye only to odd fields", () => {

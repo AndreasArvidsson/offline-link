@@ -1,5 +1,5 @@
 import path from "node:path";
-import { nativeTheme, BrowserWindow } from "electron";
+import { nativeTheme, BrowserWindow, app } from "electron";
 import { APP_NAME } from "./common/constants";
 
 const iconPath = path.resolve(__dirname, "..", "images", "icon.png");
@@ -8,7 +8,7 @@ export function createWindow(): BrowserWindow {
     nativeTheme.themeSource = "system";
 
     const window = new BrowserWindow({
-        title: APP_NAME,
+        title: `${APP_NAME} v${app.getVersion()}`,
         icon: iconPath,
 
         center: true,

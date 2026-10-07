@@ -1,6 +1,6 @@
 import type { JSX } from "preact/jsx-runtime";
 import { PersonFillDash, PersonFillX } from "react-bootstrap-icons";
-import type { ParticipationType } from "../../../common/models";
+import type { ParticipationType } from "../../common/models";
 
 export function IconParticipationChange({
     type,

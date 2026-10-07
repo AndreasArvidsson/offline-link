@@ -1,4 +1,4 @@
-import type { OfflineLinkApi } from "../../api.ts";
+import type { OfflineLinkApi } from "../api.ts";
 
 declare global {
     interface Window {

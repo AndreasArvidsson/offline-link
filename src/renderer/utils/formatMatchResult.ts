@@ -1,4 +1,4 @@
-import type { MatchResult } from "../../../common/models";
+import type { MatchResult } from "../../common/models";
 import { formatRecord } from "./formatRecord";
 import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
 

@@ -1,7 +1,7 @@
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import { NA } from "../../common/constants";
-import type { PlayerStanding, Tournament } from "../../common/models";
+import { NA } from "../common/constants";
+import type { PlayerStanding, Tournament } from "../common/models";
 import { IconParticipationChange } from "./components/IconParticipationChange";
 import { calculateStandings } from "./utils/calculateStandings";
 import { formatRecord } from "./utils/formatRecord";

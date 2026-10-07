@@ -1,4 +1,4 @@
-import type { Pairing, Player, Round } from "../../../common/models";
+import type { Pairing, Player, Round } from "../../common/models";
 
 export function generateFirstRound(
     players: Player[],

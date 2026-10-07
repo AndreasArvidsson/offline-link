@@ -1,4 +1,4 @@
-import type { ParticipationType, Round } from "../../../common/models";
+import type { ParticipationType, Round } from "../../common/models";
 
 export function getPlayerParticipations(
     rounds: Round[],
