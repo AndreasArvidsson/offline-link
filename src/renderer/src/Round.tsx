@@ -106,7 +106,13 @@ export function RoundComponent({
             case "0":
             case "1":
             case "2":
-            case "3": {
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9": {
                 const score = Number(key);
                 const scores =
                     selected.scores.length === 3
@@ -342,7 +348,11 @@ function matchToSelected(match: PairingMatch): SelectedMatch {
 
 function isMatchResultValid(result: MatchResult) {
     // Note: Draws are not counted towards the validity check. Only player1Wins and player2Wins are considered.
-    return result.player1Wins + result.player2Wins < 4;
+    return (
+        result.player1Wins < 3 &&
+        result.player2Wins < 3 &&
+        result.player1Wins + result.player2Wins < 4
+    );
 }
 
 function roundIsValid(round: Round): boolean {
