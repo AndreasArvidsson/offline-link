@@ -81,7 +81,7 @@ describe("calculateStandings", () => {
             losses: 0,
             draws: 0,
             opponentMatchWinPercentage: 0,
-            gameWinPercentage: 0,
+            gameWinPercentage: 0.33,
             opponentGameWinPercentage: 0,
         });
         assert.deepEqual(
@@ -108,8 +108,8 @@ describe("calculateStandings", () => {
         assert.equal(first.matchPoints, 4);
         assert.deepEqual([first.wins, first.losses, first.draws], [1, 0, 1]);
         close(first.gameWinPercentage, 11 / 21);
-        close(first.opponentMatchWinPercentage, (0.33 + 1 / 3) / 2);
-        close(first.opponentGameWinPercentage, (1 / 3 + 4 / 9) / 2);
+        close(first.opponentMatchWinPercentage, (0.33 + 4 / 6) / 2);
+        close(first.opponentGameWinPercentage, (1 / 3 + 10 / 15) / 2);
         const byePlayer = standing(standings, 3);
         close(byePlayer.gameWinPercentage, 10 / 15);
         close(byePlayer.opponentMatchWinPercentage, 4 / 6);
@@ -134,7 +134,7 @@ describe("calculateStandings", () => {
         );
     });
 
-    it("excludes opponents' bye wins from both opponent tiebreakers", () => {
+    it("includes opponents' bye wins in both opponent tiebreakers", () => {
         const standings = calculateStandings(
             tournament([
                 round([
@@ -148,8 +148,8 @@ describe("calculateStandings", () => {
             ]),
         );
         const winner = standing(standings, 1);
-        close(winner.opponentMatchWinPercentage, 0.33);
-        close(winner.opponentGameWinPercentage, 0.33);
+        close(winner.opponentMatchWinPercentage, 0.5);
+        close(winner.opponentGameWinPercentage, 0.5);
         const byePlayer = standing(standings, 2);
         assert.equal(byePlayer.matchPoints, 3);
         assert.deepEqual(
@@ -157,6 +157,62 @@ describe("calculateStandings", () => {
             [1, 1, 0],
         );
         close(byePlayer.gameWinPercentage, 0.5);
+    });
+
+    it("uses the Appendix C match-win percentage for a 3-2 record including a bye", () => {
+        // Appendix C: 9 match points over 5 rounds, including the first-round bye.
+        const event = tournament([
+            round([{ type: "BYE", id: nextPairingId++, playerId: 2 }]),
+            round([match(1, 2, 2, 1)], [1]),
+            round([match(2, 3, 2, 0)]),
+            round([match(2, 4, 2, 1)]),
+            round([match(5, 2, 2, 1)], [2]),
+        ]);
+        event.players.push(
+            { id: 4, name: "Player 4" },
+            { id: 5, name: "Player 5" },
+        );
+        const standings = calculateStandings(event);
+        const opponent = standing(standings, 2);
+        assert.equal(opponent.matchPoints, 9);
+        assert.deepEqual(
+            [opponent.wins, opponent.losses, opponent.draws],
+            [3, 2, 0],
+        );
+        assert.equal(opponent.dropped, true);
+        close(standing(standings, 1).opponentMatchWinPercentage, 9 / 15);
+        close(standing(standings, 1).opponentGameWinPercentage, 24 / 39);
+    });
+
+    it("ranks players using their opponents' full records including byes", () => {
+        const event = tournament([
+            round([
+                match(2, 5, 2, 1),
+                match(1, 4, 1, 2),
+                { type: "BYE", id: nextPairingId++, playerId: 3 },
+            ]),
+            round([
+                match(4, 5, 0, 2),
+                match(2, 3, 0, 2),
+                { type: "BYE", id: nextPairingId++, playerId: 1 },
+            ]),
+            round([
+                match(1, 3, 2, 0),
+                match(2, 4, 0, 2),
+                { type: "BYE", id: nextPairingId++, playerId: 5 },
+            ]),
+        ]);
+        event.players.push(
+            { id: 4, name: "Player 4" },
+            { id: 5, name: "Player 5" },
+        );
+        const standings = calculateStandings(event);
+        assert.deepEqual(
+            standings.map((item) => item.player.id),
+            [1, 4, 5, 3, 2],
+        );
+        close(standing(standings, 4).opponentMatchWinPercentage, 5 / 9);
+        close(standing(standings, 5).opponentMatchWinPercentage, 0.5);
     });
 
     it("applies percentage floors and weights repeated opponents by encounter", () => {
@@ -197,6 +253,23 @@ describe("calculateStandings", () => {
         );
         assert.equal(standing(standings, 1).gameWinPercentage, 0.33);
         assert.equal(standing(standings, 2).opponentGameWinPercentage, 0.33);
+    });
+
+    it("scores an intentional 0-0-3 draw using its reported game draws", () => {
+        const standings = calculateStandings(
+            tournament([round([match(1, 2, 0, 0, 3)])]),
+        );
+        for (const playerId of [1, 2]) {
+            const result = standing(standings, playerId);
+            assert.equal(result.matchPoints, 1);
+            assert.deepEqual(
+                [result.wins, result.losses, result.draws],
+                [0, 0, 1],
+            );
+            close(result.opponentMatchWinPercentage, 1 / 3);
+            close(result.gameWinPercentage, 1 / 3);
+            close(result.opponentGameWinPercentage, 1 / 3);
+        }
     });
 
     it("ignores partially reported rounds after a completed round", () => {

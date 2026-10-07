@@ -4,6 +4,36 @@ import type { Player } from "../common/models.ts";
 import { generateFirstRound } from "../renderer/src/utils/generateFirstRound.ts";
 
 describe("generateFirstRound", () => {
+    it("pairs every entrant exactly once and gives a bye only to odd fields", () => {
+        for (const playerCount of [0, 1, 2, 5, 8]) {
+            const players = Array.from({ length: playerCount }, (_, index) => ({
+                id: index + 1,
+                name: `Player ${index + 1}`,
+            }));
+            const round = generateFirstRound(players, () => 0.5);
+            const pairedPlayerIds = round.pairings.flatMap((pairing) =>
+                pairing.type === "MATCH"
+                    ? [pairing.player1Id, pairing.player2Id]
+                    : [pairing.playerId],
+            );
+
+            assert.deepEqual(
+                pairedPlayerIds.toSorted((a, b) => a - b),
+                players.map((player) => player.id),
+            );
+            assert.equal(
+                round.pairings.filter((pairing) => pairing.type === "BYE")
+                    .length,
+                playerCount % 2,
+            );
+            assert.equal(
+                round.pairings.filter((pairing) => pairing.type === "MATCH")
+                    .length,
+                Math.floor(playerCount / 2),
+            );
+        }
+    });
+
     it("assigns consecutive numeric IDs to matches and a bye without changing players", () => {
         const players: Player[] = [
             { id: 1, name: "Player 1" },

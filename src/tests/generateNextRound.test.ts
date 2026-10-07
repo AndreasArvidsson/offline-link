@@ -7,6 +7,7 @@ import type {
     Round,
     Tournament,
 } from "../common/models.ts";
+import { calculateStandings } from "../renderer/src/utils/calculateStandings.ts";
 import { generateNextRound } from "../renderer/src/utils/generateNextRound.ts";
 
 function tournament(playerCount: number, rounds: Round[] = []): Tournament {
@@ -120,6 +121,133 @@ function tournamentWithManyDrops(): Tournament {
 }
 
 describe("generateNextRound", () => {
+    it("uses standings rather than point-gap optimization for the final Swiss round", () => {
+        const event = tournament(8, [
+            round([
+                match(7, 5, { player1Wins: 2, player2Wins: 1, draws: 0 }),
+                match(3, 2),
+                match(8, 6, { player1Wins: 1, player2Wins: 2, draws: 0 }),
+                match(4, 1, { player1Wins: 1, player2Wins: 1, draws: 0 }),
+            ]),
+            {
+                ...round([
+                    match(3, 6, { player1Wins: 0, player2Wins: 2, draws: 0 }),
+                    match(7, 1, { player1Wins: 0, player2Wins: 2, draws: 0 }),
+                    match(4, 5, { player1Wins: 0, player2Wins: 2, draws: 0 }),
+                    match(8, 2),
+                ]),
+                number: 2,
+            },
+        ]);
+        event.roundCount = 3;
+
+        assert.deepEqual(
+            calculateStandings(event).map((standing) => standing.player.id),
+            [6, 1, 8, 3, 7, 5, 4, 2],
+        );
+        assert.deepEqual(matchIds(generateNextRound(event)), [
+            [6, 1],
+            [8, 3],
+            [7, 4],
+            [5, 2],
+        ]);
+    });
+
+    it("skips previous opponents when power pairing the final round", () => {
+        const drawResult = { player1Wins: 1, player2Wins: 1, draws: 0 };
+        const event = tournament(4, [
+            round([match(1, 2, drawResult), match(3, 4, drawResult)]),
+        ]);
+        event.roundCount = 2;
+
+        assert.deepEqual(matchIds(generateNextRound(event)), [
+            [1, 3],
+            [2, 4],
+        ]);
+    });
+
+    it("skips a fresh higher-ranked opponent when it would strand the final-round remainder", () => {
+        const drawResult = { player1Wins: 1, player2Wins: 1, draws: 0 };
+        const event = tournament(6, [
+            round([
+                match(1, 4, drawResult),
+                match(2, 3, drawResult),
+                match(5, 6, drawResult),
+            ]),
+            {
+                ...round(
+                    [
+                        match(3, 4, drawResult),
+                        match(1, 5, drawResult),
+                        match(2, 6, drawResult),
+                    ],
+                    [5, 6],
+                ),
+                number: 2,
+            },
+        ]);
+        event.roundCount = 3;
+
+        // 1-2 is fresh, but would leave a rematch between 3 and 4.
+        assert.deepEqual(matchIds(generateNextRound(event)), [
+            [1, 3],
+            [2, 4],
+        ]);
+    });
+
+    it("preserves rank preference when repairing and replacing the final-round matching", () => {
+        const drawResult = { player1Wins: 1, player2Wins: 1, draws: 0 };
+        const history = [
+            [
+                [2, 8],
+                [4, 3],
+                [6, 7],
+                [5, 1],
+            ],
+            [
+                [8, 1],
+                [7, 5],
+                [3, 6],
+                [4, 2],
+            ],
+            [
+                [4, 6],
+                [5, 8],
+                [1, 7],
+                [3, 2],
+            ],
+            [
+                [1, 2],
+                [8, 3],
+                [5, 6],
+                [4, 7],
+            ],
+        ];
+        const event = tournament(
+            8,
+            history.map((matches, index) => {
+                const previousRound = round(
+                    matches.map(([first, second]) =>
+                        match(first, second, drawResult),
+                    ),
+                );
+                previousRound.number = index + 1;
+                return previousRound;
+            }),
+        );
+        const before = structuredClone(event);
+
+        // 1-3 needs a new matching; after that, 2-5 strands the remainder.
+        // Choosing 2-6 instead repairs the matching by joining former partners 7-8.
+        assert.deepEqual(matchIds(generateNextRound(event)), [
+            [1, 3],
+            [2, 6],
+            [4, 5],
+            [7, 8],
+        ]);
+        assert.deepEqual(event, before);
+    });
+
     it("pairs by points, avoids previous opponents, and leaves the input unchanged", () => {
         const event = tournament(4, [
             round([match(1, 2, undefined, 1), match(3, 4, undefined, 2)]),

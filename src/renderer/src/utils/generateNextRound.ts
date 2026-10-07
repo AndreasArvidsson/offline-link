@@ -39,17 +39,21 @@ export function generateNextRound(tournament: Tournament): Round {
     );
 
     const byeCandidates = getByeCandidates(players, tournament.rounds);
+    const findPairing =
+        tournament.rounds.length + 1 === tournament.roundCount
+            ? findPowerPairing
+            : findBestPairing;
 
     let bye: PlayerStanding | undefined;
     let matches: Match[] | undefined;
 
     if (players.length % 2 === 0) {
-        matches = findBestPairing(players, tournament.rounds);
+        matches = findPairing(players, tournament.rounds);
     } else {
         for (const candidate of byeCandidates) {
             const remaining = players.filter((player) => player !== candidate);
 
-            const solution = findBestPairing(remaining, tournament.rounds);
+            const solution = findPairing(remaining, tournament.rounds);
 
             if (solution != null) {
                 bye = candidate;
@@ -120,10 +124,10 @@ function getByeCandidates(
     return withoutBye.length > 0 ? withoutBye : reversedPlayers;
 }
 
-function findBestPairing(
+function getFreshOpponentGraph(
     players: PlayerStanding[],
     rounds: Round[],
-): Match[] | undefined {
+): number[][] {
     const adjacency: number[][] = players.map(() => []);
     for (let first = 0; first < players.length; first++) {
         for (let second = first + 1; second < players.length; second++) {
@@ -139,6 +143,120 @@ function findBestPairing(
             }
         }
     }
+
+    return adjacency;
+}
+
+// EventLink pairs the final Swiss round by rank, skipping previous opponents.
+// https://wpn.wizards.com/en/news/eventlink-release-notes-september-28-2021
+function findPowerPairing(
+    players: PlayerStanding[],
+    rounds: Round[],
+): Match[] | undefined {
+    const adjacency = getFreshOpponentGraph(players, rounds);
+    const initialMatching = findPerfectMatching(adjacency);
+    if (initialMatching === undefined) {
+        return undefined;
+    }
+
+    const partners = players.map(() => -1);
+    for (const [first, second] of initialMatching) {
+        partners[first] = second;
+        partners[second] = first;
+    }
+
+    const matches: Match[] = [];
+    let remaining = players.map((_, index) => index);
+    while (remaining.length > 0) {
+        const [first, ...rest] = remaining;
+        let nextRemaining: number[] | undefined;
+
+        for (const opponent of rest) {
+            if (!adjacency[first].includes(opponent)) {
+                continue;
+            }
+
+            const candidates = rest.filter((vertex) => vertex !== opponent);
+
+            if (
+                !updateRemainingMatching(
+                    adjacency,
+                    partners,
+                    first,
+                    opponent,
+                    candidates,
+                )
+            ) {
+                continue;
+            }
+
+            matches.push([
+                players[first].player.id,
+                players[opponent].player.id,
+            ]);
+            partners[first] = -1;
+            partners[opponent] = -1;
+            nextRemaining = candidates;
+            break;
+        }
+
+        if (nextRemaining === undefined) {
+            return undefined;
+        }
+        remaining = nextRemaining;
+    }
+
+    return matches;
+}
+
+// Reuse the known perfect matching, or repair it by pairing the selected
+// players' former partners. Only harder cases need a new blossom search.
+function updateRemainingMatching(
+    adjacency: number[][],
+    partners: number[],
+    first: number,
+    second: number,
+    remaining: number[],
+): boolean {
+    if (partners[first] === second) {
+        return true;
+    }
+
+    const firstPartner = partners[first];
+    const secondPartner = partners[second];
+    if (adjacency[firstPartner].includes(secondPartner)) {
+        partners[firstPartner] = secondPartner;
+        partners[secondPartner] = firstPartner;
+        return true;
+    }
+
+    const indices = new Map(remaining.map((vertex, index) => [vertex, index]));
+    const remainingGraph = remaining.map((vertex) => {
+        const neighbors: number[] = [];
+        for (const neighbor of adjacency[vertex]) {
+            const index = indices.get(neighbor);
+            if (index !== undefined) {
+                neighbors.push(index);
+            }
+        }
+        return neighbors;
+    });
+    const matching = findPerfectMatching(remainingGraph);
+    if (matching === undefined) {
+        return false;
+    }
+    for (const [left, right] of matching) {
+        partners[remaining[left]] = remaining[right];
+        partners[remaining[right]] = remaining[left];
+    }
+    return true;
+}
+
+function findBestPairing(
+    players: PlayerStanding[],
+    rounds: Round[],
+): Match[] | undefined {
+    const adjacency = getFreshOpponentGraph(players, rounds);
     for (const [index, opponents] of adjacency.entries()) {
         adjacency[index] = opponents.toSorted(
             (a, b) =>

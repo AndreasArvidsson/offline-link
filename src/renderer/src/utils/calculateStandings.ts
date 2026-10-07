@@ -2,7 +2,8 @@ import type { PlayerStanding, Round, Tournament } from "../../../common/models";
 import { comparePercentages } from "./comparePercentages";
 import { getDroppedPlayers } from "./getDroppedPlayers";
 
-// https://help.mtgo.com/hc/en-us/articles/17114811016219-Tiebreakers-on-MTGO
+// Magic Tournament Rules, section 3.1 and Appendix C:
+// https://media.wizards.com/ContentResources/WPN/MTG_MTR_2026_Feb27_EN.pdf
 
 export function calculateStandings(tournament: Tournament): PlayerStanding[] {
     const droppedPlayerIds = getDroppedPlayers(tournament);
@@ -31,12 +32,8 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
                         `Missing record for opponent ${opponentId}`,
                     );
                 }
-                opponentMatchWinPercentage += applyPercentageFloor(
-                    opponent.matchWinPercentageWithoutByes,
-                );
-                opponentGameWinPercentage += applyPercentageFloor(
-                    opponent.gameWinPercentageWithoutByes,
-                );
+                opponentMatchWinPercentage += opponent.matchWinPercentage;
+                opponentGameWinPercentage += opponent.gameWinPercentage;
             }
             if (record.opponentIds.length > 0) {
                 opponentMatchWinPercentage /= record.opponentIds.length;
@@ -77,7 +74,6 @@ function calculateRecord(playerId: number, rounds: Round[]) {
     let gameWins = 0;
     let gameLosses = 0;
     let gameDraws = 0;
-    let byes = 0;
     const opponentIds: number[] = [];
 
     for (const round of rounds) {
@@ -87,7 +83,6 @@ function calculateRecord(playerId: number, rounds: Round[]) {
         for (const pairing of round.pairings) {
             if (pairing.type === "BYE") {
                 if (pairing.playerId === playerId) {
-                    byes++;
                     wins++;
                     gameWins += 2;
                 }
@@ -130,22 +125,14 @@ function calculateRecord(playerId: number, rounds: Round[]) {
         wins,
         losses,
         draws,
-        matchPoints,
-        matchWinPercentageWithoutByes: calculateWinPercentage(
-            matchPoints - byes * 3,
-            matchesPlayed - byes,
-        ),
-        gameWinPercentage:
-            matchesPlayed === 0
-                ? 0
-                : applyPercentageFloor(
-                      calculateWinPercentage(gamePoints, gamesPlayed),
-                  ),
-        gameWinPercentageWithoutByes: calculateWinPercentage(
-            gamePoints - byes * 6,
-            gamesPlayed - byes * 2,
-        ),
         opponentIds,
+        matchPoints,
+        matchWinPercentage: applyPercentageFloor(
+            calculateWinPercentage(matchPoints, matchesPlayed),
+        ),
+        gameWinPercentage: applyPercentageFloor(
+            calculateWinPercentage(gamePoints, gamesPlayed),
+        ),
     };
 }
 
