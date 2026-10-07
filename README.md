@@ -8,3 +8,7 @@ An unofficial, offline desktop tournament notebook for Magic: The Gathering orga
 2. Unpack zip-file
 3. Run OfflineLink executable (eg `OfflineLink.exe`)
 4. If prompted if you want to run this unrecognized application: press run/continue.
+
+## Developer tools
+
+Press `F12` to open or hide the developer tools.

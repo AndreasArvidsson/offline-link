@@ -24,7 +24,7 @@ export const Button = forwardRef(
                 ref={ref}
                 type="button"
                 className={classNames(
-                    "btn",
+                    "btn d-inline-flex align-items-center gap-1",
                     variant != null && getVariantClass(variant),
                     small && "btn-sm",
                     className,
