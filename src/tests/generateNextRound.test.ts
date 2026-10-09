@@ -127,6 +127,68 @@ function tournamentWithManyDrops(): Tournament {
 }
 
 describe("generateNextRound", () => {
+    it("preserves final-round rank preference when rematches are unavoidable", () => {
+        const pairs = [
+            [1, 2],
+            [1, 3],
+            [1, 4],
+            [2, 3],
+            [2, 4],
+            [3, 4],
+        ];
+        const scenarios = [
+            {
+                fresh: [],
+                expected: [
+                    [1, 2],
+                    [3, 4],
+                ],
+            },
+            {
+                fresh: [[1, 3]],
+                expected: [
+                    [1, 3],
+                    [2, 4],
+                ],
+            },
+            {
+                fresh: [
+                    [2, 3],
+                    [2, 4],
+                ],
+                expected: [
+                    [1, 3],
+                    [2, 4],
+                ],
+            },
+        ].map(({ fresh, expected }) => {
+            const freshKeys = new Set(fresh.map(([a, b]) => opponentKey(a, b)));
+            const history = round(
+                pairs
+                    .filter(([a, b]) => !freshKeys.has(opponentKey(a, b)))
+                    .map(([a, b]) => {
+                        const previous = match(a, b);
+                        if (previous.type === "MATCH") {
+                            delete previous.result;
+                        }
+                        return previous;
+                    }),
+            );
+            return { history, expected };
+        });
+        for (const { history, expected } of scenarios) {
+            const event = tournament(4, [history]);
+            event.roundCount = 2;
+            // Missing results preserve equal standings while the opponent
+            // history still determines which matches would be repeated.
+            assert.deepEqual(
+                calculateStandings(event).map((player) => player.player.id),
+                [1, 2, 3, 4],
+            );
+            assert.deepEqual(matchIds(generateNextRound(event)), expected);
+        }
+    });
+
     it("uses standings rather than point-gap optimization for the final Swiss round", () => {
         const event = tournament(8, [
             round([
@@ -380,24 +442,35 @@ describe("generateNextRound", () => {
         assert.equal(bye?.playerId, 2);
     });
 
-    it("rejects an exhausted opponent history instead of creating rematches", () => {
-        assert.throws(
-            () =>
-                generateNextRound(
-                    tournament(3, [
-                        round([
-                            {
-                                type: "BYE",
-                                id: nextFixturePairingId++,
-                                playerId: 3,
-                            },
-                            match(1, 2),
-                        ]),
-                        round([match(1, 3)]),
-                        round([match(2, 3)]),
-                    ]),
-                ),
-            /without rematches/u,
+    it("continues with a rematch after exhausting every opponent", () => {
+        const next = generateNextRound(
+            tournament(3, [
+                round([
+                    {
+                        type: "BYE",
+                        id: nextFixturePairingId++,
+                        playerId: 3,
+                    },
+                    match(1, 2),
+                ]),
+                round([match(1, 3)]),
+                round([match(2, 3)]),
+            ]),
+        );
+        assert.equal(matchIds(next).length, 1);
+        assert.equal(
+            next.pairings.filter((pairing) => pairing.type === "BYE").length,
+            1,
+        );
+        assert.deepEqual(
+            next.pairings
+                .flatMap((pairing) =>
+                    pairing.type === "MATCH"
+                        ? [pairing.player1Id, pairing.player2Id]
+                        : [pairing.playerId],
+                )
+                .toSorted((a, b) => a - b),
+            [1, 2, 3],
         );
     });
 
@@ -414,11 +487,109 @@ describe("generateNextRound", () => {
         assert.deepEqual(matchIds(next), [[1, 3]]);
     });
 
-    it("rejects a rematch when no fresh pairing exists", () => {
-        assert.throws(
-            () => generateNextRound(tournament(2, [round([match(1, 2)])])),
-            /without rematches/u,
+    it("allows a rematch when the only two players have already met", () => {
+        for (const roundCount of [2, 5]) {
+            const event = tournament(2, [round([match(1, 2)])]);
+            event.roundCount = roundCount;
+            assert.deepEqual(matchIds(generateNextRound(event)), [[1, 2]]);
+        }
+    });
+
+    it("minimizes rematches for every four-player opponent history", () => {
+        const pairs = [
+            [1, 2],
+            [1, 3],
+            [1, 4],
+            [2, 3],
+            [2, 4],
+            [3, 4],
+        ];
+        const alternatives = [
+            [
+                [1, 2],
+                [3, 4],
+            ],
+            [
+                [1, 3],
+                [2, 4],
+            ],
+            [
+                [1, 4],
+                [2, 3],
+            ],
+        ];
+        for (let mask = 0; mask < 64; mask++) {
+            const previousPairs = pairs.filter(
+                (_, index) => Math.floor(mask / 2 ** index) % 2 !== 0,
+            );
+            const previous = new Set(
+                previousPairs.map(([a, b]) => opponentKey(a, b)),
+            );
+            const countRematches = (matches: number[][]) =>
+                matches.filter(([a, b]) => previous.has(opponentKey(a, b)))
+                    .length;
+            const minimum = Math.min(...alternatives.map(countRematches));
+            for (const roundCount of [2, 5]) {
+                const event = tournament(4, [
+                    round(previousPairs.map(([a, b]) => match(a, b))),
+                ]);
+                event.roundCount = roundCount;
+                const before = structuredClone(event);
+                const matches = matchIds(generateNextRound(event));
+                assert.equal(countRematches(matches), minimum);
+                assert.deepEqual(
+                    matches.flat().toSorted((a, b) => a - b),
+                    [1, 2, 3, 4],
+                );
+                assert.deepEqual(event, before);
+            }
+        }
+    });
+
+    it("prioritizes fewer rematches over bye preference in the fallback", () => {
+        const previousPairs = [
+            [1, 4],
+            [1, 5],
+            [2, 3],
+            [2, 4],
+            [2, 5],
+            [3, 4],
+            [3, 5],
+            [4, 5],
+        ];
+        const previous = new Set(
+            previousPairs.map(([a, b]) => opponentKey(a, b)),
         );
+        const history = round([
+            ...previousPairs.map(([a, b]) => match(a, b)),
+            ...[2, 3, 4, 5].map((playerId): Pairing => ({
+                type: "BYE",
+                id: nextFixturePairingId++,
+                playerId,
+            })),
+        ]);
+        for (const roundCount of [2, 5]) {
+            const event = tournament(5, [structuredClone(history)]);
+            event.roundCount = roundCount;
+            const next = generateNextRound(event);
+            const bye = next.pairings.find((pairing) => pairing.type === "BYE");
+            assert.ok(bye);
+            // A bye for player 1 would remove every fresh edge, forcing two
+            // rematches. Another recipient permits one fresh match.
+            assert.notEqual(bye.playerId, 1);
+            assert.equal(
+                matchIds(next).filter(([a, b]) =>
+                    previous.has(opponentKey(a, b)),
+                ).length,
+                1,
+            );
+            assert.deepEqual(
+                [...matchIds(next).flat(), bye.playerId].toSorted(
+                    (a, b) => a - b,
+                ),
+                [1, 2, 3, 4, 5],
+            );
+        }
     });
 
     it("preserves a valid pairing when score optimization exhausts the search budget", () => {

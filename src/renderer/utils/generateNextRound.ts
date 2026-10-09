@@ -62,9 +62,14 @@ export function generateNextRound(tournament: Tournament): Round {
     }
 
     if (matches == null) {
-        throw new Error(
-            "Unable to generate a valid Swiss pairing without rematches",
+        const fallback = findFallbackPairing(
+            players,
+            byeCandidates,
+            tournament.rounds,
+            tournament.rounds.length + 1 === tournament.roundCount,
         );
+        bye = fallback.bye;
+        matches = fallback.matches;
     }
 
     const highestPairingId = tournament.rounds.reduce(
@@ -109,6 +114,131 @@ function getByeCandidates(players: PlayerStanding[]): PlayerStanding[] {
     // Standings are highest to lowest, so reverse them to prefer
     // the lowest-ranked player for the bye.
     return players.toReversed().toSorted((a, b) => a.byeCount - b.byeCount);
+}
+
+function findFallbackPairing(
+    players: PlayerStanding[],
+    byeCandidates: PlayerStanding[],
+    rounds: Round[],
+    finalRound: boolean,
+): { bye: PlayerStanding | undefined; matches: Match[] } {
+    const candidates = players.length % 2 === 0 ? [undefined] : byeCandidates;
+
+    // Try the fewest rematches first, then the preferred bye recipients.
+    for (
+        let rematches = 1;
+        rematches <= Math.floor(players.length / 2);
+        rematches++
+    ) {
+        for (const bye of candidates) {
+            const remaining = players.filter((player) => player !== bye);
+            const playerCount = remaining.length;
+            const matching = findRematchMatching(remaining, rounds, rematches);
+            if (matching === undefined) {
+                continue;
+            }
+
+            if (finalRound) {
+                return {
+                    bye,
+                    matches: findRankedRematchPairing(
+                        remaining,
+                        rounds,
+                        rematches,
+                    ),
+                };
+            }
+
+            const matches: Match[] = [];
+            const unmatched: number[] = [];
+            for (const [first, second] of matching) {
+                if (second >= playerCount) {
+                    unmatched.push(first);
+                } else {
+                    matches.push([
+                        remaining[first].player.id,
+                        remaining[second].player.id,
+                    ]);
+                }
+            }
+            unmatched.sort((a, b) => a - b);
+            for (let index = 0; index < unmatched.length; index += 2) {
+                matches.push([
+                    remaining[unmatched[index]].player.id,
+                    remaining[unmatched[index + 1]].player.id,
+                ]);
+            }
+            return { bye, matches };
+        }
+    }
+
+    // Even fields always have a complete matching once all rematches are
+    // allowed. Empty and single-player fields need no matches.
+    return { bye: candidates[0], matches: [] };
+}
+
+function findRematchMatching(
+    players: PlayerStanding[],
+    rounds: Round[],
+    rematches: number,
+): Match[] | undefined {
+    if (rematches < 0) {
+        return undefined;
+    }
+    const adjacency = getFreshOpponentGraph(players, rounds);
+    // Each pair of dummy vertices lets two players sit out the fresh
+    // matching. Pair those players together as rematches afterwards.
+    // Clamp the allowance when fewer players remain: allowing more rematches
+    // than matches imposes no additional restriction.
+    const allowance = Math.min(rematches, players.length / 2);
+    for (let dummy = 0; dummy < allowance * 2; dummy++) {
+        const dummyIndex = players.length + dummy;
+        adjacency.push(players.map((_, index) => index));
+        for (let index = 0; index < players.length; index++) {
+            adjacency[index].push(dummyIndex);
+        }
+    }
+    return findPerfectMatching(adjacency);
+}
+
+function findRankedRematchPairing(
+    players: PlayerStanding[],
+    rounds: Round[],
+    rematches: number,
+): Match[] {
+    const matches: Match[] = [];
+    let remaining = players;
+    let remainingRematches = rematches;
+    while (remaining.length > 0) {
+        const [first, ...rest] = remaining;
+        // As in power pairings, skip previous opponents first. Only consider
+        // a rematch when no fresh opponent can preserve the minimum count.
+        const opponents = rest.toSorted(
+            (a, b) =>
+                Number(havePlayed(first.player.id, a.player.id, rounds)) -
+                Number(havePlayed(first.player.id, b.player.id, rounds)),
+        );
+        for (const opponent of opponents) {
+            const repeated = Number(
+                havePlayed(first.player.id, opponent.player.id, rounds),
+            );
+            const next = rest.filter((player) => player !== opponent);
+            if (
+                findRematchMatching(
+                    next,
+                    rounds,
+                    remainingRematches - repeated,
+                ) === undefined
+            ) {
+                continue;
+            }
+            matches.push([first.player.id, opponent.player.id]);
+            remaining = next;
+            remainingRematches -= repeated;
+            break;
+        }
+    }
+    return matches;
 }
 
 function getFreshOpponentGraph(
