@@ -4,9 +4,9 @@ import { channels } from "./api.ts";
 import { APP_ID } from "./common/constants.ts";
 import type { Tournament } from "./common/models.ts";
 import { createWindow } from "./createWindow.ts";
-import { getRecentTournaments } from "./getRecentTournaments.ts";
-import { getTournament } from "./getTournament.ts";
 import { storage } from "./storage.ts";
+import { getRecentTournaments } from "./util/getRecentTournaments.ts";
+import { getTournament } from "./util/getTournament.ts";
 import { isWindows } from "./util/isOS.ts";
 import { showErrorNotification } from "./util/notifications.ts";
 

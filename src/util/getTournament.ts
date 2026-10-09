@@ -1,5 +1,5 @@
-import type { Tournament } from "./common/models";
-import { storage } from "./storage";
+import type { Tournament } from "../common/models";
+import { storage } from "../storage";
 
 export function getTournament(id: string): Tournament {
     const tournament = storage.getTournaments().find((t) => t.id === id);
