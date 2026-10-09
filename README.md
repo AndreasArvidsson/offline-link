@@ -53,7 +53,7 @@ First-round pairings and bye selection are random.
 - Before the final round, pairings favor small match-point differences. Standings order can influence the choice between equally good pairings.
 - Rematches are prohibited.
 - Round generation fails if no complete pairing satisfies the rematch and bye-eligibility rules.
-- With an odd number of active players, prefer the lowest-ranked player without a previous bye who allows valid pairings. If everyone has received a bye, repeat byes are allowed.
+- With an odd number of active players, try bye recipients in order of fewest previous byes, then lowest standing. Select the first recipient who allows complete pairings without rematches.
 
 ### Final round
 

@@ -80,6 +80,7 @@ describe("calculateStandings", () => {
             rank: 1,
             participationChange: undefined,
             player: { id: 1, name: "Player 1" },
+            byeCount: 0,
             matchPoints: 0,
             wins: 0,
             losses: 0,
@@ -121,7 +122,7 @@ describe("calculateStandings", () => {
         assert.equal(standing(standings, 2).participationChange, "DROPPED");
     });
 
-    it("ignores in-progress rounds and missing results", () => {
+    it("counts assigned byes but ignores in-progress scores and missing results", () => {
         const missing = match(1, 2, 2, 0);
         delete missing.result;
         const pending = round(
@@ -132,9 +133,11 @@ describe("calculateStandings", () => {
             [1],
         );
         pending.status = "IN_PROGRESS";
+        const expected = calculateStandings(tournament());
+        standing(expected, 3).byeCount = 1;
         assert.deepEqual(
             calculateStandings(tournament([round([missing]), pending])),
-            calculateStandings(tournament()),
+            expected,
         );
     });
 
@@ -458,6 +461,7 @@ describe("calculateStandings", () => {
             rank: 1,
             participationChange: undefined,
             player: { id: 1, name: "Player 1" },
+            byeCount: 1,
             matchPoints: 3,
             wins: 1,
             losses: 0,

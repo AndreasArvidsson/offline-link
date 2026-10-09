@@ -69,6 +69,7 @@ export interface PlayerStanding {
     rank: number | null;
     participationChange?: ParticipationType;
     player: Player;
+    byeCount: number;
     matchPoints: number;
 
     wins: number;

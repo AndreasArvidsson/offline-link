@@ -469,7 +469,7 @@ describe("generateNextRound", () => {
         );
     });
 
-    it("does not use a repeat bye to work around unpairable eligible recipients", () => {
+    it("uses a repeat bye when lower-count candidates would force rematches", () => {
         // Player 5 has played everyone, so only a repeat bye for 5 would permit fresh matches.
         const event = tournament(5, [
             round([
@@ -480,7 +480,61 @@ describe("generateNextRound", () => {
                 match(5, 4),
             ]),
         ]);
-        assert.throws(() => generateNextRound(event), /without rematches/u);
+        const next = generateNextRound(event);
+        assert.equal(
+            next.pairings.find((pairing) => pairing.type === "BYE")?.playerId,
+            5,
+        );
+        assert.deepEqual(
+            matchIds(next)
+                .flat()
+                .toSorted((a, b) => a - b),
+            [1, 2, 3, 4],
+        );
+    });
+
+    it("prefers fewer byes over lower standing in ordinary and final rounds", () => {
+        for (const roundCount of [3, 5]) {
+            const event = tournament(5, [
+                round([
+                    { type: "BYE", id: nextFixturePairingId++, playerId: 1 },
+                    { type: "BYE", id: nextFixturePairingId++, playerId: 2 },
+                    { type: "BYE", id: nextFixturePairingId++, playerId: 3 },
+                ]),
+                round(
+                    [
+                        match(1, 4),
+                        match(2, 5),
+                        {
+                            type: "BYE",
+                            id: nextFixturePairingId++,
+                            playerId: 3,
+                        },
+                    ],
+                    [4, 5],
+                ),
+            ]);
+            event.roundCount = roundCount;
+            const active = calculateStandings(event).filter(
+                (player) => player.participationChange == null,
+            );
+            assert.deepEqual(
+                active.map((player) => [player.player.id, player.byeCount]),
+                [
+                    [1, 1],
+                    [2, 1],
+                    [3, 2],
+                ],
+            );
+
+            const next = generateNextRound(event);
+            assert.equal(
+                next.pairings.find((pairing) => pairing.type === "BYE")
+                    ?.playerId,
+                2,
+            );
+            assert.deepEqual(matchIds(next), [[1, 3]]);
+        }
     });
 
     it("allows a repeat bye after every active player has received one", () => {

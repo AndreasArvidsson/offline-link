@@ -6,7 +6,6 @@ import type {
 } from "../../common/models";
 import { calculateStandings } from "./calculateStandings";
 import { findPerfectMatching } from "./findPerfectMatching";
-import { hasReceivedBye } from "./hasReceivedBye";
 import { havePlayed } from "./havePlayed";
 
 const MAX_PAIRING_ATTEMPTS = 100_000;
@@ -37,7 +36,7 @@ export function generateNextRound(tournament: Tournament): Round {
         (standing) => standing.participationChange == null,
     );
 
-    const byeCandidates = getByeCandidates(players, tournament.rounds);
+    const byeCandidates = getByeCandidates(players);
     const findPairing =
         tournament.rounds.length + 1 === tournament.roundCount
             ? findPowerPairing
@@ -106,21 +105,10 @@ export function generateNextRound(tournament: Tournament): Round {
     };
 }
 
-function getByeCandidates(
-    players: PlayerStanding[],
-    rounds: Round[],
-): PlayerStanding[] {
+function getByeCandidates(players: PlayerStanding[]): PlayerStanding[] {
     // Standings are highest to lowest, so reverse them to prefer
     // the lowest-ranked player for the bye.
-    const reversedPlayers = players.toReversed();
-
-    const withoutBye = reversedPlayers.filter(
-        (player) => !hasReceivedBye(player.player.id, rounds),
-    );
-
-    // Do not give a player a second bye while another active player
-    // has not yet received one.
-    return withoutBye.length > 0 ? withoutBye : reversedPlayers;
+    return players.toReversed().toSorted((a, b) => a.byeCount - b.byeCount);
 }
 
 function getFreshOpponentGraph(

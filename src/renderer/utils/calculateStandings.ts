@@ -1,6 +1,7 @@
 import type { PlayerStanding, Round, Tournament } from "../../common/models";
 import { comparePercentages } from "./comparePercentages";
 import { getPlayerParticipations } from "./getPlayerParticipations";
+import { getPlayersByeCount } from "./getPlayersByeCount";
 import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
 
 // Magic Tournament Rules, section 3.1 and Appendix C:
@@ -8,6 +9,7 @@ import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
 
 export function calculateStandings(tournament: Tournament): PlayerStanding[] {
     const participation = getPlayerParticipations(tournament.rounds);
+    const byeCount = getPlayersByeCount(tournament.rounds);
     const records = new Map(
         tournament.players.map((player) => [
             player.id,
@@ -45,6 +47,7 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
                 rank: null,
                 participationChange: participation.get(player.id),
                 player,
+                byeCount: byeCount.get(player.id) ?? 0,
                 matchPoints: record.matchPoints,
                 wins: record.wins,
                 losses: record.losses,
