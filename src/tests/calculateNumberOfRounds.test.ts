@@ -3,9 +3,15 @@ import { describe, it } from "mocha";
 import { calculateNumberOfRounds } from "../renderer/utils/calculateNumberOfRounds.ts";
 
 describe("calculateNumberOfRounds", () => {
+    for (const playerCount of [-1, 0, 1]) {
+        it(`rejects ${playerCount} players`, () => {
+            assert.throws(() => calculateNumberOfRounds(playerCount), {
+                message: `Invalid player count: ${playerCount}`,
+            });
+        });
+    }
+
     const cases: [number, number][] = [
-        [0, 0],
-        [1, 0],
         [2, 1],
         [3, 2],
         [4, 2],
@@ -24,6 +30,7 @@ describe("calculateNumberOfRounds", () => {
         [227, 9],
         [409, 9],
         [410, 10],
+        [1000, 10],
     ];
 
     for (const [playerCount, expectedRounds] of cases) {
