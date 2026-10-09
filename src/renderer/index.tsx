@@ -5,11 +5,17 @@ import { App } from "./App.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 // oxlint-disable-next-line import/no-unassigned-import
 import "./styles.css";
+import { MessageProvider } from "./Messages.tsx";
 
-const root = globalThis.document.querySelector("#root");
+const root = document.getElementById("root");
 
 if (root == null) {
     throw new Error("Root element not found");
 }
 
-render(<App />, root);
+render(
+    <MessageProvider>
+        <App />
+    </MessageProvider>,
+    root,
+);

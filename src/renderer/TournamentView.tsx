@@ -5,6 +5,7 @@ import { GoBackButton } from "./components/GoBackButton.tsx";
 import { InputText } from "./components/InputText.tsx";
 import { Loading } from "./components/Loading.tsx";
 import { NavItem } from "./components/NavItem.tsx";
+import { useMessages } from "./Messages.tsx";
 import { Players } from "./Players.tsx";
 import { RoundComponent } from "./Round.tsx";
 import { Standings } from "./Standings.tsx";
@@ -14,7 +15,6 @@ import { createNewTournament } from "./utils/createNewTournament.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
 import { generateFirstRound } from "./utils/generateFirstRound.ts";
 import { generateNextRound } from "./utils/generateNextRound.ts";
-import { handleError } from "./utils/handleError.ts";
 import { isEmptyString } from "./utils/isEmptyString.ts";
 import { statusToString } from "./utils/statusToString.ts";
 
@@ -42,6 +42,7 @@ export function TournamentView({
 }: Props): JSX.Element {
     const [tournament, setTournament] = useState<Tournament>();
     const [tab, setTab] = useState<Tab>();
+    const { addError } = useMessages();
 
     useEffect(() => {
         if (id != null) {
@@ -52,13 +53,13 @@ export function TournamentView({
                     setTab(calculateTab(t));
                     return undefined;
                 })
-                .catch(handleError);
+                .catch(addError);
         } else {
             const t = createNewTournament();
             setTournament(t);
             setTab(calculateTab(t));
         }
-    }, [id]);
+    }, [id, addError]);
 
     if (tournament == null || tab == null) {
         return <Loading />;
@@ -72,7 +73,7 @@ export function TournamentView({
             updatedAt: Date.now(),
         };
         setTournament(updated);
-        window.api.saveTournament(updated).catch(handleError);
+        window.api.saveTournament(updated).catch(addError);
     };
 
     const disabled = tournament.status === "COMPLETED";
@@ -99,10 +100,14 @@ export function TournamentView({
                 : round,
         );
         if (rounds.length < tournament.roundCount) {
-            const nextRound = generateNextRound({ ...tournament, rounds });
-            rounds.push(nextRound);
-            setTab({ type: "round", round: nextRound.number });
-            updateTournament({ rounds });
+            try {
+                const nextRound = generateNextRound({ ...tournament, rounds });
+                rounds.push(nextRound);
+                setTab({ type: "round", round: nextRound.number });
+                updateTournament({ rounds });
+            } catch (error) {
+                addError(error);
+            }
         } else {
             updateTournament({
                 rounds,

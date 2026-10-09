@@ -24,14 +24,13 @@ interface PairingSolution {
 }
 
 export function generateNextRound(tournament: Tournament): Round {
+    if (tournament.rounds.length >= tournament.roundCount) {
+        throw new Error("All tournament rounds have already been generated");
+    }
     if (tournament.rounds.some((round) => round.status !== "COMPLETED")) {
         throw new Error(
             "Complete the current round before generating the next round",
         );
-    }
-
-    if (tournament.rounds.length >= tournament.roundCount) {
-        throw new Error("All tournament rounds have already been generated");
     }
 
     const players = calculateStandings(tournament).filter(

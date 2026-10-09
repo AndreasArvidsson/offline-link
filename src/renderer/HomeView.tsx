@@ -4,10 +4,10 @@ import { PlusCircle } from "react-bootstrap-icons";
 import type { RecentTournament } from "../api.ts";
 import { APP_NAME } from "../common/constants.ts";
 import { Button } from "./components/Button.tsx";
+import { useMessages } from "./Messages.tsx";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
-import { handleError } from "./utils/handleError.ts";
 
 const RECENT_LIMIT = 10;
 
@@ -18,13 +18,11 @@ interface Props {
 
 export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
     const [tournaments, setTournaments] = useState<RecentTournament[]>([]);
+    const { addError } = useMessages();
 
     useEffect(() => {
-        window.api
-            .getRecentTournaments()
-            .then(setTournaments)
-            .catch(handleError);
-    }, []);
+        window.api.getRecentTournaments().then(setTournaments).catch(addError);
+    }, [addError]);
 
     return (
         <div className="d-flex flex-column min-vh-100">

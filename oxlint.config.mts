@@ -66,6 +66,7 @@ const disabledRules = [
     "unicorn/prefer-at",
     "unicorn/prefer-global-this",
     "unicorn/prefer-module",
+    "unicorn/prefer-query-selector",
     "unicorn/prefer-spread",
     "unicorn/prefer-ternary",
     "unicorn/switch-case-braces",

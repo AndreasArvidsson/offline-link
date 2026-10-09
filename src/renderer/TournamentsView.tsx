@@ -4,10 +4,10 @@ import type { RecentTournament } from "../api.ts";
 import { APP_NAME } from "../common/constants.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
 import { Loading } from "./components/Loading.tsx";
+import { useMessages } from "./Messages.tsx";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
-import { handleError } from "./utils/handleError.ts";
 
 interface Props {
     dateFormatter: DateFormatter;
@@ -19,13 +19,11 @@ export function TournamentsView({
     navigate,
 }: Props): JSX.Element {
     const [tournaments, setTournaments] = useState<RecentTournament[]>();
+    const { addError } = useMessages();
 
     useEffect(() => {
-        window.api
-            .getRecentTournaments()
-            .then(setTournaments)
-            .catch(handleError);
-    }, []);
+        window.api.getRecentTournaments().then(setTournaments).catch(addError);
+    }, [addError]);
 
     if (tournaments == null) {
         return <Loading />;
