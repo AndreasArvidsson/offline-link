@@ -173,88 +173,99 @@ export function TournamentView({
 
     return (
         <>
-            <GoBackButton navigate={navigate} />
+            <header>
+                <GoBackButton navigate={navigate} />
 
-            <h1>Tournament</h1>
+                <h1>Tournament</h1>
+            </header>
 
-            <table className="table">
-                <tbody>
-                    <tr>
-                        <td>Created</td>
-                        <td>{dateFormatter.format(tournament.createdAt)}</td>
-                    </tr>
-                    <tr>
-                        <td>Updated</td>
-                        <td>{dateFormatter.format(tournament.updatedAt)}</td>
-                    </tr>
-                    <tr>
-                        <td>Name</td>
-                        <td>
-                            <InputText
-                                placeholder="Tournament name"
-                                value={tournament.name}
-                                disabled={disabled}
-                                invalid={invalidName}
-                                onChange={(name) => {
-                                    updateTournament({ name });
-                                }}
-                            />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <main>
+                <table className="table">
+                    <tbody>
+                        <tr>
+                            <td>Created</td>
+                            <td>
+                                {dateFormatter.format(tournament.createdAt)}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Updated</td>
+                            <td>
+                                {dateFormatter.format(tournament.updatedAt)}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Name</td>
+                            <td>
+                                <InputText
+                                    placeholder="Tournament name"
+                                    value={tournament.name}
+                                    disabled={disabled}
+                                    invalid={invalidName}
+                                    onChange={(name) => {
+                                        updateTournament({ name });
+                                    }}
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <p>
-                {tournament.roundCount > 0 && (
-                    <span>
-                        {tournament.players.length} players{" · "}
-                        {tournament.roundCount} rounds
+                <p>
+                    {tournament.roundCount > 0 && (
+                        <span>
+                            {tournament.players.length} players{" · "}
+                            {tournament.roundCount} rounds
+                        </span>
+                    )}
+
+                    <span className="float-end">
+                        {statusToString(tournament.status)}
                     </span>
+                </p>
+
+                {!invalidName && (
+                    <ul className="nav nav-tabs mb-3">
+                        <NavItem
+                            active={tab.type === "players"}
+                            onClick={() => {
+                                setTab({ type: "players" });
+                            }}
+                        >
+                            Players
+                        </NavItem>
+                        {tournament.rounds.map((round) => (
+                            <NavItem
+                                key={round.number}
+                                active={
+                                    tab.type === "round" &&
+                                    tab.round === round.number
+                                }
+                                onClick={() => {
+                                    setTab({
+                                        type: "round",
+                                        round: round.number,
+                                    });
+                                }}
+                            >
+                                Round {round.number}
+                            </NavItem>
+                        ))}
+                        {tournament.roundCount > 0 && (
+                            <NavItem
+                                active={tab.type === "standings"}
+                                onClick={() => {
+                                    setTab({ type: "standings" });
+                                }}
+                            >
+                                Standings
+                            </NavItem>
+                        )}
+                    </ul>
                 )}
 
-                <span className="float-end">
-                    {statusToString(tournament.status)}
-                </span>
-            </p>
-
-            {!invalidName && (
-                <ul className="nav nav-tabs mb-3">
-                    <NavItem
-                        active={tab.type === "players"}
-                        onClick={() => {
-                            setTab({ type: "players" });
-                        }}
-                    >
-                        Players
-                    </NavItem>
-                    {tournament.rounds.map((round) => (
-                        <NavItem
-                            key={round.number}
-                            active={
-                                tab.type === "round" &&
-                                tab.round === round.number
-                            }
-                            onClick={() => {
-                                setTab({ type: "round", round: round.number });
-                            }}
-                        >
-                            Round {round.number}
-                        </NavItem>
-                    ))}
-                    {tournament.roundCount > 0 && (
-                        <NavItem
-                            active={tab.type === "standings"}
-                            onClick={() => {
-                                setTab({ type: "standings" });
-                            }}
-                        >
-                            Standings
-                        </NavItem>
-                    )}
-                </ul>
-            )}
-
-            {renderTab()}
+                {renderTab()}
+            </main>
         </>
     );
 }

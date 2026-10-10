@@ -69,9 +69,9 @@ export function App(): JSX.Element {
     };
 
     return (
-        <>
+        <div className="d-flex flex-column min-vh-100 pt-3">
             <Messages />
-            <div className="pt-3">{renderView()}</div>
-        </>
+            {renderView()}
+        </div>
     );
 }

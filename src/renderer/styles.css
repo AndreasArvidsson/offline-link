@@ -5,8 +5,3 @@
 .selected-match:focus {
     outline: -webkit-focus-ring-color auto 1px;
 }
-
-.messages {
-    margin-top: 0.5rem;
-    margin-bottom: -1rem;
-}

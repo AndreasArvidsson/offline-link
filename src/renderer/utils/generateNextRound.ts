@@ -37,10 +37,8 @@ export function generateNextRound(tournament: Tournament): Round {
     );
 
     const byeCandidates = getByeCandidates(players);
-    const findPairing =
-        tournament.rounds.length + 1 === tournament.roundCount
-            ? findPowerPairing
-            : findBestPairing;
+    const isFinalRound = tournament.rounds.length + 1 === tournament.roundCount;
+    const findPairing = isFinalRound ? findPowerPairing : findBestPairing;
 
     let bye: PlayerStanding | undefined;
     let matches: Match[] | undefined;
@@ -50,7 +48,6 @@ export function generateNextRound(tournament: Tournament): Round {
     } else {
         for (const candidate of byeCandidates) {
             const remaining = players.filter((player) => player !== candidate);
-
             const solution = findPairing(remaining, tournament.rounds);
 
             if (solution != null) {
@@ -66,7 +63,7 @@ export function generateNextRound(tournament: Tournament): Round {
             players,
             byeCandidates,
             tournament.rounds,
-            tournament.rounds.length + 1 === tournament.roundCount,
+            isFinalRound,
         );
         bye = fallback.bye;
         matches = fallback.matches;
@@ -120,7 +117,7 @@ function findFallbackPairing(
     players: PlayerStanding[],
     byeCandidates: PlayerStanding[],
     rounds: Round[],
-    finalRound: boolean,
+    isFinalRound: boolean,
 ): { bye: PlayerStanding | undefined; matches: Match[] } {
     const candidates = players.length % 2 === 0 ? [undefined] : byeCandidates;
 
@@ -138,7 +135,7 @@ function findFallbackPairing(
                 continue;
             }
 
-            if (finalRound) {
+            if (isFinalRound) {
                 return {
                     bye,
                     matches: findRankedRematchPairing(

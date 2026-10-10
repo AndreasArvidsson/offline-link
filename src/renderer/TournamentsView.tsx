@@ -31,20 +31,24 @@ export function TournamentsView({
 
     return (
         <>
-            <GoBackButton navigate={navigate} />
+            <header>
+                <GoBackButton navigate={navigate} />
 
-            <h1>Tournaments</h1>
+                <h1>Tournaments</h1>
+            </header>
 
-            <p>
-                All {tournaments.length} tournaments saved in Documents/
-                {APP_NAME}.
-            </p>
+            <main>
+                <p>
+                    All {tournaments.length} tournaments saved in Documents/
+                    {APP_NAME}.
+                </p>
 
-            <TournamentList
-                tournaments={tournaments}
-                dateFormatter={dateFormatter}
-                navigate={navigate}
-            />
+                <TournamentList
+                    tournaments={tournaments}
+                    dateFormatter={dateFormatter}
+                    navigate={navigate}
+                />
+            </main>
         </>
     );
 }

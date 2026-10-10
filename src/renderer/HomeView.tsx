@@ -25,7 +25,7 @@ export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
     }, [addError]);
 
     return (
-        <div className="d-flex flex-column min-vh-100">
+        <div className="d-flex flex-column flex-grow-1">
             <header>
                 <h1>{APP_NAME}</h1>
                 <p>Your local tournament notebook</p>
