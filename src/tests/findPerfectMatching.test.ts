@@ -108,11 +108,11 @@ describe("findPerfectMatching", () => {
             const adjacency = graph(vertices.length, presentEdges);
             const matches = findPerfectMatching(adjacency);
             assert.equal(
-                matches !== undefined,
+                matches != null,
                 hasPerfectMatching(adjacency, vertices),
                 `Graph ${mask}`,
             );
-            if (matches !== undefined) {
+            if (matches != null) {
                 assertValidMatching(adjacency, matches);
             }
         }

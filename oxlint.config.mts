@@ -107,7 +107,7 @@ export default defineConfig({
     },
     rules: {
         ...Object.fromEntries(disabledRules.map((r) => [r, "off"])),
-        eqeqeq: [
+        "eslint/eqeqeq": [
             "warn",
             "always",
             {

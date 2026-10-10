@@ -131,7 +131,8 @@ function findFallbackPairing(
             const remaining = players.filter((player) => player !== bye);
             const playerCount = remaining.length;
             const matching = findRematchMatching(remaining, rounds, rematches);
-            if (matching === undefined) {
+
+            if (matching == null) {
                 continue;
             }
 
@@ -225,7 +226,7 @@ function findRankedRematchPairing(
                     next,
                     rounds,
                     remainingRematches - repeated,
-                ) === undefined
+                ) == null
             ) {
                 continue;
             }
@@ -269,7 +270,8 @@ function findPowerPairing(
 ): Match[] | undefined {
     const adjacency = getFreshOpponentGraph(players, rounds);
     const initialMatching = findPerfectMatching(adjacency);
-    if (initialMatching === undefined) {
+
+    if (initialMatching == null) {
         return undefined;
     }
 
@@ -314,7 +316,7 @@ function findPowerPairing(
             break;
         }
 
-        if (nextRemaining === undefined) {
+        if (nextRemaining == null) {
             return undefined;
         }
         remaining = nextRemaining;
@@ -349,14 +351,14 @@ function updateRemainingMatching(
         const neighbors: number[] = [];
         for (const neighbor of adjacency[vertex]) {
             const index = indices.get(neighbor);
-            if (index !== undefined) {
+            if (index != null) {
                 neighbors.push(index);
             }
         }
         return neighbors;
     });
     const matching = findPerfectMatching(remainingGraph);
-    if (matching === undefined) {
+    if (matching == null) {
         return false;
     }
     for (const [left, right] of matching) {
@@ -381,7 +383,7 @@ function findBestPairing(
 
     // Establish feasibility before spending the bounded score-optimization budget.
     const initialMatches = findPerfectMatching(adjacency);
-    if (initialMatches === undefined) {
+    if (initialMatches == null) {
         return undefined;
     }
 
