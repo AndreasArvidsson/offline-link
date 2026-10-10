@@ -15,6 +15,7 @@ import { IconParticipationChange } from "./components/IconParticipationChange";
 import { PlayersDropped } from "./PlayersDropped";
 import { formatMatchResult } from "./utils/formatMatchResult";
 import { formatRecord } from "./utils/formatRecord";
+import { Lookup } from "./utils/Lookup";
 
 interface Props {
     disabled: boolean;
@@ -50,6 +51,17 @@ export function RoundComponent({
     const matches = round.pairings.filter((p) => p.type === "MATCH");
     const countResult = matches.filter((p) => p.result != null).length;
     const byes = round.pairings.filter((p) => p.type === "BYE");
+    const playersById = new Lookup<number, Player>(
+        "Players",
+        players.map((player) => [player.id, player]),
+    );
+    // This is a normal map because it is expected to be sparse with missing player ids.
+    const participationByPlayerId = new Map(
+        round.participationChanges.map((change) => [
+            change.playerId,
+            change.type,
+        ]),
+    );
 
     const updateRound = (partialRound: Partial<Round>) => {
         onChange({
@@ -59,14 +71,13 @@ export function RoundComponent({
     };
 
     const playerName = (id: number): string | JSX.Element => {
-        const name = players.find((p) => p.id === id)?.name ?? "Unknown player";
-        const participationType = round.participationChanges.find(
-            (change) => change.playerId === id,
-        );
+        const name = playersById.get(id).name;
         return (
             <>
                 {name}{" "}
-                <IconParticipationChange type={participationType?.type} />
+                <IconParticipationChange
+                    type={participationByPlayerId.get(id)}
+                />
             </>
         );
     };
@@ -96,11 +107,8 @@ export function RoundComponent({
 
     const navigate = (selected: SelectedMatch, direction: "up" | "down") => {
         const currentIndex = matches.findIndex((m) => m.id === selected.id);
-        const nextIndex =
-            direction === "up"
-                ? matches.findLastIndex((m, i) => i < currentIndex)
-                : matches.findIndex((m, i) => i > currentIndex);
-        if (nextIndex !== -1) {
+        const nextIndex = currentIndex + (direction === "up" ? -1 : 1);
+        if (nextIndex >= 0 && nextIndex < matches.length) {
             const nextMatch = matches[nextIndex];
             setSelectedMatch(matchToSelected(nextMatch));
         }
@@ -245,7 +253,7 @@ export function RoundComponent({
                     <PlayersDropped
                         disabled={disabled}
                         players={getActivePlayers(players, matches, byes)}
-                        round={round}
+                        participationByPlayerId={participationByPlayerId}
                         onChange={(id, type) => {
                             updateRound({
                                 participationChanges:
@@ -263,7 +271,7 @@ export function RoundComponent({
                     <Button
                         variant="success"
                         className="float-end"
-                        disabled={disabled || !roundIsValid(round)}
+                        disabled={disabled || countResult !== matches.length}
                         onClick={startNextRound}
                     >
                         {isLastRound
@@ -364,10 +372,6 @@ function isMatchResultValid(result: MatchResult) {
         result.player2Wins < 3 &&
         result.player1Wins + result.player2Wins < 4
     );
-}
-
-function roundIsValid(round: Round): boolean {
-    return round.pairings.every((p) => p.type === "BYE" || p.result != null);
 }
 
 function getActivePlayers(

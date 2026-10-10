@@ -192,10 +192,11 @@ function findRematchMatching(
     // Clamp the allowance when fewer players remain: allowing more rematches
     // than matches imposes no additional restriction.
     const allowance = Math.min(rematches, players.length / 2);
+    const playerIndices = players.map((_, index) => index);
 
     for (let dummy = 0; dummy < allowance * 2; dummy++) {
         const dummyIndex = players.length + dummy;
-        adjacency.push(players.map((_, index) => index));
+        adjacency.push(playerIndices);
         for (let index = 0; index < players.length; index++) {
             adjacency[index].push(dummyIndex);
         }
@@ -297,7 +298,12 @@ function findPowerPairing(
         let nextRemaining: number[] | undefined;
 
         for (const opponent of rest) {
-            if (!adjacency[first].includes(opponent)) {
+            if (
+                havePlayed(
+                    players[first].player.id,
+                    players[opponent].player.id,
+                )
+            ) {
                 continue;
             }
 

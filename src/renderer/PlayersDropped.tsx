@@ -2,13 +2,13 @@ import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
 import { NA } from "../common/constants";
-import type { Player, ParticipationType, Round } from "../common/models";
+import type { Player, ParticipationType } from "../common/models";
 import { Select } from "./components/Select";
 
 interface Props {
     disabled: boolean;
-    round: Round;
     players: Player[];
+    participationByPlayerId: ReadonlyMap<number, ParticipationType>;
     onChange: (playerId: number, status: ParticipationType | undefined) => void;
 }
 
@@ -21,7 +21,7 @@ const choices = [
 export function PlayersDropped({
     disabled,
     players,
-    round,
+    participationByPlayerId,
     onChange,
 }: Props): JSX.Element {
     const [expanded, setExpanded] = useState(false);
@@ -40,10 +40,9 @@ export function PlayersDropped({
             {expanded && (
                 <div className="card-body">
                     {players.map((player) => {
-                        const participationChange =
-                            round.participationChanges.find(
-                                (item) => item.playerId === player.id,
-                            );
+                        const participationType = participationByPlayerId.get(
+                            player.id,
+                        );
                         return (
                             <label
                                 key={player.id}
@@ -53,7 +52,7 @@ export function PlayersDropped({
                                 <Select
                                     small
                                     className="w-auto"
-                                    value={participationChange?.type ?? ""}
+                                    value={participationType ?? ""}
                                     disabled={disabled}
                                     onChange={(value) =>
                                         onChange(player.id, value || undefined)

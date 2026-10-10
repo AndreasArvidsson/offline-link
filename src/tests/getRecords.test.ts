@@ -114,6 +114,9 @@ describe("getRecords", () => {
 
     it("rejects lookup of a player outside the tournament", () => {
         const records = getRecords(tournament([]));
-        assert.throws(() => records.get(99), /Missing record for player 99/u);
+        assert.throws(
+            () => records.get(99),
+            /Key "99" not found in lookup "Player records"/u,
+        );
     });
 });

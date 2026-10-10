@@ -4,12 +4,9 @@ import type {
     Tournament,
 } from "../../common/models";
 import { isDoubleMatchLoss } from "./isDoubleMatchLoss";
+import { Lookup } from "./Lookup";
 
 const MINIMUM_WIN_PERCENTAGE = 0.33;
-
-interface Records {
-    get: (playerId: number) => PlayerRecord;
-}
 
 interface TemporaryRecord {
     opponentIds: number[];
@@ -21,28 +18,24 @@ interface TemporaryRecord {
     gameDraws: number;
 }
 
-export function getRecords(tournament: Tournament): Records {
-    const totals = new Map<number, TemporaryRecord>();
-
-    for (const player of tournament.players) {
-        totals.set(player.id, {
-            opponentIds: [],
-            matchWins: 0,
-            matchLosses: 0,
-            matchDraws: 0,
-            gameWins: 0,
-            gameLosses: 0,
-            gameDraws: 0,
-        });
-    }
-
-    const getRecord = (playerId: number): TemporaryRecord => {
-        const record = totals.get(playerId);
-        if (record == null) {
-            throw new Error(`Missing temporary record for player ${playerId}`);
-        }
-        return record;
-    };
+export function getRecords(
+    tournament: Tournament,
+): Lookup<number, PlayerRecord> {
+    const temporary = new Lookup<number, TemporaryRecord>(
+        "Temporary records",
+        tournament.players.map((player) => [
+            player.id,
+            {
+                opponentIds: [],
+                matchWins: 0,
+                matchLosses: 0,
+                matchDraws: 0,
+                gameWins: 0,
+                gameLosses: 0,
+                gameDraws: 0,
+            },
+        ]),
+    );
 
     for (const round of tournament.rounds) {
         if (round.status !== "COMPLETED") {
@@ -51,7 +44,7 @@ export function getRecords(tournament: Tournament): Records {
 
         for (const pairing of round.pairings) {
             if (pairing.type === "BYE") {
-                const record = getRecord(pairing.playerId);
+                const record = temporary.get(pairing.playerId);
                 record.matchWins++;
                 record.gameWins += 2;
                 continue;
@@ -62,14 +55,14 @@ export function getRecords(tournament: Tournament): Records {
             }
 
             addMatch(
-                getRecord(pairing.player1Id),
+                temporary.get(pairing.player1Id),
                 pairing.player2Id,
                 pairing.result,
                 true,
             );
 
             addMatch(
-                getRecord(pairing.player2Id),
+                temporary.get(pairing.player2Id),
                 pairing.player1Id,
                 pairing.result,
                 false,
@@ -77,21 +70,13 @@ export function getRecords(tournament: Tournament): Records {
         }
     }
 
-    const records = new Map<number, PlayerRecord>();
-
-    for (const [playerId, record] of totals) {
-        records.set(playerId, finalizeRecord(record));
-    }
-
-    return {
-        get: (playerId) => {
-            const record = records.get(playerId);
-            if (record == null) {
-                throw new Error(`Missing record for player ${playerId}`);
-            }
-            return record;
-        },
-    };
+    return new Lookup<number, PlayerRecord>(
+        "Player records",
+        tournament.players.map((player) => [
+            player.id,
+            finalizeRecord(temporary.get(player.id)),
+        ]),
+    );
 }
 
 function addMatch(

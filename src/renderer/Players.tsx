@@ -62,7 +62,15 @@ export function Players({
                 <Button
                     variant="success"
                     className="float-end"
-                    disabled={disabled || !playersAreValid(players)}
+                    disabled={
+                        disabled ||
+                        // Minimum 2 players required
+                        players.length < 2 ||
+                        // Player names must be unique
+                        playersMap.size !== players.length ||
+                        // Player names cannot be empty
+                        playersMap.has("")
+                    }
                     onClick={startFirstRound}
                 >
                     Start round 1
@@ -130,6 +138,7 @@ function validatePlayer(
 
 function getPlayersMap(players: Player[]): Map<string, Set<number>> {
     const playersMap = new Map<string, Set<number>>();
+
     for (const player of players) {
         const normalized = normalizeName(player.name);
         const existing = playersMap.get(normalized);
@@ -139,15 +148,8 @@ function getPlayersMap(players: Player[]): Map<string, Set<number>> {
             playersMap.set(normalized, new Set([player.id]));
         }
     }
-    return playersMap;
-}
 
-function playersAreValid(players: Player[]): boolean {
-    if (players.length < 2) {
-        return false;
-    }
-    const names = new Set(players.map((player) => normalizeName(player.name)));
-    return names.size === players.length && !names.has("");
+    return playersMap;
 }
 
 function normalizeName(name: string): string {
