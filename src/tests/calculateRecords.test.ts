@@ -8,7 +8,7 @@ import type {
     Round,
     Tournament,
 } from "../common/models.ts";
-import { getRecords } from "../renderer/utils/getRecords.ts";
+import { calculateRecords } from "../renderer/utils/calculateRecords.ts";
 
 let nextPairingId = 1;
 
@@ -51,7 +51,7 @@ function match(
     };
 }
 
-describe("getRecords", () => {
+describe("calculateRecords", () => {
     it("aggregates both players and preserves repeated opponents in encounter order", () => {
         const event = tournament([
             round([
@@ -71,7 +71,7 @@ describe("getRecords", () => {
             },
         ]);
         const before = structuredClone(event);
-        const records = getRecords(event);
+        const records = calculateRecords(event);
 
         assert.deepEqual(records.get(1), {
             opponentIds: [2, 3, 2, 2],
@@ -113,7 +113,7 @@ describe("getRecords", () => {
     });
 
     it("rejects lookup of a player outside the tournament", () => {
-        const records = getRecords(tournament([]));
+        const records = calculateRecords(tournament([]));
         assert.throws(
             () => records.get(99),
             /Key "99" not found in lookup "Player records"/u,

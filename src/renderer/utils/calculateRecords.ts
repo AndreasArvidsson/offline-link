@@ -18,7 +18,7 @@ interface TemporaryRecord {
     gameDraws: number;
 }
 
-export function getRecords(
+export function calculateRecords(
     tournament: Tournament,
 ): Lookup<number, PlayerRecord> {
     const temporary = new Lookup<number, TemporaryRecord>(

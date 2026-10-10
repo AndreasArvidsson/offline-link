@@ -1,8 +1,8 @@
 import type { PlayerStanding, Tournament } from "../../common/models";
+import { calculateRecords } from "./calculateRecords";
 import { comparePercentages } from "./comparePercentages";
 import { getPlayerParticipations } from "./getPlayerParticipations";
 import { getPlayersByeCount } from "./getPlayersByeCount";
-import { getRecords } from "./getRecords";
 
 // Magic Tournament Rules, section 3.1 and Appendix C:
 // https://media.wizards.com/ContentResources/WPN/MTG_MTR_2026_Feb27_EN.pdf
@@ -10,7 +10,7 @@ import { getRecords } from "./getRecords";
 export function calculateStandings(tournament: Tournament): PlayerStanding[] {
     const participation = getPlayerParticipations(tournament.rounds);
     const byeCount = getPlayersByeCount(tournament.rounds);
-    const records = getRecords(tournament);
+    const records = calculateRecords(tournament);
 
     return tournament.players
         .map((player): PlayerStanding => {
