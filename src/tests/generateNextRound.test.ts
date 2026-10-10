@@ -402,14 +402,11 @@ describe("generateNextRound", () => {
         assert.deepEqual(event, before);
     });
 
-    it("starts pairing IDs at one when there is no round history", () => {
-        const next = generateNextRound(tournament(3));
-
-        assert.deepEqual(
-            next.pairings.map((pairing) => pairing.id),
-            [1, 2],
+    it("rejects generating pairings before the first round is generated", () => {
+        assert.throws(
+            () => generateNextRound(tournament(3)),
+            /The first round must be generated separately/u,
         );
-        assert.equal(next.pairings.at(-1)?.type, "BYE");
     });
 
     it("backtracks when the first choice would force a rematch", () => {
@@ -750,11 +747,19 @@ describe("generateNextRound", () => {
         assert.deepEqual(matchIds(next), [[1, 2]]);
     });
 
-    it("handles empty and single-player fields", () => {
-        assert.deepEqual(generateNextRound(tournament(0)).pairings, []);
-        const next = generateNextRound(tournament(1));
-        assert.equal(next.pairings.length, 1);
-        assert.equal(next.pairings[0].type, "BYE");
+    it("handles empty and single-player fields after players drop", () => {
+        const previousMatch = match(1, 2);
+        assert.deepEqual(
+            generateNextRound(tournament(2, [round([previousMatch], [1, 2])]))
+                .pairings,
+            [],
+        );
+        const next = generateNextRound(
+            tournament(2, [round([previousMatch], [2])]),
+        );
+        assert.deepEqual(next.pairings, [
+            { type: "BYE", id: previousMatch.id + 1, playerId: 1 },
+        ]);
     });
 
     it("rejects generating pairings before the previous round is completed", () => {

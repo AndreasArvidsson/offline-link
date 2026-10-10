@@ -26,8 +26,11 @@ interface PairingSolution {
 }
 
 export function generateNextRound(tournament: Tournament): Round {
+    if (tournament.rounds.length === 0) {
+        throw new Error("The first round must be generated separately");
+    }
     if (tournament.rounds.length >= tournament.roundCount) {
-        throw new Error("All tournament rounds have already been generated");
+        throw new Error("All rounds have already been generated");
     }
     if (tournament.rounds.some((round) => round.status !== "COMPLETED")) {
         throw new Error(
