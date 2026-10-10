@@ -30,15 +30,37 @@ export function Standings({ tournament }: Props): JSX.Element {
                     <tr>
                         <th>Rank</th>
                         <th>Player</th>
-                        <th title="Match Points">Points</th>
-                        <th title="Win-Loss-Draw Record">Record</th>
-                        <th title="Opponent Match Win Percentage: How well your opponents performed in their matches, averaged once per match you played against them. Each opponent's percentage is their match points divided by the maximum possible points, including their byes, with a minimum of 33%. Your own byes add no opponent. Higher is better; this is the first tiebreaker after match points.">
+                        <th
+                            title={title(
+                                "Match Points: 3 points for a win, 1 point for a draw, 0 points for a loss.",
+                                "Higher is better; this is the primary criteria for ranking.",
+                            )}
+                        >
+                            Points
+                        </th>
+                        <th title="Win-Loss-Draw record">Record</th>
+                        <th
+                            title={title(
+                                "Opponent Match Win Percentage: Average of your opponents' match win percentages.",
+                                "Higher is better; this is the first tiebreaker.",
+                            )}
+                        >
                             OMW%
                         </th>
-                        <th title="Game Win Percentage: The share of possible game points you earned across individual games. A game win earns 3 points, a draw earns 1, and a loss earns 0. Divide your game points by 3 times the number of games played, with a minimum of 33%. A bye counts as two game wins. Higher is better; this is the second tiebreaker.">
+                        <th
+                            title={title(
+                                "Game Win Percentage: Your game win percentages.",
+                                "Higher is better; this is the second tiebreaker.",
+                            )}
+                        >
                             GW%
                         </th>
-                        <th title="Opponent Game Win Percentage: How well your opponents performed in their individual games, averaged once per match you played against them. Each opponent's game win percentage includes their byes and has a minimum of 33% for this calculation. Your own byes add no opponent. Higher is better; this is the third tiebreaker.">
+                        <th
+                            title={title(
+                                "Opponent Game Win Percentage: Average of your opponents' game win percentages.",
+                                "Higher is better; this is the third tiebreaker.",
+                            )}
+                        >
                             OGW%
                         </th>
                     </tr>
@@ -86,4 +108,8 @@ export function Standings({ tournament }: Props): JSX.Element {
 
 function format(value: number, decimals = 1): string {
     return (value * 100).toFixed(decimals);
+}
+
+function title(...lines: string[]) {
+    return lines.join("\n");
 }

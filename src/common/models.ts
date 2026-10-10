@@ -65,12 +65,17 @@ export interface MatchResult {
 }
 
 export interface PlayerRecord {
+    opponentIds: number[];
+
     matchWins: number;
     matchLosses: number;
     matchDraws: number;
-    opponentIds: number[];
+
+    // 3 points for a win, 1 point for a draw, 0 points for a loss.
     matchPoints: number;
+    // Share of possible match points earned, calculated as: matchPoints / (3 * (matchWins + matchLosses + matchDraws)), with a minimum of 33%.
     matchWinPercentage: number;
+    // Share of possible game points earned, calculated as: gamePoints / (3 * (gameWins + gameLosses + gameDraws)), with a minimum of 33%.
     gameWinPercentage: number;
 }
 
@@ -86,10 +91,10 @@ export interface PlayerStanding {
     matchLosses: number;
     matchDraws: number;
 
-    // Opponent Match Win Percentage: How well your opponents performed in their matches, averaged once per match you played against them. Each opponent's percentage is their match points divided by the maximum possible points, including their byes, with a minimum of 33%. Your own byes add no opponent. Higher is better; this is the first tiebreaker after match points.
+    // Opponent Match Win Percentage: Average of your opponents' match win percentages. Higher is better; this is the first tiebreaker.
     opponentMatchWinPercentage: number;
-    // Game Win Percentage: The share of possible game points you earned across individual games. A game win earns 3 points, a draw earns 1, and a loss earns 0. Divide your game points by 3 times the number of games played, with a minimum of 33%. A bye counts as two game wins. Higher is better; this is the second tiebreaker.
+    // Game Win Percentage: Your game win percentages. Higher is better; this is the second tiebreaker.
     gameWinPercentage: number;
-    // Opponent Game Win Percentage: How well your opponents performed in their individual games, averaged once per match you played against them. Each opponent's game win percentage includes their byes and has a minimum of 33% for this calculation. Your own byes add no opponent. Higher is better; this is the third tiebreaker.
+    // Opponent Game Win Percentage: Average of your opponents' game win percentages. Higher is better; this is the third tiebreaker.
     opponentGameWinPercentage: number;
 }
