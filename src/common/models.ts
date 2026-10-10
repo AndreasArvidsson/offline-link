@@ -64,17 +64,27 @@ export interface MatchResult {
     draws: number;
 }
 
+export interface PlayerRecord {
+    matchWins: number;
+    matchLosses: number;
+    matchDraws: number;
+    opponentIds: number[];
+    matchPoints: number;
+    matchWinPercentage: number;
+    gameWinPercentage: number;
+}
+
 export interface PlayerStanding {
     // Disqualified players remain visible but have no place in the standings.
     rank: number | null;
-    participationChange?: ParticipationType;
     player: Player;
+    participationChange?: ParticipationType;
     byeCount: number;
     matchPoints: number;
 
-    wins: number;
-    losses: number;
-    draws: number;
+    matchWins: number;
+    matchLosses: number;
+    matchDraws: number;
 
     // Opponent Match Win Percentage: How well your opponents performed in their matches, averaged once per match you played against them. Each opponent's percentage is their match points divided by the maximum possible points, including their byes, with a minimum of 33%. Your own byes add no opponent. Higher is better; this is the first tiebreaker after match points.
     opponentMatchWinPercentage: number;

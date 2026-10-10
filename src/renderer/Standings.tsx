@@ -56,17 +56,25 @@ export function Standings({ tournament }: Props): JSX.Element {
                             <td>{standing.matchPoints}</td>
                             <td>
                                 {formatRecord(
-                                    standing.wins,
-                                    standing.losses,
-                                    standing.draws,
+                                    standing.matchWins,
+                                    standing.matchLosses,
+                                    standing.matchDraws,
                                 )}
                             </td>
                             <td>
-                                {format(standing.opponentMatchWinPercentage)}
+                                {standing.opponentMatchWinPercentage === 0
+                                    ? NA
+                                    : format(
+                                          standing.opponentMatchWinPercentage,
+                                      )}
                             </td>
                             <td>{format(standing.gameWinPercentage)}</td>
                             <td>
-                                {format(standing.opponentGameWinPercentage)}
+                                {standing.opponentGameWinPercentage === 0
+                                    ? NA
+                                    : format(
+                                          standing.opponentGameWinPercentage,
+                                      )}
                             </td>
                         </tr>
                     ))}

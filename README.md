@@ -74,6 +74,8 @@ Players are ranked using the following criteria, in order:
 3. Game-win percentage
 4. Opponents’ game-win percentage
 
+Disqualified players appear below all other players and receive no rank, regardless of their match points or tiebreakers.
+
 ## Developer tools
 
 Press `F12` to open or hide the developer tools.

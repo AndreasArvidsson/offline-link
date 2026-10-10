@@ -76,19 +76,20 @@ describe("calculateStandings", () => {
             standings.map((item) => item.player.id),
             [1, 2, 3],
         );
-        assert.deepEqual(standings[0], {
+        const expected: PlayerStanding = {
             rank: 1,
             participationChange: undefined,
             player: { id: 1, name: "Player 1" },
             byeCount: 0,
             matchPoints: 0,
-            wins: 0,
-            losses: 0,
-            draws: 0,
+            matchWins: 0,
+            matchLosses: 0,
+            matchDraws: 0,
             opponentMatchWinPercentage: 0,
             gameWinPercentage: 0.33,
             opponentGameWinPercentage: 0,
-        });
+        };
+        assert.deepEqual(standings[0], expected);
         assert.deepEqual(
             calculateStandings({ ...tournament(), players: [] }),
             [],
@@ -111,7 +112,10 @@ describe("calculateStandings", () => {
         );
         const first = standing(standings, 1);
         assert.equal(first.matchPoints, 4);
-        assert.deepEqual([first.wins, first.losses, first.draws], [1, 0, 1]);
+        assert.deepEqual(
+            [first.matchWins, first.matchLosses, first.matchDraws],
+            [1, 0, 1],
+        );
         close(first.gameWinPercentage, 11 / 21);
         close(first.opponentMatchWinPercentage, (0.33 + 4 / 6) / 2);
         close(first.opponentGameWinPercentage, (1 / 3 + 10 / 15) / 2);
@@ -160,7 +164,7 @@ describe("calculateStandings", () => {
         const byePlayer = standing(standings, 2);
         assert.equal(byePlayer.matchPoints, 3);
         assert.deepEqual(
-            [byePlayer.wins, byePlayer.losses, byePlayer.draws],
+            [byePlayer.matchWins, byePlayer.matchLosses, byePlayer.matchDraws],
             [1, 1, 0],
         );
         close(byePlayer.gameWinPercentage, 0.5);
@@ -183,7 +187,7 @@ describe("calculateStandings", () => {
         const opponent = standing(standings, 2);
         assert.equal(opponent.matchPoints, 9);
         assert.deepEqual(
-            [opponent.wins, opponent.losses, opponent.draws],
+            [opponent.matchWins, opponent.matchLosses, opponent.matchDraws],
             [3, 2, 0],
         );
         assert.equal(opponent.participationChange, "DROPPED");
@@ -262,7 +266,7 @@ describe("calculateStandings", () => {
             const result = standing(standings, playerId);
             assert.equal(result.matchPoints, 0);
             assert.deepEqual(
-                [result.wins, result.losses, result.draws],
+                [result.matchWins, result.matchLosses, result.matchDraws],
                 [0, 1, 0],
             );
             assert.equal(result.opponentMatchWinPercentage, 0.33);
@@ -284,7 +288,7 @@ describe("calculateStandings", () => {
             const result = standing(after, playerId);
             assert.equal(result.matchPoints, 3);
             assert.deepEqual(
-                [result.wins, result.losses, result.draws],
+                [result.matchWins, result.matchLosses, result.matchDraws],
                 [1, 1, 0],
             );
             assert.equal(result.participationChange, "DROPPED");
@@ -316,7 +320,7 @@ describe("calculateStandings", () => {
             const result = standing(standings, playerId);
             assert.equal(result.matchPoints, 1);
             assert.deepEqual(
-                [result.wins, result.losses, result.draws],
+                [result.matchWins, result.matchLosses, result.matchDraws],
                 [0, 0, 1],
             );
             close(result.opponentMatchWinPercentage, 1 / 3);
@@ -333,7 +337,7 @@ describe("calculateStandings", () => {
             const result = standing(standings, playerId);
             assert.equal(result.matchPoints, 1);
             assert.deepEqual(
-                [result.wins, result.losses, result.draws],
+                [result.matchWins, result.matchLosses, result.matchDraws],
                 [0, 0, 1],
             );
             close(result.opponentMatchWinPercentage, 1 / 3);
@@ -449,7 +453,7 @@ describe("calculateStandings", () => {
     });
 
     it("gives a bye-only player a win and game points without inventing an opponent", () => {
-        const result = standing(
+        const actual = standing(
             calculateStandings(
                 tournament([
                     round([{ type: "BYE", id: nextPairingId++, playerId: 1 }]),
@@ -457,19 +461,20 @@ describe("calculateStandings", () => {
             ),
             1,
         );
-        assert.deepEqual(result, {
+        const expected: PlayerStanding = {
             rank: 1,
             participationChange: undefined,
             player: { id: 1, name: "Player 1" },
             byeCount: 1,
             matchPoints: 3,
-            wins: 1,
-            losses: 0,
-            draws: 0,
+            matchWins: 1,
+            matchLosses: 0,
+            matchDraws: 0,
             opponentMatchWinPercentage: 0,
             gameWinPercentage: 1,
             opponentGameWinPercentage: 0,
-        });
+        };
+        assert.deepEqual(actual, expected);
     });
 
     it("moves a disqualified winner below ranked players without changing records or tiebreakers", () => {
@@ -579,7 +584,7 @@ describe("calculateStandings", () => {
         assert.equal(disqualified.rank, null);
         assert.equal(disqualified.participationChange, "DISQUALIFIED");
         assert.equal(disqualified.matchPoints, 3);
-        assert.equal(disqualified.losses, 0);
+        assert.equal(disqualified.matchLosses, 0);
         close(standing(standings, 2).opponentMatchWinPercentage, 1);
         assert.equal(standings.at(-1)?.player.id, 1);
     });

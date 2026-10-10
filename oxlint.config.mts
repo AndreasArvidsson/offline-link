@@ -39,6 +39,7 @@ const disabledRules = [
     "import/prefer-default-export",
     "node/no-top-level-await",
     "oxc/no-async-await",
+    "oxc/no-map-spread",
     "oxc/no-optional-chaining",
     "oxc/no-rest-spread-properties",
     "promise/avoid-new",
