@@ -85,9 +85,9 @@ describe("calculateStandings", () => {
             matchWins: 0,
             matchLosses: 0,
             matchDraws: 0,
-            opponentMatchWinPercentage: 0,
+            opponentsMatchWinPercentage: 0,
             gameWinPercentage: 0.33,
-            opponentGameWinPercentage: 0,
+            opponentsGameWinPercentage: 0,
         };
         assert.deepEqual(standings[0], expected);
         assert.deepEqual(
@@ -117,12 +117,12 @@ describe("calculateStandings", () => {
             [1, 0, 1],
         );
         close(first.gameWinPercentage, 11 / 21);
-        close(first.opponentMatchWinPercentage, (0.33 + 4 / 6) / 2);
-        close(first.opponentGameWinPercentage, (1 / 3 + 10 / 15) / 2);
+        close(first.opponentsMatchWinPercentage, (0.33 + 4 / 6) / 2);
+        close(first.opponentsGameWinPercentage, (1 / 3 + 10 / 15) / 2);
         const byePlayer = standing(standings, 3);
         close(byePlayer.gameWinPercentage, 10 / 15);
-        close(byePlayer.opponentMatchWinPercentage, 4 / 6);
-        close(byePlayer.opponentGameWinPercentage, 11 / 21);
+        close(byePlayer.opponentsMatchWinPercentage, 4 / 6);
+        close(byePlayer.opponentsGameWinPercentage, 11 / 21);
         assert.equal(standing(standings, 2).participationChange, "DROPPED");
     });
 
@@ -159,8 +159,8 @@ describe("calculateStandings", () => {
             ]),
         );
         const winner = standing(standings, 1);
-        close(winner.opponentMatchWinPercentage, 0.5);
-        close(winner.opponentGameWinPercentage, 0.5);
+        close(winner.opponentsMatchWinPercentage, 0.5);
+        close(winner.opponentsGameWinPercentage, 0.5);
         const byePlayer = standing(standings, 2);
         assert.equal(byePlayer.matchPoints, 3);
         assert.deepEqual(
@@ -191,8 +191,8 @@ describe("calculateStandings", () => {
             [3, 2, 0],
         );
         assert.equal(opponent.participationChange, "DROPPED");
-        close(standing(standings, 1).opponentMatchWinPercentage, 9 / 15);
-        close(standing(standings, 1).opponentGameWinPercentage, 24 / 39);
+        close(standing(standings, 1).opponentsMatchWinPercentage, 9 / 15);
+        close(standing(standings, 1).opponentsGameWinPercentage, 24 / 39);
     });
 
     it("ranks players using their opponents' full records including byes", () => {
@@ -222,8 +222,8 @@ describe("calculateStandings", () => {
             standings.map((item) => item.player.id),
             [1, 4, 5, 3, 2],
         );
-        close(standing(standings, 4).opponentMatchWinPercentage, 5 / 9);
-        close(standing(standings, 5).opponentMatchWinPercentage, 0.5);
+        close(standing(standings, 4).opponentsMatchWinPercentage, 5 / 9);
+        close(standing(standings, 5).opponentsMatchWinPercentage, 0.5);
     });
 
     it("applies percentage floors and weights repeated opponents by encounter", () => {
@@ -235,8 +235,8 @@ describe("calculateStandings", () => {
             ]),
         );
         const first = standing(standings, 1);
-        close(first.opponentMatchWinPercentage, (0.33 + 0.33 + 1) / 3);
-        close(first.opponentGameWinPercentage, (0.33 + 0.33 + 1) / 3);
+        close(first.opponentsMatchWinPercentage, (0.33 + 0.33 + 1) / 3);
+        close(first.opponentsGameWinPercentage, (0.33 + 0.33 + 1) / 3);
         assert.equal(standing(standings, 2).gameWinPercentage, 0.33);
         assert.deepEqual(
             standings.map((item) => item.player.id),
@@ -254,8 +254,8 @@ describe("calculateStandings", () => {
             ]),
         );
         close(standing(standings, 1).gameWinPercentage, 0.33);
-        close(standing(standings, 2).opponentMatchWinPercentage, 0.33);
-        close(standing(standings, 2).opponentGameWinPercentage, 0.33);
+        close(standing(standings, 2).opponentsMatchWinPercentage, 0.33);
+        close(standing(standings, 2).opponentsGameWinPercentage, 0.33);
     });
 
     it("scores a 0-0-0 result as a match loss for both players", () => {
@@ -269,9 +269,9 @@ describe("calculateStandings", () => {
                 [result.matchWins, result.matchLosses, result.matchDraws],
                 [0, 1, 0],
             );
-            assert.equal(result.opponentMatchWinPercentage, 0.33);
+            assert.equal(result.opponentsMatchWinPercentage, 0.33);
             assert.equal(result.gameWinPercentage, 0.33);
-            assert.equal(result.opponentGameWinPercentage, 0.33);
+            assert.equal(result.opponentsGameWinPercentage, 0.33);
         }
     });
 
@@ -299,15 +299,18 @@ describe("calculateStandings", () => {
         }
         close(standing(after, 1).gameWinPercentage, 2 / 3);
         close(standing(after, 2).gameWinPercentage, 1);
-        close(standing(after, 1).opponentMatchWinPercentage, 1 / 2);
-        close(standing(after, 1).opponentGameWinPercentage, 3 / 4);
+        close(standing(after, 1).opponentsMatchWinPercentage, 1 / 2);
+        close(standing(after, 1).opponentsGameWinPercentage, 3 / 4);
         close(
-            standing(after, 2).opponentMatchWinPercentage,
+            standing(after, 2).opponentsMatchWinPercentage,
             (0.33 + 1 / 2) / 2,
         );
-        close(standing(after, 2).opponentGameWinPercentage, (0.33 + 2 / 3) / 2);
         close(
-            standing(after, 3).opponentMatchWinPercentage,
+            standing(after, 2).opponentsGameWinPercentage,
+            (0.33 + 2 / 3) / 2,
+        );
+        close(
+            standing(after, 3).opponentsMatchWinPercentage,
             (1 / 2 + 0.33) / 2,
         );
     });
@@ -323,9 +326,9 @@ describe("calculateStandings", () => {
                 [result.matchWins, result.matchLosses, result.matchDraws],
                 [0, 0, 1],
             );
-            close(result.opponentMatchWinPercentage, 1 / 3);
+            close(result.opponentsMatchWinPercentage, 1 / 3);
             close(result.gameWinPercentage, 1 / 3);
-            close(result.opponentGameWinPercentage, 1 / 3);
+            close(result.opponentsGameWinPercentage, 1 / 3);
         }
     });
 
@@ -340,9 +343,9 @@ describe("calculateStandings", () => {
                 [result.matchWins, result.matchLosses, result.matchDraws],
                 [0, 0, 1],
             );
-            close(result.opponentMatchWinPercentage, 1 / 3);
+            close(result.opponentsMatchWinPercentage, 1 / 3);
             close(result.gameWinPercentage, 1 / 3);
-            close(result.opponentGameWinPercentage, 1 / 3);
+            close(result.opponentsGameWinPercentage, 1 / 3);
         }
     });
 
@@ -420,8 +423,8 @@ describe("calculateStandings", () => {
         const seventh = standing(standings, 7);
         assert.equal(second.matchPoints, 4);
         assert.equal(seventh.matchPoints, 4);
-        close(second.opponentMatchWinPercentage, 1297 / 2700);
-        close(seventh.opponentMatchWinPercentage, 1297 / 2700);
+        close(second.opponentsMatchWinPercentage, 1297 / 2700);
+        close(seventh.opponentsMatchWinPercentage, 1297 / 2700);
         close(second.gameWinPercentage, 1 / 2);
         close(seventh.gameWinPercentage, 4 / 7);
         const order = standings.map((item) => item.player.id);
@@ -448,8 +451,8 @@ describe("calculateStandings", () => {
             standings.map((item) => item.player.id),
             [4, 3, 2, 1],
         );
-        close(standing(standings, 1).opponentGameWinPercentage, 3 / 7);
-        close(standing(standings, 2).opponentGameWinPercentage, 4 / 7);
+        close(standing(standings, 1).opponentsGameWinPercentage, 3 / 7);
+        close(standing(standings, 2).opponentsGameWinPercentage, 4 / 7);
     });
 
     it("gives a bye-only player a win and game points without inventing an opponent", () => {
@@ -470,9 +473,9 @@ describe("calculateStandings", () => {
             matchWins: 1,
             matchLosses: 0,
             matchDraws: 0,
-            opponentMatchWinPercentage: 0,
+            opponentsMatchWinPercentage: 0,
             gameWinPercentage: 1,
-            opponentGameWinPercentage: 0,
+            opponentsGameWinPercentage: 0,
         };
         assert.deepEqual(actual, expected);
     });
@@ -510,8 +513,8 @@ describe("calculateStandings", () => {
             } = current;
             assert.deepEqual(currentRecord, previousRecord);
         }
-        close(standing(after, 2).opponentMatchWinPercentage, 1);
-        close(standing(after, 2).opponentGameWinPercentage, 1);
+        close(standing(after, 2).opponentsMatchWinPercentage, 1);
+        close(standing(after, 2).opponentsGameWinPercentage, 1);
         assert.equal(standing(after, 1).matchPoints, 3);
         assert.deepEqual(event, snapshot);
     });
@@ -585,7 +588,7 @@ describe("calculateStandings", () => {
         assert.equal(disqualified.participationChange, "DISQUALIFIED");
         assert.equal(disqualified.matchPoints, 3);
         assert.equal(disqualified.matchLosses, 0);
-        close(standing(standings, 2).opponentMatchWinPercentage, 1);
+        close(standing(standings, 2).opponentsMatchWinPercentage, 1);
         assert.equal(standings.at(-1)?.player.id, 1);
     });
 });

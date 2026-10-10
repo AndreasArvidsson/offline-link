@@ -15,23 +15,23 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
     return tournament.players
         .map((player): PlayerStanding => {
             const record = records.get(player.id);
-            let opponentMatchWinSum = 0;
-            let opponentGameWinSum = 0;
+            let opponentsMatchWinSum = 0;
+            let opponentsGameWinSum = 0;
 
             for (const opponentId of record.opponentIds) {
                 const opponent = records.get(opponentId);
 
-                opponentMatchWinSum += opponent.matchWinPercentage;
-                opponentGameWinSum += opponent.gameWinPercentage;
+                opponentsMatchWinSum += opponent.matchWinPercentage;
+                opponentsGameWinSum += opponent.gameWinPercentage;
             }
 
-            const opponentMatchWinPercentage =
+            const opponentsMatchWinPercentage =
                 record.opponentIds.length > 0
-                    ? opponentMatchWinSum / record.opponentIds.length
+                    ? opponentsMatchWinSum / record.opponentIds.length
                     : 0;
-            const opponentGameWinPercentage =
+            const opponentsGameWinPercentage =
                 record.opponentIds.length > 0
-                    ? opponentGameWinSum / record.opponentIds.length
+                    ? opponentsGameWinSum / record.opponentIds.length
                     : 0;
 
             return {
@@ -44,8 +44,8 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
                 matchLosses: record.matchLosses,
                 matchDraws: record.matchDraws,
                 gameWinPercentage: record.gameWinPercentage,
-                opponentMatchWinPercentage,
-                opponentGameWinPercentage,
+                opponentsMatchWinPercentage,
+                opponentsGameWinPercentage,
             };
         })
         .toSorted(
@@ -55,17 +55,17 @@ export function calculateStandings(tournament: Tournament): PlayerStanding[] {
                     Number(b.participationChange === "DISQUALIFIED") ||
                 // Higher match points are ranked higher
                 b.matchPoints - a.matchPoints ||
-                // Higher opponent match win percentage is ranked higher
+                // Higher opponents match win percentage is ranked higher
                 comparePercentages(
-                    b.opponentMatchWinPercentage,
-                    a.opponentMatchWinPercentage,
+                    b.opponentsMatchWinPercentage,
+                    a.opponentsMatchWinPercentage,
                 ) ||
                 // Higher game win percentage is ranked higher
                 comparePercentages(b.gameWinPercentage, a.gameWinPercentage) ||
-                // Higher opponent game win percentage is ranked higher
+                // Higher opponents game win percentage is ranked higher
                 comparePercentages(
-                    b.opponentGameWinPercentage,
-                    a.opponentGameWinPercentage,
+                    b.opponentsGameWinPercentage,
+                    a.opponentsGameWinPercentage,
                 ),
         )
         .map((standing, index) => ({

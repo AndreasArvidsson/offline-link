@@ -41,7 +41,7 @@ export function Standings({ tournament }: Props): JSX.Element {
                         <th title="Win-Loss-Draw record">Record</th>
                         <th
                             title={title(
-                                "Opponent Match Win Percentage: Average of your opponents' match win percentages.",
+                                "Opponents’ Match Win Percentage: Average of your opponents' match win percentages.",
                                 "Higher is better; this is the first tiebreaker.",
                             )}
                         >
@@ -57,7 +57,7 @@ export function Standings({ tournament }: Props): JSX.Element {
                         </th>
                         <th
                             title={title(
-                                "Opponent Game Win Percentage: Average of your opponents' game win percentages.",
+                                "Opponents’ Game Win Percentage: Average of your opponents' game win percentages.",
                                 "Higher is better; this is the third tiebreaker.",
                             )}
                         >
@@ -84,18 +84,18 @@ export function Standings({ tournament }: Props): JSX.Element {
                                 )}
                             </td>
                             <td>
-                                {standing.opponentMatchWinPercentage === 0
+                                {standing.opponentsMatchWinPercentage === 0
                                     ? NA
                                     : format(
-                                          standing.opponentMatchWinPercentage,
+                                          standing.opponentsMatchWinPercentage,
                                       )}
                             </td>
                             <td>{format(standing.gameWinPercentage)}</td>
                             <td>
-                                {standing.opponentGameWinPercentage === 0
+                                {standing.opponentsGameWinPercentage === 0
                                     ? NA
                                     : format(
-                                          standing.opponentGameWinPercentage,
+                                          standing.opponentsGameWinPercentage,
                                       )}
                             </td>
                         </tr>

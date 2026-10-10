@@ -91,10 +91,10 @@ export interface PlayerStanding {
     matchLosses: number;
     matchDraws: number;
 
-    // Opponent Match Win Percentage: Average of your opponents' match win percentages. Higher is better; this is the first tiebreaker.
-    opponentMatchWinPercentage: number;
+    // Opponents’ Match Win Percentage: Average of your opponents' match win percentages. Higher is better; this is the first tiebreaker.
+    opponentsMatchWinPercentage: number;
     // Game Win Percentage: Your game win percentages. Higher is better; this is the second tiebreaker.
     gameWinPercentage: number;
-    // Opponent Game Win Percentage: Average of your opponents' game win percentages. Higher is better; this is the third tiebreaker.
-    opponentGameWinPercentage: number;
+    // Opponents’ Game Win Percentage: Average of your opponents' game win percentages. Higher is better; this is the third tiebreaker.
+    opponentsGameWinPercentage: number;
 }
