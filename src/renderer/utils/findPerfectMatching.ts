@@ -7,6 +7,7 @@ export function findPerfectMatching(
     adjacency: number[][],
 ): [number, number][] | undefined {
     const vertexCount = adjacency.length;
+
     if (vertexCount % 2 !== 0) {
         return undefined;
     }
@@ -37,11 +38,13 @@ export function findPerfectMatching(
     }
 
     const matches: [number, number][] = [];
+
     for (let vertex = 0; vertex < vertexCount; vertex++) {
         if (vertex < partners[vertex]) {
             matches.push([vertex, partners[vertex]]);
         }
     }
+
     return matches;
 }
 
@@ -98,6 +101,7 @@ function findAugmentingEnd(
             }
         }
     }
+
     return -1;
 }
 
@@ -118,6 +122,7 @@ function contractBlossom(
     for (let member = 0; member < bases.length; member++) {
         if (blossom[bases[member]]) {
             bases[member] = base;
+
             if (!queued[member]) {
                 queued[member] = true;
                 queue.push(member);
@@ -135,6 +140,7 @@ function findCommonBase(
 ): number {
     const ancestors = new Set<number>();
     let vertex = first;
+
     while (vertex !== -1) {
         const base = bases[vertex];
         ancestors.add(base);
@@ -142,9 +148,11 @@ function findCommonBase(
     }
 
     vertex = second;
+
     while (!ancestors.has(bases[vertex])) {
         vertex = parents[partners[bases[vertex]]];
     }
+
     return bases[vertex];
 }
 
@@ -159,6 +167,7 @@ function markBlossomPath(
 ): void {
     let vertex = start;
     let nextChild = child;
+
     while (bases[vertex] !== base) {
         const partner = partners[vertex];
         blossom[bases[vertex]] = true;

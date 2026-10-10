@@ -6,6 +6,8 @@ import type {
 } from "../../common/models";
 import { calculateStandings } from "./calculateStandings";
 import { findPerfectMatching } from "./findPerfectMatching";
+import { getByeCandidates } from "./getByeCandidates";
+import { getHighestPairingId } from "./getHighestPairingId";
 import { havePlayed } from "./havePlayed";
 
 const MAX_PAIRING_ATTEMPTS = 100_000;
@@ -36,16 +38,15 @@ export function generateNextRound(tournament: Tournament): Round {
         (standing) => standing.participationChange == null,
     );
 
-    const byeCandidates = getByeCandidates(players);
+    const useBye = players.length % 2 === 1;
+    const byeCandidates = useBye ? getByeCandidates(players) : [];
     const isFinalRound = tournament.rounds.length + 1 === tournament.roundCount;
     const findPairing = isFinalRound ? findPowerPairing : findBestPairing;
 
     let bye: PlayerStanding | undefined;
     let matches: Match[] | undefined;
 
-    if (players.length % 2 === 0) {
-        matches = findPairing(players, tournament.rounds);
-    } else {
+    if (useBye) {
         for (const candidate of byeCandidates) {
             const remaining = players.filter((player) => player !== candidate);
             const solution = findPairing(remaining, tournament.rounds);
@@ -56,6 +57,8 @@ export function generateNextRound(tournament: Tournament): Round {
                 break;
             }
         }
+    } else {
+        matches = findPairing(players, tournament.rounds);
     }
 
     if (matches == null) {
@@ -69,16 +72,7 @@ export function generateNextRound(tournament: Tournament): Round {
         matches = fallback.matches;
     }
 
-    const highestPairingId = tournament.rounds.reduce(
-        (highest, round) =>
-            round.pairings.reduce(
-                (highestInRound, pairing) =>
-                    Math.max(highestInRound, pairing.id),
-                highest,
-            ),
-        0,
-    );
-    let nextPairingId = highestPairingId + 1;
+    let nextPairingId = getHighestPairingId(tournament.rounds) + 1;
 
     const pairings: Pairing[] = matches.map(
         ([player1Id, player2Id], index) => ({
@@ -96,6 +90,8 @@ export function generateNextRound(tournament: Tournament): Round {
             id: nextPairingId++,
             playerId: bye.player.id,
         });
+    } else if (useBye) {
+        throw new Error("Failed to generate a valid pairing with a bye");
     }
 
     return {
@@ -105,12 +101,6 @@ export function generateNextRound(tournament: Tournament): Round {
         participationChanges: [],
         pairings,
     };
-}
-
-function getByeCandidates(players: PlayerStanding[]): PlayerStanding[] {
-    // Standings are highest to lowest, so reverse them to prefer
-    // the lowest-ranked player for the bye.
-    return players.toReversed().toSorted((a, b) => a.byeCount - b.byeCount);
 }
 
 function findFallbackPairing(
@@ -149,6 +139,7 @@ function findFallbackPairing(
 
             const matches: Match[] = [];
             const unmatched: number[] = [];
+
             for (const [first, second] of matching) {
                 if (second >= playerCount) {
                     unmatched.push(first);
@@ -159,13 +150,16 @@ function findFallbackPairing(
                     ]);
                 }
             }
+
             unmatched.sort((a, b) => a - b);
+
             for (let index = 0; index < unmatched.length; index += 2) {
                 matches.push([
                     remaining[unmatched[index]].player.id,
                     remaining[unmatched[index + 1]].player.id,
                 ]);
             }
+
             return { bye, matches };
         }
     }
@@ -183,12 +177,14 @@ function findRematchMatching(
     if (rematches < 0) {
         return undefined;
     }
+
     const adjacency = getFreshOpponentGraph(players, rounds);
     // Each pair of dummy vertices lets two players sit out the fresh
     // matching. Pair those players together as rematches afterwards.
     // Clamp the allowance when fewer players remain: allowing more rematches
     // than matches imposes no additional restriction.
     const allowance = Math.min(rematches, players.length / 2);
+
     for (let dummy = 0; dummy < allowance * 2; dummy++) {
         const dummyIndex = players.length + dummy;
         adjacency.push(players.map((_, index) => index));
@@ -196,6 +192,7 @@ function findRematchMatching(
             adjacency[index].push(dummyIndex);
         }
     }
+
     return findPerfectMatching(adjacency);
 }
 
@@ -207,6 +204,7 @@ function findRankedRematchPairing(
     const matches: Match[] = [];
     let remaining = players;
     let remainingRematches = rematches;
+
     while (remaining.length > 0) {
         const [first, ...rest] = remaining;
         // As in power pairings, skip previous opponents first. Only consider
@@ -216,11 +214,13 @@ function findRankedRematchPairing(
                 Number(havePlayed(first.player.id, a.player.id, rounds)) -
                 Number(havePlayed(first.player.id, b.player.id, rounds)),
         );
+
         for (const opponent of opponents) {
             const repeated = Number(
                 havePlayed(first.player.id, opponent.player.id, rounds),
             );
             const next = rest.filter((player) => player !== opponent);
+
             if (
                 findRematchMatching(
                     next,
@@ -230,12 +230,14 @@ function findRankedRematchPairing(
             ) {
                 continue;
             }
+
             matches.push([first.player.id, opponent.player.id]);
             remaining = next;
             remainingRematches -= repeated;
             break;
         }
     }
+
     return matches;
 }
 
@@ -244,6 +246,7 @@ function getFreshOpponentGraph(
     rounds: Round[],
 ): number[][] {
     const adjacency: number[][] = players.map(() => []);
+
     for (let first = 0; first < players.length; first++) {
         for (let second = first + 1; second < players.length; second++) {
             if (
@@ -276,6 +279,7 @@ function findPowerPairing(
     }
 
     const partners = players.map(() => -1);
+
     for (const [first, second] of initialMatching) {
         partners[first] = second;
         partners[second] = first;
@@ -283,6 +287,7 @@ function findPowerPairing(
 
     const matches: Match[] = [];
     let remaining = players.map((_, index) => index);
+
     while (remaining.length > 0) {
         const [first, ...rest] = remaining;
         let nextRemaining: number[] | undefined;
@@ -319,6 +324,7 @@ function findPowerPairing(
         if (nextRemaining == null) {
             return undefined;
         }
+
         remaining = nextRemaining;
     }
 
@@ -340,6 +346,7 @@ function updateRemainingMatching(
 
     const firstPartner = partners[first];
     const secondPartner = partners[second];
+
     if (adjacency[firstPartner].includes(secondPartner)) {
         partners[firstPartner] = secondPartner;
         partners[secondPartner] = firstPartner;
@@ -349,22 +356,28 @@ function updateRemainingMatching(
     const indices = new Map(remaining.map((vertex, index) => [vertex, index]));
     const remainingGraph = remaining.map((vertex) => {
         const neighbors: number[] = [];
+
         for (const neighbor of adjacency[vertex]) {
             const index = indices.get(neighbor);
             if (index != null) {
                 neighbors.push(index);
             }
         }
+
         return neighbors;
     });
+
     const matching = findPerfectMatching(remainingGraph);
+
     if (matching == null) {
         return false;
     }
+
     for (const [left, right] of matching) {
         partners[remaining[left]] = remaining[right];
         partners[remaining[right]] = remaining[left];
     }
+
     return true;
 }
 
@@ -373,6 +386,7 @@ function findBestPairing(
     rounds: Round[],
 ): Match[] | undefined {
     const adjacency = getFreshOpponentGraph(players, rounds);
+
     for (const [index, opponents] of adjacency.entries()) {
         adjacency[index] = opponents.toSorted(
             (a, b) =>
@@ -383,11 +397,13 @@ function findBestPairing(
 
     // Establish feasibility before spending the bounded score-optimization budget.
     const initialMatches = findPerfectMatching(adjacency);
+
     if (initialMatches == null) {
         return undefined;
     }
 
     const initialCost: PairingCost = { maxDifference: 0, totalDifference: 0 };
+
     for (const [first, second] of initialMatches) {
         const difference = getMatchDifference(players[first], players[second]);
         initialCost.maxDifference = Math.max(

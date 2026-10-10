@@ -127,6 +127,31 @@ function tournamentWithManyDrops(): Tournament {
 }
 
 describe("generateNextRound", () => {
+    it("pairs adjacent standings ranks in the final round when all are fresh", () => {
+        const event = tournament(8, [
+            round([match(1, 8), match(2, 7), match(3, 6), match(4, 5)]),
+            {
+                ...round([match(1, 3), match(2, 4), match(5, 7), match(6, 8)]),
+                number: 2,
+            },
+        ]);
+        event.roundCount = 3;
+        event.players = event.players.toReversed();
+
+        assert.deepEqual(
+            calculateStandings(event).map((standing) => standing.player.id),
+            [2, 1, 4, 3, 6, 5, 8, 7],
+        );
+        const next = generateNextRound(event);
+        assert.deepEqual(matchIds(next), [
+            [2, 1],
+            [4, 3],
+            [6, 5],
+            [8, 7],
+        ]);
+        assert.equal(next.pairings.length, 4);
+    });
+
     it("preserves final-round rank preference when rematches are unavoidable", () => {
         const pairs = [
             [1, 2],
