@@ -4,7 +4,7 @@ export function formatRecord(
     draws: number,
 ): string {
     if (draws > 0) {
-        return `${wins} - ${losses} - ${draws}`;
+        return `${wins}-${losses}-${draws}`;
     }
-    return `${wins} - ${losses}`;
+    return `${wins}-${losses}`;
 }
