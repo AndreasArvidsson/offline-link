@@ -8,6 +8,7 @@ export function createNewTournament(): Tournament {
         name: "",
         createdAt: timestamp,
         updatedAt: timestamp,
+        startingTableNumber: 1,
         roundCount: 0,
         status: "NOT_STARTED",
         players: [],

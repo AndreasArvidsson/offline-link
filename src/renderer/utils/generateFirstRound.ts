@@ -2,6 +2,7 @@ import type { Pairing, Player, Round } from "../../common/models";
 
 export function generateFirstRound(
     players: Player[],
+    startingTableNumber: number,
     random: () => number = Math.random,
 ): Round {
     const shuffledPlayers = shuffle(players, random);
@@ -11,7 +12,7 @@ export function generateFirstRound(
         pairings.push({
             type: "MATCH",
             id: pairings.length + 1,
-            table: pairings.length + 1,
+            table: startingTableNumber + pairings.length,
             player1Id: shuffledPlayers[i].id,
             player2Id: shuffledPlayers[i + 1].id,
         });

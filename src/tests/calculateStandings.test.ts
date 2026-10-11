@@ -19,6 +19,7 @@ function tournament(rounds: Round[] = []): Tournament {
         name: "Test",
         createdAt: 0,
         updatedAt: 0,
+        startingTableNumber: 1,
         roundCount: rounds.length,
         status: "IN_PROGRESS",
         players: [1, 2, 3].map((id) => ({ id, name: `Player ${id}` })),

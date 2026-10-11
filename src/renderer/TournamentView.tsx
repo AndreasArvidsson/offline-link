@@ -2,6 +2,7 @@ import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import type { Round, Tournament } from "../common/models.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
+import { InputNumber } from "./components/InputNumber.tsx";
 import { InputText } from "./components/InputText.tsx";
 import { Loading } from "./components/Loading.tsx";
 import { NavItem } from "./components/NavItem.tsx";
@@ -81,7 +82,10 @@ export function TournamentView({
     const invalidName = !disabled && isEmptyString(tournament.name);
 
     const startFirstRound = (roundCount: number) => {
-        const firstRound = generateFirstRound(tournament.players);
+        const firstRound = generateFirstRound(
+            tournament.players,
+            tournament.startingTableNumber,
+        );
         updateTournament({
             status: "IN_PROGRESS",
             roundCount,
@@ -123,8 +127,7 @@ export function TournamentView({
             return null;
         }
 
-        const { type } = tab;
-        switch (type) {
+        switch (tab.type) {
             case "players":
                 return (
                     <Players
@@ -172,7 +175,7 @@ export function TournamentView({
             }
 
             default: {
-                const _exhaustiveCheck: never = type;
+                const _exhaustiveCheck: never = tab;
                 throw new Error("Unhandled tab type");
             }
         }
@@ -211,6 +214,21 @@ export function TournamentView({
                                     invalid={invalidName}
                                     onChange={(name) => {
                                         updateTournament({ name });
+                                    }}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Starting table #</td>
+                            <td>
+                                <InputNumber
+                                    value={tournament.startingTableNumber}
+                                    disabled={disabled}
+                                    isInteger
+                                    onChange={(value) => {
+                                        updateTournament({
+                                            startingTableNumber: value ?? 1,
+                                        });
                                     }}
                                 />
                             </td>

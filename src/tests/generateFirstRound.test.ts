@@ -10,7 +10,7 @@ describe("generateFirstRound", () => {
                 id: index + 1,
                 name: `Player ${index + 1}`,
             }));
-            const round = generateFirstRound(players, () => 0.5);
+            const round = generateFirstRound(players, 1, () => 0.5);
             const pairedPlayerIds = round.pairings.flatMap((pairing) =>
                 pairing.type === "MATCH"
                     ? [pairing.player1Id, pairing.player2Id]
@@ -44,7 +44,7 @@ describe("generateFirstRound", () => {
         ];
         const before = structuredClone(players);
 
-        const round = generateFirstRound(players, () => 0);
+        const round = generateFirstRound(players, 1, () => 0);
 
         assert.deepEqual(
             round.pairings.map((pairing) => pairing.id),
@@ -55,5 +55,23 @@ describe("generateFirstRound", () => {
             ["MATCH", "MATCH", "BYE"],
         );
         assert.deepEqual(players, before);
+    });
+
+    it("generate first round with custom starting table number", () => {
+        const players: Player[] = [
+            { id: 1, name: "Player 1" },
+            { id: 2, name: "Player 2" },
+            { id: 3, name: "Player 3" },
+            { id: 4, name: "Player 4" },
+            { id: 5, name: "Player 5" },
+        ];
+        const round = generateFirstRound(players, 5, () => 0);
+
+        assert.deepEqual(
+            round.pairings.map((pairing) =>
+                pairing.type === "MATCH" ? pairing.table : null,
+            ),
+            [5, 6, null],
+        );
     });
 });

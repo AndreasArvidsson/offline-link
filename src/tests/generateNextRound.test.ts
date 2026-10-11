@@ -17,6 +17,7 @@ function tournament(playerCount: number, rounds: Round[] = []): Tournament {
         name: "Test",
         createdAt: 0,
         updatedAt: 0,
+        startingTableNumber: 1,
         roundCount: 5,
         status: "IN_PROGRESS",
         rounds,
@@ -831,5 +832,16 @@ describe("generateNextRound", () => {
             type: "DISQUALIFIED",
         }));
         assert.deepEqual(generateNextRound(event).pairings, []);
+    });
+
+    it("generates next round with custom starting table number", () => {
+        const event = tournament(5, [round([match(1, 2)])]);
+        event.startingTableNumber = 5;
+        assert.deepEqual(
+            generateNextRound(event).pairings.map((pairing) =>
+                pairing.type === "MATCH" ? pairing.table : null,
+            ),
+            [5, 6, null],
+        );
     });
 });

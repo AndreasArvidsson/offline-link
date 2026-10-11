@@ -34,7 +34,7 @@ export function generateNextRound(tournament: Tournament): Round {
         ([player1Id, player2Id], index) => ({
             type: "MATCH",
             id: nextPairingId++,
-            table: index + 1,
+            table: tournament.startingTableNumber + index,
             player1Id,
             player2Id,
         }),

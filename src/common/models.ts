@@ -5,6 +5,7 @@ export interface Tournament {
     name: string;
     createdAt: number;
     updatedAt: number;
+    startingTableNumber: number;
     roundCount: number;
     status: TournamentStatus;
     players: Player[];
