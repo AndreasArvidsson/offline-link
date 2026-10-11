@@ -1,4 +1,4 @@
-import type { JSX } from "preact/jsx-runtime";
+import type { JSX } from "preact";
 import type { RecentTournament } from "../api.ts";
 import { Button } from "./components/Button.tsx";
 import type { View } from "./types.ts";

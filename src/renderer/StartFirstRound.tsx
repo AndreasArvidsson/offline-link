@@ -1,0 +1,66 @@
+import type { JSX } from "preact";
+import { useEffect, useState } from "preact/hooks";
+import { Button } from "./components/Button";
+import type { SelectOption } from "./components/Select";
+import { Select } from "./components/Select";
+import { calculateNumberOfRounds } from "./utils/calculateNumberOfRounds";
+
+interface Props {
+    disabled: boolean;
+    playerCount: number;
+    startFirstRound: (roundCount: number) => void;
+}
+
+export function StartFirstRound({
+    disabled,
+    playerCount,
+    startFirstRound,
+}: Props): JSX.Element {
+    const [roundCountRecommended, setRoundCountRecommended] = useState(0);
+    const [roundCountOverride, setRoundCountOverride] = useState<number>();
+
+    useEffect(() => {
+        setRoundCountRecommended(calculateNumberOfRounds(playerCount));
+    }, [playerCount]);
+
+    const roundCount = roundCountOverride ?? roundCountRecommended;
+
+    return (
+        <span className="float-end">
+            <Select
+                value={roundCountOverride}
+                onChange={(value) => setRoundCountOverride(value)}
+            >
+                {getOptions(roundCountRecommended)}
+            </Select>
+
+            <Button
+                variant="success"
+                className="mt-3"
+                disabled={disabled || roundCount === 0}
+                onClick={() => startFirstRound(roundCount)}
+            >
+                Start round 1
+            </Button>
+        </span>
+    );
+}
+
+function getOptions(
+    roundCountRecommended: number,
+): SelectOption<number | undefined>[] {
+    return [
+        {
+            value: undefined,
+            children: `${getOptionLabel(roundCountRecommended)} (recommended)`,
+        },
+        ...Array.from({ length: 10 }).map((_, index) => ({
+            value: index + 1,
+            children: getOptionLabel(index + 1),
+        })),
+    ];
+}
+
+function getOptionLabel(roundCount: number): string {
+    return roundCount === 1 ? "1 round" : `${roundCount} rounds`;
+}

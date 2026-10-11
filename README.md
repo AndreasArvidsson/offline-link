@@ -1,6 +1,6 @@
 # OfflineLink
 
-An unofficial, offline desktop tournament notebook for Magic: The Gathering organizers. Official Wizards reporting stays in EventLink.
+An unofficial, offline desktop tournament notebook for Magic: The Gathering organizers. Official Wizards reporting stays in [EventLink](https://wpn.wizards.com/en/news/definitive-guide-wizards-eventlink).
 
 ## Installation
 
@@ -15,6 +15,10 @@ An unofficial, offline desktop tournament notebook for Magic: The Gathering orga
 ## Rule definitions
 
 OfflineLink is based on the [Magic Tournament Rules (MTR) - Feb 27, 2026](https://media.wizards.com/ContentResources/WPN/MTG_MTR_2026_Feb27_EN.pdf).
+
+## Best of 3
+
+OfflineLink uses best of 3 (BO3) rounds.
 
 ## Swiss pairing algorithm
 

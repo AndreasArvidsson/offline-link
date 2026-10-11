@@ -1,5 +1,5 @@
+import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import type { JSX } from "preact/jsx-runtime";
 import type { RecentTournament } from "../api.ts";
 import { APP_NAME } from "../common/constants.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";

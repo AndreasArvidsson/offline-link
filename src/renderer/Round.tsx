@@ -1,5 +1,5 @@
+import type { JSX } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
-import type { JSX } from "preact/jsx-runtime";
 import { NA } from "../common/constants";
 import type {
     MatchResult,

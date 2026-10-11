@@ -1,6 +1,6 @@
 export function calculateNumberOfRounds(playerCount: number): number {
     if (playerCount < 2) {
-        throw new Error(`Invalid player count: ${playerCount}`);
+        return 0;
     }
 
     if (playerCount < 9) {

@@ -1,14 +1,15 @@
-import type { JSX } from "preact/jsx-runtime";
+import type { JSX } from "preact";
 import { PlusCircle, Trash3 } from "react-bootstrap-icons";
 import type { Player } from "../common/models";
 import { Button } from "./components/Button";
 import { InputText } from "./components/InputText";
+import { StartFirstRound } from "./StartFirstRound";
 
 interface Props {
     disabled: boolean;
     players: Player[];
     onChange: (players: Player[]) => void;
-    startFirstRound: () => void;
+    startFirstRound: (roundCount: number) => void;
 }
 
 export function Players({
@@ -59,9 +60,7 @@ export function Players({
                     <PlusCircle /> Add Player
                 </Button>
 
-                <Button
-                    variant="success"
-                    className="float-end"
+                <StartFirstRound
                     disabled={
                         disabled ||
                         // Minimum 2 players required
@@ -71,10 +70,9 @@ export function Players({
                         // Player names cannot be empty
                         playersMap.has("")
                     }
-                    onClick={startFirstRound}
-                >
-                    Start round 1
-                </Button>
+                    playerCount={players.length}
+                    startFirstRound={startFirstRound}
+                />
             </div>
         </>
     );

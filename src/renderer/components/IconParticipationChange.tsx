@@ -1,4 +1,4 @@
-import type { JSX } from "preact/jsx-runtime";
+import type { JSX } from "preact";
 import { PersonFillDash, PersonFillX } from "react-bootstrap-icons";
 import type { ParticipationType } from "../../common/models";
 

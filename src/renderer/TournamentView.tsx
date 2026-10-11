@@ -1,5 +1,5 @@
+import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import type { JSX } from "preact/jsx-runtime";
 import type { Round, Tournament } from "../common/models.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
 import { InputText } from "./components/InputText.tsx";
@@ -10,7 +10,6 @@ import { Players } from "./Players.tsx";
 import { RoundComponent } from "./Round.tsx";
 import { Standings } from "./Standings.tsx";
 import type { View } from "./types.ts";
-import { calculateNumberOfRounds } from "./utils/calculateNumberOfRounds.ts";
 import { createNewTournament } from "./utils/createNewTournament.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
 import { generateFirstRound } from "./utils/generateFirstRound.ts";
@@ -79,8 +78,7 @@ export function TournamentView({
     const disabled = tournament.status === "COMPLETED";
     const invalidName = !disabled && isEmptyString(tournament.name);
 
-    const startFirstRound = () => {
-        const roundCount = calculateNumberOfRounds(tournament.players.length);
+    const startFirstRound = (roundCount: number) => {
         const firstRound = generateFirstRound(tournament.players);
         updateTournament({
             roundCount,

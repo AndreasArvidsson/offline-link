@@ -1,5 +1,5 @@
+import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import type { JSX } from "preact/jsx-runtime";
 import type { Parameters } from "../api.ts";
 import { Loading } from "./components/Loading.tsx";
 import { HomeView } from "./HomeView.tsx";

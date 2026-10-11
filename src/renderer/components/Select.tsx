@@ -3,14 +3,15 @@ import { classNames } from "../utils/classNames";
 
 const UNDEFINED_VALUE = "__SELECT_UNDEFINED__";
 
-type SelectValue = string | undefined;
+type SelectValue = string | number | undefined;
 
 export interface SelectOption<T extends SelectValue> {
     value: T;
+    disabled?: boolean;
     children: ComponentChildren;
 }
 
-interface BaseProps<T extends SelectValue> extends Omit<
+interface Props<T extends SelectValue> extends Omit<
     SelectHTMLAttributes,
     "value" | "onChange" | "children" | "role"
 > {
@@ -18,26 +19,12 @@ interface BaseProps<T extends SelectValue> extends Omit<
     small?: boolean;
     invalid?: boolean;
     warning?: boolean;
-    children?: readonly (SelectOption<T> | false)[];
-}
-
-interface DefinedProps<T extends string> extends BaseProps<T> {
     value: T;
     onChange: (value: T) => void;
+    children?: readonly SelectOption<T>[];
 }
 
-interface OptionalProps<T extends string> extends BaseProps<T | undefined> {
-    value?: T | undefined;
-    onChange: (value: T | undefined) => void;
-}
-
-type Props<T extends string> = DefinedProps<T> | OptionalProps<T>;
-
-export function Select<T extends string>(props: DefinedProps<T>): JSX.Element;
-// The overloads preserve contextual typing for JSX onChange callbacks.
-// oxlint-disable-next-line typescript-eslint/unified-signatures
-export function Select<T extends string>(props: OptionalProps<T>): JSX.Element;
-export function Select<T extends string>({
+export function Select<T extends SelectValue>({
     className,
     value,
     small,
@@ -61,26 +48,24 @@ export function Select<T extends string>({
             value={value ?? UNDEFINED_VALUE}
             onChange={(e) => {
                 const rawValue = e.currentTarget.value;
-                const selectedValue =
-                    // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
-                    rawValue === UNDEFINED_VALUE ? undefined : (rawValue as T);
-                // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion
-                (onChange as (value: T | undefined) => void)(selectedValue);
+                const selectedOption = children?.find(
+                    (child) =>
+                        String(child.value ?? UNDEFINED_VALUE) === rawValue,
+                );
+                if (selectedOption != null) {
+                    onChange(selectedOption.value);
+                }
             }}
         >
-            {children?.map((child) => {
-                if (child === false) {
-                    return false;
-                }
-                return (
-                    <option
-                        key={child.value ?? UNDEFINED_VALUE}
-                        value={child.value ?? UNDEFINED_VALUE}
-                    >
-                        {child.children}
-                    </option>
-                );
-            })}
+            {children?.map((child) => (
+                <option
+                    key={child.value ?? UNDEFINED_VALUE}
+                    value={child.value ?? UNDEFINED_VALUE}
+                    disabled={child.disabled}
+                >
+                    {child.children}
+                </option>
+            ))}
         </select>
     );
 }
