@@ -1,4 +1,5 @@
-import type { Pairing, Player, Round } from "../../common/models";
+import type { PartialPairing, Player, Round } from "../../common/models";
+import { assignTableNumbers } from "./assignTableNumbers";
 
 export function generateFirstRound(
     players: Player[],
@@ -6,13 +7,12 @@ export function generateFirstRound(
     random: () => number = Math.random,
 ): Round {
     const shuffledPlayers = shuffle(players, random);
-    const pairings: Pairing[] = [];
+    const pairings: PartialPairing[] = [];
 
     for (let i = 0; i + 1 < shuffledPlayers.length; i += 2) {
         pairings.push({
             type: "MATCH",
             id: pairings.length + 1,
-            table: startingTableNumber + pairings.length,
             player1Id: shuffledPlayers[i].id,
             player2Id: shuffledPlayers[i + 1].id,
         });
@@ -31,7 +31,7 @@ export function generateFirstRound(
         createdAt: Date.now(),
         status: "IN_PROGRESS",
         participationChanges: [],
-        pairings,
+        pairings: assignTableNumbers(pairings, players, startingTableNumber),
     };
 }
 

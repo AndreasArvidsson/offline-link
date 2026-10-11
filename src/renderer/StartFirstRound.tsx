@@ -51,7 +51,7 @@ export function StartFirstRound({
 
             <Button
                 variant="success"
-                className="mt-3"
+                className="mt-3 float-end"
                 disabled={disabled || effectiveRoundCount === 0}
                 onClick={() => startFirstRound(effectiveRoundCount)}
             >

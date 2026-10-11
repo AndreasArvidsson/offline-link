@@ -24,6 +24,7 @@ export interface Player {
     // Incrementing ID for the player.
     id: number;
     name: string;
+    lockedTableNumber?: number;
 }
 
 export type ParticipationType = "DROPPED" | "DISQUALIFIED";
@@ -59,6 +60,10 @@ export interface PairingBye {
 }
 
 export type Pairing = PairingMatch | PairingBye;
+
+export type PartialPairing =
+    | Omit<PairingMatch, "table" | "result">
+    | PairingBye;
 
 // A reported 0-0-0 result represents a double match loss. Unplayed intentional
 // draws are recorded as 0-0-3; an unreported match has no result.

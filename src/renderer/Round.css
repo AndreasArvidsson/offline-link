@@ -1,0 +1,29 @@
+.round-pairings .selected-match:focus {
+    outline: -webkit-focus-ring-color auto 1px;
+}
+
+.round-pairings td {
+    vertical-align: middle;
+}
+
+.round-pairings th.match-results,
+.round-pairings td.match-results {
+    width: 10rem;
+    text-align: center;
+}
+
+.round-pairings th.player-1,
+.round-pairings td.player-1 {
+    text-align: right;
+}
+
+.round-pairings th.table-number,
+.round-pairings td.table-number {
+    width: 5rem;
+    text-align: center;
+}
+
+.round-pairings .player-record {
+    font-size: 0.8rem;
+    color: #666;
+}

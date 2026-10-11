@@ -133,6 +133,7 @@ export function TournamentView({
                     <Players
                         disabled={disabled || tournament.roundCount > 0}
                         roundCount={tournament.roundCount}
+                        startingTableNumber={tournament.startingTableNumber}
                         players={tournament.players}
                         startFirstRound={startFirstRound}
                         onChange={(players) => updateTournament({ players })}
@@ -259,6 +260,7 @@ export function TournamentView({
                         >
                             Players
                         </NavItem>
+
                         {tournament.rounds.map((round) => (
                             <NavItem
                                 key={round.number}
@@ -276,6 +278,7 @@ export function TournamentView({
                                 Round {round.number}
                             </NavItem>
                         ))}
+
                         {tournament.roundCount > 0 && (
                             <NavItem
                                 active={tab.type === "standings"}

@@ -844,4 +844,50 @@ describe("generateNextRound", () => {
             [5, 6, null],
         );
     });
+
+    it("reserves the lower locked table before ordinary matches without changing pairings or the tournament", () => {
+        const drawResult = { player1Wins: 1, player2Wins: 1, draws: 0 };
+        const event = tournament(4, [
+            round([match(1, 2, drawResult, 10), match(3, 4, drawResult, 20)]),
+        ]);
+        event.roundCount = 2;
+        event.startingTableNumber = 5;
+        event.players[1].lockedTableNumber = 5;
+        event.players[3].lockedTableNumber = 12;
+        const before = structuredClone(event);
+
+        const next = generateNextRound(event);
+
+        assert.deepEqual(next.pairings, [
+            { type: "MATCH", id: 21, table: 6, player1Id: 1, player2Id: 3 },
+            { type: "MATCH", id: 22, table: 5, player1Id: 2, player2Id: 4 },
+        ]);
+        assert.deepEqual(event, before);
+    });
+
+    it("reserves locked bye tables while releasing tables for excluded players", () => {
+        for (const type of ["DROPPED", "DISQUALIFIED"] as const) {
+            const drawResult = { player1Wins: 1, player2Wins: 1, draws: 0 };
+            const event = tournament(6, [
+                round([
+                    match(1, 2, drawResult, 10),
+                    match(3, 4, drawResult, 11),
+                    match(5, 6, drawResult, 12),
+                ]),
+            ]);
+            event.roundCount = 2;
+            event.startingTableNumber = 5;
+            event.players[4].lockedTableNumber = 5;
+            event.players[5].lockedTableNumber = 6;
+            event.rounds[0].participationChanges = [{ playerId: 6, type }];
+
+            const next = generateNextRound(event);
+
+            assert.deepEqual(next.pairings, [
+                { type: "MATCH", id: 13, table: 6, player1Id: 1, player2Id: 3 },
+                { type: "MATCH", id: 14, table: 7, player1Id: 2, player2Id: 4 },
+                { type: "BYE", id: 15, playerId: 5 },
+            ]);
+        }
+    });
 });

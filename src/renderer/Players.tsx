@@ -1,13 +1,15 @@
 import type { JSX } from "preact";
-import { PlusCircle, Trash3 } from "react-bootstrap-icons";
+import { PlusCircle } from "react-bootstrap-icons";
 import type { Player } from "../common/models";
 import { Button } from "./components/Button";
-import { InputText } from "./components/InputText";
+import { PlayerComponent } from "./PlayerComponent";
 import { StartFirstRound } from "./StartFirstRound";
+import { normalizeName } from "./utils/normalizeName";
 
 interface Props {
     disabled: boolean;
     roundCount: number;
+    startingTableNumber: number;
     players: Player[];
     onChange: (players: Player[]) => void;
     startFirstRound: (roundCount: number) => void;
@@ -16,11 +18,18 @@ interface Props {
 export function Players({
     disabled,
     roundCount,
+    startingTableNumber,
     players,
     onChange,
     startFirstRound,
 }: Props): JSX.Element {
-    const playersMap = getPlayersMap(players);
+    const normalizedPlayerNames = getNormalizedPlayerNames(players);
+
+    const lockedTables = new Set(
+        players
+            .map((player) => player.lockedTableNumber)
+            .filter((tableNumber) => tableNumber != null),
+    );
 
     return (
         <>
@@ -28,8 +37,10 @@ export function Players({
                 <PlayerComponent
                     key={player.id}
                     disabled={disabled}
+                    startingTableNumber={startingTableNumber}
                     player={player}
-                    playersMap={playersMap}
+                    normalizedPlayerNames={normalizedPlayerNames}
+                    lockedTables={lockedTables}
                     onChange={(updatedPlayer) => {
                         onChange(
                             players.map((p) =>
@@ -68,9 +79,13 @@ export function Players({
                         // Minimum 2 players required
                         players.length < 2 ||
                         // Player names must be unique
-                        playersMap.size !== players.length ||
+                        normalizedPlayerNames.size !== players.length ||
                         // Player names cannot be empty
-                        playersMap.has("")
+                        normalizedPlayerNames.has("") ||
+                        // All locked tables must have valid numbers
+                        Array.from(lockedTables).some(
+                            (tableNumber) => tableNumber < startingTableNumber,
+                        )
                     }
                     playerCount={players.length}
                     roundCount={roundCount}
@@ -81,78 +96,18 @@ export function Players({
     );
 }
 
-interface PlayerProps {
-    disabled: boolean;
-    player: Player;
-    playersMap: Map<string, Set<number>>;
-    onChange: (player: Player) => void;
-    onRemove: (player: Player) => void;
-}
-
-function PlayerComponent({
-    player,
-    playersMap,
-    onChange,
-    onRemove,
-    disabled,
-}: PlayerProps) {
-    return (
-        <div key={player.id} className="input-group mb-2">
-            <InputText
-                placeholder="Player name"
-                value={player.name}
-                disabled={disabled}
-                invalid={!disabled && !validatePlayer(player, playersMap)}
-                onChange={(name) => {
-                    onChange({ ...player, name });
-                }}
-            />
-
-            <Button
-                variant="danger"
-                disabled={disabled}
-                title="Remove player"
-                onClick={() => {
-                    onRemove(player);
-                }}
-            >
-                <Trash3 />
-            </Button>
-        </div>
-    );
-}
-
-function validatePlayer(
-    player: Player,
-    playersMap: Map<string, Set<number>>,
-): boolean {
-    const normalized = normalizeName(player.name);
-    if (normalized === "") {
-        return false;
-    }
-    const existing = playersMap.get(normalized);
-    if (existing != null && (existing.size > 1 || !existing.has(player.id))) {
-        return false;
-    }
-    return true;
-}
-
-function getPlayersMap(players: Player[]): Map<string, Set<number>> {
-    const playersMap = new Map<string, Set<number>>();
+function getNormalizedPlayerNames(players: Player[]): Map<string, Set<number>> {
+    const res = new Map<string, Set<number>>();
 
     for (const player of players) {
         const normalized = normalizeName(player.name);
-        const existing = playersMap.get(normalized);
+        const existing = res.get(normalized);
         if (existing != null) {
             existing.add(player.id);
         } else {
-            playersMap.set(normalized, new Set([player.id]));
+            res.set(normalized, new Set([player.id]));
         }
     }
 
-    return playersMap;
-}
-
-function normalizeName(name: string): string {
-    return name.trim().toLocaleLowerCase();
+    return res;
 }

@@ -19,6 +19,7 @@ import { classNames } from "./utils/classNames";
 import { formatMatchResult } from "./utils/formatMatchResult";
 import { formatPlayerRecord } from "./utils/formatRecord";
 import { Lookup } from "./utils/Lookup";
+import "./Round.css";
 
 interface Props {
     disabled: boolean;

@@ -1,0 +1,10 @@
+.btn.locked-table-number {
+    justify-content: center;
+}
+
+.input-group > .form-control.locked-table-number,
+.input-group > .btn.locked-table-number {
+    flex: 0 0 auto;
+    width: 4rem;
+    text-align: center;
+}

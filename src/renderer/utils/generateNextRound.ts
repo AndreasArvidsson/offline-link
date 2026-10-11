@@ -1,4 +1,5 @@
-import type { Pairing, Round, Tournament } from "../../common/models";
+import type { PartialPairing, Round, Tournament } from "../../common/models";
+import { assignTableNumbers } from "./assignTableNumbers";
 import { calculateStandings } from "./calculateStandings";
 import { findRoundPairing } from "./findRoundPairing";
 import { getHavePlayed } from "./getHavePlayed";
@@ -30,11 +31,10 @@ export function generateNextRound(tournament: Tournament): Round {
 
     let nextPairingId = getHighestPairingId(tournament.rounds) + 1;
 
-    const pairings: Pairing[] = matches.map(
-        ([player1Id, player2Id], index) => ({
+    const pairings: PartialPairing[] = matches.map(
+        ([player1Id, player2Id]) => ({
             type: "MATCH",
             id: nextPairingId++,
-            table: tournament.startingTableNumber + index,
             player1Id,
             player2Id,
         }),
@@ -55,6 +55,10 @@ export function generateNextRound(tournament: Tournament): Round {
         createdAt: Date.now(),
         status: "IN_PROGRESS",
         participationChanges: [],
-        pairings,
+        pairings: assignTableNumbers(
+            pairings,
+            tournament.players,
+            tournament.startingTableNumber,
+        ),
     };
 }
