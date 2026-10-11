@@ -4,6 +4,7 @@ import { Button } from "./components/Button";
 import type { SelectOption } from "./components/Select";
 import { Select } from "./components/Select";
 import { calculateNumberOfRounds } from "./utils/calculateNumberOfRounds";
+import { getRoundsText } from "./utils/getRoundsText";
 
 interface Props {
     disabled: boolean;
@@ -66,15 +67,11 @@ function getOptions(
     return [
         {
             value: undefined,
-            children: `${getOptionLabel(roundCountRecommended)} (recommended)`,
+            children: `${getRoundsText(roundCountRecommended)} (recommended)`,
         },
         ...Array.from({ length: 10 }).map((_, index) => ({
             value: index + 1,
-            children: getOptionLabel(index + 1),
+            children: getRoundsText(index + 1),
         })),
     ];
-}
-
-function getOptionLabel(roundCount: number): string {
-    return roundCount === 1 ? "1 round" : `${roundCount} rounds`;
 }

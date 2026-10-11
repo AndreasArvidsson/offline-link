@@ -11,7 +11,11 @@ export interface Tournament {
     rounds: Round[];
 }
 
-export const tournamentStatuses = ["IN_PROGRESS", "COMPLETED"] as const;
+export const tournamentStatuses = [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "COMPLETED",
+] as const;
 
 export type TournamentStatus = (typeof tournamentStatuses)[number];
 

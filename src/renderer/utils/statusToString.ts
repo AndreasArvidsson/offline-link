@@ -2,6 +2,8 @@ import type { TournamentStatus } from "../../common/models";
 
 export function statusToString(status: TournamentStatus): string {
     switch (status) {
+        case "NOT_STARTED":
+            return "Not started";
         case "IN_PROGRESS":
             return "In progress";
         case "COMPLETED":

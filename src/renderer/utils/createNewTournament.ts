@@ -9,7 +9,7 @@ export function createNewTournament(): Tournament {
         createdAt: timestamp,
         updatedAt: timestamp,
         roundCount: 0,
-        status: "IN_PROGRESS",
+        status: "NOT_STARTED",
         players: [],
         rounds: [],
     };

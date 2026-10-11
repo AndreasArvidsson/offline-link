@@ -15,6 +15,7 @@ import { createNewTournament } from "./utils/createNewTournament.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
 import { generateFirstRound } from "./utils/generateFirstRound.ts";
 import { generateNextRound } from "./utils/generateNextRound.ts";
+import { getRoundsText } from "./utils/getRoundsText.ts";
 import { isEmptyString } from "./utils/isEmptyString.ts";
 import { statusToString } from "./utils/statusToString.ts";
 
@@ -82,6 +83,7 @@ export function TournamentView({
     const startFirstRound = (roundCount: number) => {
         const firstRound = generateFirstRound(tournament.players);
         updateTournament({
+            status: "IN_PROGRESS",
             roundCount,
             players: tournament.players.map((player) => ({
                 ...player,
@@ -216,18 +218,18 @@ export function TournamentView({
                     </tbody>
                 </table>
 
-                <p>
+                <div className="d-flex gap-2 mb-3">
                     {tournament.roundCount > 0 && (
                         <span>
                             {tournament.players.length} players{" · "}
-                            {tournament.roundCount} rounds
+                            {getRoundsText(tournament.roundCount)}
                         </span>
                     )}
 
-                    <span className="float-end">
+                    <span className="ms-auto">
                         {statusToString(tournament.status)}
                     </span>
-                </p>
+                </div>
 
                 {!invalidName && (
                     <ul className="nav nav-tabs mb-3">
