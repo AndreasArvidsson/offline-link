@@ -1,0 +1,8 @@
+.popover {
+    max-width: unset !important;
+}
+
+.popover .popover-arrow {
+    width: unset !important;
+    height: unset !important;
+}

@@ -18,6 +18,7 @@ import type { ComponentChildren, HTMLAttributes, JSX, VNode } from "preact";
 import { cloneElement } from "preact";
 import { useRef, useState } from "preact/hooks";
 import { classNames } from "../utils/classNames";
+import "./Popover.css";
 
 interface Parameters {
     overlay: ComponentChildren | ((hide: () => void) => ComponentChildren);

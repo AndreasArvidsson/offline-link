@@ -33,7 +33,7 @@ export function ConfirmModal({
                 <ModalBody className="mb-2">{children}</ModalBody>
             )}
 
-            <ModalFooter>
+            <ModalFooter className="justify-content-center">
                 <Button
                     variant={resolveBtnVariant}
                     small
@@ -50,7 +50,7 @@ export function ConfirmModal({
                 <Button
                     variant="secondary"
                     small
-                    className="ms-2"
+                    className="ms-3"
                     onClick={reject}
                 >
                     <XSquare /> Cancel

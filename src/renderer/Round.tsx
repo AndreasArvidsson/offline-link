@@ -29,6 +29,7 @@ interface Props {
     playerRecords: Lookup<number, PlayerRecord>;
     isLastRound: boolean;
     startNextRound: () => void;
+    endTournamentEarly: () => void;
     onChange: (rounds: Round) => void;
 }
 
@@ -44,6 +45,7 @@ export function RoundComponent({
     playerRecords,
     isLastRound,
     startNextRound,
+    endTournamentEarly,
     onChange,
 }: Props): JSX.Element {
     const [selectedMatch, setSelectedMatch] = useState<SelectedMatch>();
@@ -57,6 +59,7 @@ export function RoundComponent({
 
     const matches = round.pairings.filter((p) => p.type === "MATCH");
     const countResult = matches.filter((p) => p.result != null).length;
+    const actionsDisabled = disabled || countResult !== matches.length;
     const byes = round.pairings.filter((p) => p.type === "BYE");
     const playersById = new Lookup<number, Player>(
         "Players",
@@ -290,20 +293,28 @@ export function RoundComponent({
                     />
                 </div>
 
-                <div className="col">
+                <div className="col d-flex flex-column align-items-end gap-2">
                     <Confirm onClick={startNextRound}>
-                        <Button
-                            variant="success"
-                            className="float-end"
-                            disabled={
-                                disabled || countResult !== matches.length
-                            }
-                        >
+                        <Button variant="success" disabled={actionsDisabled}>
                             {isLastRound
                                 ? "Complete tournament"
                                 : `Start round ${round.number + 1}`}
                         </Button>
                     </Confirm>
+
+                    {!isLastRound && (
+                        <Confirm
+                            header={`End tournament after round ${round.number}?`}
+                            onClick={endTournamentEarly}
+                        >
+                            <Button
+                                variant="outline-danger"
+                                disabled={actionsDisabled}
+                            >
+                                End tournament early
+                            </Button>
+                        </Confirm>
+                    )}
                 </div>
             </div>
         </>

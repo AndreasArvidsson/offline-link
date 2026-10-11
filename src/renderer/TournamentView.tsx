@@ -99,7 +99,7 @@ export function TournamentView({
         setTab({ type: "round", round: firstRound.number });
     };
 
-    const startNextRound = () => {
+    const completeRound = (endTournamentEarly: boolean) => {
         const rounds = tournament.rounds.map((round, index): Round =>
             index === tournament.rounds.length - 1
                 ? { ...round, status: "COMPLETED" }
@@ -112,7 +112,15 @@ export function TournamentView({
                       type: "STOPPED",
                       duration: tournament.timer.duration,
                   };
-        if (rounds.length < tournament.roundCount) {
+        if (endTournamentEarly || rounds.length >= tournament.roundCount) {
+            updateTournament({
+                rounds,
+                status: "COMPLETED",
+                roundCount: tournament.rounds.length,
+                timer,
+            });
+            setTab({ type: "standings" });
+        } else {
             try {
                 const nextRound = generateNextRound({ ...tournament, rounds });
                 rounds.push(nextRound);
@@ -121,13 +129,6 @@ export function TournamentView({
             } catch (error) {
                 addError(error);
             }
-        } else {
-            updateTournament({
-                rounds,
-                status: "COMPLETED",
-                timer,
-            });
-            setTab({ type: "standings" });
         }
     };
 
@@ -170,7 +171,8 @@ export function TournamentView({
                         players={tournament.players}
                         playerRecords={playerRecords}
                         isLastRound={round.number === tournament.roundCount}
-                        startNextRound={startNextRound}
+                        startNextRound={() => completeRound(false)}
+                        endTournamentEarly={() => completeRound(true)}
                         onChange={(updatedRound) => {
                             updateTournament({
                                 rounds: tournament.rounds.map((r) =>
