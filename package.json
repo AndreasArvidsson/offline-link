@@ -29,6 +29,7 @@
         "node": ">=v24.14.0"
     },
     "dependencies": {
+        "@floating-ui/react": "^0.27.20",
         "bootstrap": "^5.3.8",
         "preact": "^11.0.1",
         "react-bootstrap-icons": "^1.11.6"
@@ -42,7 +43,7 @@
         "electron": "^44.7.0",
         "mocha": "^12.0.3",
         "oxfmt": "^0.72.0",
-        "oxlint-tsgolint": "^7.0.2003",
+        "oxlint-tsgolint": "^7.0.2004",
         "oxlint": "^1.87.0",
         "stylelint-config-standard": "^40.0.0",
         "stylelint": "^17.12.0",

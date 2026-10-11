@@ -12,14 +12,15 @@ import type {
     Round,
 } from "../common/models";
 import { Button } from "./components/Button";
+import { Confirm } from "./components/Confirm";
 import { IconParticipationChange } from "./components/IconParticipationChange";
 import { MatchScoreBoxes } from "./components/MatchScoreBoxes";
 import { PlayersDropped } from "./PlayersDropped";
 import { classNames } from "./utils/classNames";
 import { formatMatchResult } from "./utils/formatMatchResult";
 import { formatPlayerRecord } from "./utils/formatRecord";
-import { Lookup } from "./utils/Lookup";
 import "./Round.css";
+import { Lookup } from "./utils/Lookup";
 
 interface Props {
     disabled: boolean;
@@ -27,7 +28,7 @@ interface Props {
     players: Player[];
     playerRecords: Lookup<number, PlayerRecord>;
     isLastRound: boolean;
-    startNextRound: (() => void) | undefined;
+    startNextRound: () => void;
     onChange: (rounds: Round) => void;
 }
 
@@ -290,16 +291,19 @@ export function RoundComponent({
                 </div>
 
                 <div className="col">
-                    <Button
-                        variant="success"
-                        className="float-end"
-                        disabled={disabled || countResult !== matches.length}
-                        onClick={startNextRound}
-                    >
-                        {isLastRound
-                            ? "Complete tournament"
-                            : `Start round ${round.number + 1}`}
-                    </Button>
+                    <Confirm onClick={startNextRound}>
+                        <Button
+                            variant="success"
+                            className="float-end"
+                            disabled={
+                                disabled || countResult !== matches.length
+                            }
+                        >
+                            {isLastRound
+                                ? "Complete tournament"
+                                : `Start round ${round.number + 1}`}
+                        </Button>
+                    </Confirm>
                 </div>
             </div>
         </>

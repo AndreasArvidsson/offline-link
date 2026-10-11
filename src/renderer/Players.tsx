@@ -2,7 +2,7 @@ import type { JSX } from "preact";
 import { PlusCircle } from "react-bootstrap-icons";
 import type { Player } from "../common/models";
 import { Button } from "./components/Button";
-import { PlayerComponent } from "./PlayerComponent";
+import { PlayerComponent } from "./Player";
 import { StartFirstRound } from "./StartFirstRound";
 import { normalizeName } from "./utils/normalizeName";
 

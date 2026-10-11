@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { Button } from "./components/Button";
+import { Confirm } from "./components/Confirm";
 import type { SelectOption } from "./components/Select";
 import { Select } from "./components/Select";
 import { calculateNumberOfRounds } from "./utils/calculateNumberOfRounds";
@@ -49,14 +50,15 @@ export function StartFirstRound({
                 {getOptions(roundCountRecommended)}
             </Select>
 
-            <Button
-                variant="success"
-                className="mt-3 float-end"
-                disabled={disabled || effectiveRoundCount === 0}
-                onClick={() => startFirstRound(effectiveRoundCount)}
-            >
-                Start round 1
-            </Button>
+            <Confirm onClick={() => startFirstRound(effectiveRoundCount)}>
+                <Button
+                    variant="success"
+                    className="mt-3 float-end"
+                    disabled={disabled || effectiveRoundCount === 0}
+                >
+                    Start round 1
+                </Button>
+            </Confirm>
         </span>
     );
 }
