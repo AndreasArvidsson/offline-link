@@ -4,7 +4,7 @@ import { NA } from "../common/constants";
 import type { PlayerStanding, Tournament } from "../common/models";
 import { IconParticipationChange } from "./components/IconParticipationChange";
 import { calculateStandings } from "./utils/calculateStandings";
-import { formatRecord } from "./utils/formatRecord";
+import { formatPlayerRecord } from "./utils/formatRecord";
 
 interface Props {
     tournament: Tournament;
@@ -38,7 +38,7 @@ export function Standings({ tournament }: Props): JSX.Element {
                         >
                             Points
                         </th>
-                        <th title="Win-Loss-Draw record">Record</th>
+                        <th title="Win-Loss-Draw">W-L-D</th>
                         <th
                             title={title(
                                 "Opponents’ Match Win Percentage: Average of your opponents' match win percentages.",
@@ -76,13 +76,7 @@ export function Standings({ tournament }: Props): JSX.Element {
                                 />
                             </td>
                             <td>{standing.matchPoints}</td>
-                            <td>
-                                {formatRecord(
-                                    standing.matchWins,
-                                    standing.matchLosses,
-                                    standing.matchDraws,
-                                )}
-                            </td>
+                            <td>{formatPlayerRecord(standing)}</td>
                             <td>
                                 {standing.opponentsMatchWinPercentage === 0
                                     ? NA

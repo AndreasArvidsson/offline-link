@@ -20,6 +20,7 @@ interface TemporaryRecord {
 
 export function calculateRecords(
     tournament: Tournament,
+    roundCountLimit?: number,
 ): Lookup<number, PlayerRecord> {
     const temporary = new Lookup<number, TemporaryRecord>(
         "Temporary records",
@@ -37,7 +38,12 @@ export function calculateRecords(
         ]),
     );
 
-    for (const round of tournament.rounds) {
+    const rounds =
+        roundCountLimit != null
+            ? tournament.rounds.slice(0, roundCountLimit)
+            : tournament.rounds;
+
+    for (const round of rounds) {
         if (round.status !== "COMPLETED") {
             continue;
         }

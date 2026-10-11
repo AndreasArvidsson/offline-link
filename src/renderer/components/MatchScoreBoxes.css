@@ -1,0 +1,9 @@
+.match-score-boxes > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2.25rem;
+    border: 1px solid var(--bs-secondary-color);
+    border-radius: 0.2rem;
+}

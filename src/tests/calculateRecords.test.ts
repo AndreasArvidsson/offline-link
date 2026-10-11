@@ -112,6 +112,99 @@ describe("calculateRecords", () => {
         assert.deepEqual(event, before);
     });
 
+    it("returns empty records when the round count limit is zero", () => {
+        const event = tournament([
+            round([
+                match(1, 2, { player1Wins: 2, player2Wins: 0, draws: 0 }),
+                { type: "BYE", id: nextPairingId++, playerId: 3 },
+            ]),
+        ]);
+        const records = calculateRecords(event, 0);
+
+        for (const player of event.players) {
+            assert.deepEqual(records.get(player.id), {
+                opponentIds: [],
+                matchWins: 0,
+                matchLosses: 0,
+                matchDraws: 0,
+                matchPoints: 0,
+                matchWinPercentage: 0.33,
+                gameWinPercentage: 0.33,
+            });
+        }
+    });
+
+    it("excludes the displayed completed round and later rounds from historical records", () => {
+        const event = tournament([
+            round([match(1, 2, { player1Wins: 2, player2Wins: 0, draws: 0 })]),
+            round([match(1, 3, { player1Wins: 1, player2Wins: 2, draws: 0 })]),
+            round([match(1, 4, { player1Wins: 1, player2Wins: 1, draws: 1 })]),
+        ]);
+        const before = structuredClone(event);
+
+        assert.deepEqual(calculateRecords(event, 1).get(1), {
+            opponentIds: [2],
+            matchWins: 1,
+            matchLosses: 0,
+            matchDraws: 0,
+            matchPoints: 3,
+            matchWinPercentage: 1,
+            gameWinPercentage: 1,
+        });
+        assert.deepEqual(calculateRecords(event, 2).get(1), {
+            opponentIds: [2, 3],
+            matchWins: 1,
+            matchLosses: 1,
+            matchDraws: 0,
+            matchPoints: 3,
+            matchWinPercentage: 0.5,
+            gameWinPercentage: 9 / 15,
+        });
+        assert.deepEqual(event, before);
+    });
+
+    it("does not include later completed rounds to replace an in-progress round within the limit", () => {
+        const event = tournament([
+            {
+                ...round([
+                    match(1, 2, { player1Wins: 2, player2Wins: 0, draws: 0 }),
+                ]),
+                status: "IN_PROGRESS",
+            },
+            round([match(1, 3, { player1Wins: 2, player2Wins: 0, draws: 0 })]),
+        ]);
+        const records = calculateRecords(event, 1);
+        const emptyRecords = calculateRecords(event, 0);
+
+        for (const player of event.players) {
+            assert.deepEqual(
+                records.get(player.id),
+                emptyRecords.get(player.id),
+            );
+        }
+    });
+
+    it("includes all available rounds when the limit reaches or exceeds the round count", () => {
+        const event = tournament([
+            round([
+                match(1, 2, { player1Wins: 2, player2Wins: 1, draws: 0 }),
+                { type: "BYE", id: nextPairingId++, playerId: 3 },
+            ]),
+            round([match(1, 3, { player1Wins: 1, player2Wins: 1, draws: 1 })]),
+        ]);
+        const allRecords = calculateRecords(event);
+
+        for (const limit of [event.rounds.length, event.rounds.length + 1]) {
+            const records = calculateRecords(event, limit);
+            for (const player of event.players) {
+                assert.deepEqual(
+                    records.get(player.id),
+                    allRecords.get(player.id),
+                );
+            }
+        }
+    });
+
     it("rejects lookup of a player outside the tournament", () => {
         const records = calculateRecords(tournament([]));
         assert.throws(

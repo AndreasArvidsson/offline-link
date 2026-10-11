@@ -10,6 +10,7 @@ import { Players } from "./Players.tsx";
 import { RoundComponent } from "./Round.tsx";
 import { Standings } from "./Standings.tsx";
 import type { View } from "./types.ts";
+import { calculateRecords } from "./utils/calculateRecords.ts";
 import { createNewTournament } from "./utils/createNewTournament.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
 import { generateFirstRound } from "./utils/generateFirstRound.ts";
@@ -143,11 +144,16 @@ export function TournamentView({
                 if (round == null) {
                     throw new Error("Round not found");
                 }
+                const playerRecords = calculateRecords(
+                    tournament,
+                    round.number - 1,
+                );
                 return (
                     <RoundComponent
                         disabled={disabled || round.status === "COMPLETED"}
                         round={round}
                         players={tournament.players}
+                        playerRecords={playerRecords}
                         isLastRound={round.number === tournament.roundCount}
                         startNextRound={startNextRound}
                         onChange={(updatedRound) => {

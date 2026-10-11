@@ -8,19 +8,23 @@ import type {
     ParticipationType,
     Player,
     PlayerParticipationChange,
+    PlayerRecord,
     Round,
 } from "../common/models";
 import { Button } from "./components/Button";
 import { IconParticipationChange } from "./components/IconParticipationChange";
+import { MatchScoreBoxes } from "./components/MatchScoreBoxes";
 import { PlayersDropped } from "./PlayersDropped";
+import { classNames } from "./utils/classNames";
 import { formatMatchResult } from "./utils/formatMatchResult";
-import { formatRecord } from "./utils/formatRecord";
+import { formatPlayerRecord } from "./utils/formatRecord";
 import { Lookup } from "./utils/Lookup";
 
 interface Props {
     disabled: boolean;
     round: Round;
     players: Player[];
+    playerRecords: Lookup<number, PlayerRecord>;
     isLastRound: boolean;
     startNextRound: (() => void) | undefined;
     onChange: (rounds: Round) => void;
@@ -35,6 +39,7 @@ export function RoundComponent({
     disabled,
     round,
     players,
+    playerRecords,
     isLastRound,
     startNextRound,
     onChange,
@@ -168,8 +173,22 @@ export function RoundComponent({
         }
     };
 
+    const renderPlayer = (playerId: number) => {
+        const record = playerRecords.get(playerId);
+        return (
+            <span>
+                {playerName(playerId)}
+                <div className="player-record">
+                    {formatPlayerRecord(record)}
+                </div>
+            </span>
+        );
+    };
+
     const renderMatch = (match: PairingMatch) => {
-        if (selectedMatch?.id === match.id && !disabled) {
+        const isSelectedMatch = selectedMatch?.id === match.id;
+
+        if (isSelectedMatch && !disabled) {
             return (
                 <tr
                     ref={selectedMatchRef}
@@ -181,10 +200,14 @@ export function RoundComponent({
                         e.preventDefault();
                     }}
                 >
-                    <td>{match.table}</td>
-                    <td>{playerName(match.player1Id)}</td>
-                    <td>{getSelectedResultString(selectedMatch)}</td>
-                    <td>{playerName(match.player2Id)}</td>
+                    <td className="table-number">{match.table}</td>
+                    <td className="player-1">
+                        {renderPlayer(match.player1Id)}
+                    </td>
+                    <td className="match-results">
+                        {getSelectedResult(selectedMatch)}
+                    </td>
+                    <td>{renderPlayer(match.player2Id)}</td>
                 </tr>
             );
         }
@@ -192,23 +215,24 @@ export function RoundComponent({
         return (
             <tr
                 key={match.id}
-                className={
-                    selectedMatch?.id === match.id ? "table-primary" : undefined
-                }
+                className={isSelectedMatch ? "table-primary" : undefined}
             >
-                <td>{match.table}</td>
-                <td>{playerName(match.player1Id)}</td>
+                <td className="table-number">{match.table}</td>
+                <td className="player-1">{renderPlayer(match.player1Id)}</td>
                 <td
-                    className={disabled ? undefined : "pointer"}
+                    className={classNames(
+                        "match-results",
+                        !disabled && "pointer",
+                    )}
                     onClick={
                         disabled
                             ? undefined
                             : () => setSelectedMatch(matchToSelected(match))
                     }
                 >
-                    {getResultString(match.result)}
+                    {getResult(match.result)}
                 </td>
-                <td>{playerName(match.player2Id)}</td>
+                <td>{renderPlayer(match.player2Id)}</td>
             </tr>
         );
     };
@@ -216,9 +240,9 @@ export function RoundComponent({
     const renderBye = (bye: PairingBye) => {
         return (
             <tr key={bye.id}>
-                <td>{NA}</td>
-                <td>{playerName(bye.playerId)}</td>
-                <td>BYE</td>
+                <td className="table-number">{NA}</td>
+                <td className="player-1">{renderPlayer(bye.playerId)}</td>
+                <td className="match-results">BYE</td>
                 <td>{NA}</td>
             </tr>
         );
@@ -227,19 +251,16 @@ export function RoundComponent({
     return (
         <>
             <p>
-                <span>Round {round.number}</span>
-                <span className="float-end">
-                    {countResult} / {matches.length} reported
-                </span>
+                {countResult} / {matches.length} reported
             </p>
 
-            <table className="table table-striped">
+            <table className="table table-striped round-pairings">
                 <thead>
                     <tr>
-                        <th>Table</th>
-                        <th>Player 1</th>
-                        <th>Result</th>
-                        <th>Player 2</th>
+                        <th className="table-number">Table</th>
+                        <th className="player-1">Player #1</th>
+                        <th className="match-results">Match results</th>
+                        <th>Player #2</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -295,49 +316,32 @@ function getUpdatedParticipationChanges(
     return type == null ? otherChanges : [...otherChanges, { playerId, type }];
 }
 
-function getResultString(result: MatchResult | undefined): string {
-    return result == null
-        ? getResultStringHelper(undefined, undefined, undefined)
-        : formatMatchResult(result);
+function getResult(result: MatchResult | undefined): string | JSX.Element {
+    return result == null ? (
+        <MatchScoreBoxes player1Wins={undefined} player2Wins={undefined} />
+    ) : (
+        formatMatchResult(result)
+    );
 }
 
-function getSelectedResultString(result: SelectedMatch): string {
+function getSelectedResult(result: SelectedMatch): string | JSX.Element {
     const { scores } = result;
     switch (scores.length) {
         case 0:
-            return getResultStringHelper(undefined, undefined, undefined);
         case 1:
-            return getResultStringHelper(
-                result.scores[0],
-                undefined,
-                undefined,
-            );
         case 2:
-            return getResultStringHelper(
-                result.scores[0],
-                result.scores[1],
-                undefined,
+            return (
+                <MatchScoreBoxes
+                    player1Wins={scores[0]}
+                    player2Wins={scores[1]}
+                />
             );
         case 3:
-            return getResultString(selectedToResults(result));
+            return getResult(selectedToResults(result));
         default: {
             throw new Error("Unhandled case");
         }
     }
-}
-
-function getResultStringHelper(
-    player1Wins: number | undefined,
-    player2Wins: number | undefined,
-    draws: number | undefined,
-): string {
-    if (player1Wins != null && player2Wins != null) {
-        return formatRecord(player1Wins, player2Wins, draws ?? 0);
-    }
-    if (player1Wins != null) {
-        return `${player1Wins} - [   ]`.replaceAll(" ", "\u00A0");
-    }
-    return "[   ] - [   ]".replaceAll(" ", "\u00A0");
 }
 
 function selectedToResults(result: SelectedMatch): MatchResult {

@@ -140,6 +140,12 @@ export default defineConfig({
                 caughtErrorsIgnorePattern: "^_",
             },
         ],
+        "import/no-unassigned-import": [
+            "warn",
+            {
+                allow: ["**/*.css"],
+            },
+        ],
         "no-warning-comments": [
             "warn",
             {
@@ -152,16 +158,16 @@ export default defineConfig({
                 extensions: [".tsx"],
             },
         ],
-        "typescript/strict-boolean-expressions": [
-            "warn",
-            {
-                allowNullableBoolean: true,
-            },
-        ],
         "typescript/no-confusing-void-expression": [
             "warn",
             {
                 ignoreArrowShorthand: true,
+            },
+        ],
+        "typescript/strict-boolean-expressions": [
+            "warn",
+            {
+                allowNullableBoolean: true,
             },
         ],
     },
