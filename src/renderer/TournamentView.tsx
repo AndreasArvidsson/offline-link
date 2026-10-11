@@ -1,6 +1,6 @@
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import type { Round, Tournament } from "../common/models.ts";
+import type { Round, Timer, Tournament } from "../common/models.ts";
 import { GoBackButton } from "./components/GoBackButton.tsx";
 import { InputNumber } from "./components/InputNumber.tsx";
 import { InputText } from "./components/InputText.tsx";
@@ -105,12 +105,19 @@ export function TournamentView({
                 ? { ...round, status: "COMPLETED" }
                 : round,
         );
+        const timer: Timer | undefined =
+            tournament.timer == null
+                ? undefined
+                : {
+                      type: "STOPPED",
+                      duration: tournament.timer.duration,
+                  };
         if (rounds.length < tournament.roundCount) {
             try {
                 const nextRound = generateNextRound({ ...tournament, rounds });
                 rounds.push(nextRound);
+                updateTournament({ rounds, timer });
                 setTab({ type: "round", round: nextRound.number });
-                updateTournament({ rounds });
             } catch (error) {
                 addError(error);
             }
@@ -118,6 +125,7 @@ export function TournamentView({
             updateTournament({
                 rounds,
                 status: "COMPLETED",
+                timer,
             });
             setTab({ type: "standings" });
         }
@@ -186,11 +194,13 @@ export function TournamentView({
     return (
         <>
             <header>
-                <TimerComponent
-                    timer={tournament.timer}
-                    rounds={tournament.rounds}
-                    onChange={(timer) => updateTournament({ timer })}
-                />
+                {tournament.status === "IN_PROGRESS" && (
+                    <TimerComponent
+                        timer={tournament.timer}
+                        rounds={tournament.rounds}
+                        onChange={(timer) => updateTournament({ timer })}
+                    />
+                )}
 
                 <GoBackButton navigate={navigate} />
 
