@@ -10,6 +10,7 @@ import { useMessages } from "./Messages.tsx";
 import { Players } from "./Players.tsx";
 import { RoundComponent } from "./Round.tsx";
 import { Standings } from "./Standings.tsx";
+import { TimerComponent } from "./Timer.tsx";
 import type { View } from "./types.ts";
 import { calculateRecords } from "./utils/calculateRecords.ts";
 import { createNewTournament } from "./utils/createNewTournament.ts";
@@ -185,6 +186,12 @@ export function TournamentView({
     return (
         <>
             <header>
+                <TimerComponent
+                    timer={tournament.timer}
+                    rounds={tournament.rounds}
+                    onChange={(timer) => updateTournament({ timer })}
+                />
+
                 <GoBackButton navigate={navigate} />
 
                 <h1>Tournament</h1>

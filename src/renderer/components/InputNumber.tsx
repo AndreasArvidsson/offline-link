@@ -10,6 +10,7 @@ interface Props extends Omit<
     isInteger?: boolean;
     value?: number;
     onChange?: (value: number | undefined) => void;
+    formatValue?: (value: number) => string;
 }
 
 export function InputNumber({
@@ -17,13 +18,22 @@ export function InputNumber({
     value,
     onChange,
     onBlur,
+    formatValue,
     ...rest
 }: Props): JSX.Element {
     const [currentText, setCurrentText] = useState(value?.toString());
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const updateCurrentText = (val: number | undefined) => {
+        if (val != null && formatValue != null) {
+            setCurrentText(formatValue(val));
+        } else {
+            setCurrentText(val?.toString());
+        }
+    };
+
     useEffect(() => {
-        setCurrentText(value?.toString());
+        updateCurrentText(value);
     }, [value]);
 
     const commitValue = (newValue: number | undefined) => {
@@ -42,10 +52,9 @@ export function InputNumber({
             inputRef.current.value = newText;
         }
 
-        setCurrentText(newText);
-
         // If the text is empty, clear the value and notify parent
         if (newText === "") {
+            updateCurrentText(undefined);
             commitValue(undefined);
             return;
         }
@@ -54,7 +63,10 @@ export function InputNumber({
         const newValue = parseInputValue(newText);
 
         if (newValue != null) {
+            updateCurrentText(newValue);
             commitValue(newValue);
+        } else {
+            setCurrentText(newText);
         }
     };
 
@@ -63,12 +75,12 @@ export function InputNumber({
             currentText == null ? undefined : parseInputValue(currentText);
 
         if (parsedValue == null) {
-            setCurrentText(value?.toString());
+            updateCurrentText(value);
             onBlur?.(e);
             return;
         }
 
-        setCurrentText(parsedValue.toString());
+        updateCurrentText(parsedValue);
         commitValue(parsedValue);
         onBlur?.(e);
     };

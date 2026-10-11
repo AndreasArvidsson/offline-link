@@ -22,16 +22,16 @@ export function TournamentList({
                 <div>Your saved tournaments will appear here.</div>
             )}
 
-            {tournaments.map((item) => (
-                <div key={item.id} className="mb-2">
+            {tournaments.map((tournament) => (
+                <div key={tournament.id} className="mb-2">
                     <Button
                         variant="outline-secondary"
                         onClick={() => {
-                            navigate({ type: "tournament", id: item.id });
+                            navigate({ type: "tournament", id: tournament.id });
                         }}
                     >
-                        <strong>{item.name}</strong>
-                        {getText(item, dateFormatter)}
+                        <strong>{tournament.name}</strong>
+                        {getText(tournament, dateFormatter)}
                     </Button>
                 </div>
             ))}

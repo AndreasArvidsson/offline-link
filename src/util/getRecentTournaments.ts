@@ -14,5 +14,6 @@ function toRecentTournament(tournament: Tournament): RecentTournament {
         playerCount: tournament.players.length,
         roundCount: tournament.roundCount,
         status: tournament.status,
+        timer: tournament.timer,
     };
 }

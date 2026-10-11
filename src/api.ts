@@ -1,4 +1,4 @@
-import type { Tournament, TournamentStatus } from "./common/models.ts";
+import type { Timer, Tournament, TournamentStatus } from "./common/models.ts";
 
 export interface RecentTournament {
     id: string;
@@ -7,6 +7,7 @@ export interface RecentTournament {
     playerCount: number;
     roundCount: number;
     status: TournamentStatus;
+    timer: Timer | undefined;
 }
 
 export interface Parameters {

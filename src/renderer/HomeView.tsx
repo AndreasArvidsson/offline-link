@@ -5,6 +5,7 @@ import type { RecentTournament } from "../api.ts";
 import { APP_NAME } from "../common/constants.ts";
 import { Button } from "./components/Button.tsx";
 import { useMessages } from "./Messages.tsx";
+import { Timers } from "./Timers.tsx";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
@@ -52,6 +53,8 @@ export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
                 </Button>
 
                 <hr />
+
+                <Timers tournaments={tournaments} navigate={navigate} />
 
                 <h2>Recent tournaments</h2>
 

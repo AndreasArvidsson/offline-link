@@ -7,10 +7,33 @@ export interface Tournament {
     updatedAt: number;
     startingTableNumber: number;
     roundCount: number;
+    timer?: Timer;
     status: TournamentStatus;
     players: Player[];
     rounds: Round[];
 }
+
+interface StoppedTimer {
+    type: "STOPPED";
+    // Duration in seconds.
+    duration: number;
+}
+
+interface RunningTimer {
+    type: "RUNNING";
+    duration: number;
+    // End timestamp in milliseconds.
+    endsAt: number;
+}
+
+interface PausedTimer {
+    type: "PAUSED";
+    duration: number;
+    // Remaining time in seconds. Only set when the timer is paused.
+    remaining: number;
+}
+
+export type Timer = StoppedTimer | RunningTimer | PausedTimer;
 
 export const tournamentStatuses = [
     "NOT_STARTED",
