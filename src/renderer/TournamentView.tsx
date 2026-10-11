@@ -126,6 +126,7 @@ export function TournamentView({
                 return (
                     <Players
                         disabled={disabled || tournament.roundCount > 0}
+                        roundCount={tournament.roundCount}
                         players={tournament.players}
                         startFirstRound={startFirstRound}
                         onChange={(players) => updateTournament({ players })}

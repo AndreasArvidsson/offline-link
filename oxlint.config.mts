@@ -45,6 +45,7 @@ const disabledRules = [
     "promise/avoid-new",
     "promise/prefer-await-to-callbacks",
     "react-perf/jsx-no-new-function-as-prop",
+    "react/exhaustive-deps",
     "react/forbid-component-props",
     "react/jsx-max-depth",
     "react/jsx-no-literals",

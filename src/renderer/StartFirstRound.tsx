@@ -8,12 +8,14 @@ import { calculateNumberOfRounds } from "./utils/calculateNumberOfRounds";
 interface Props {
     disabled: boolean;
     playerCount: number;
+    roundCount: number;
     startFirstRound: (roundCount: number) => void;
 }
 
 export function StartFirstRound({
     disabled,
     playerCount,
+    roundCount,
     startFirstRound,
 }: Props): JSX.Element {
     const [roundCountRecommended, setRoundCountRecommended] = useState(0);
@@ -23,12 +25,24 @@ export function StartFirstRound({
         setRoundCountRecommended(calculateNumberOfRounds(playerCount));
     }, [playerCount]);
 
-    const roundCount = roundCountOverride ?? roundCountRecommended;
+    useEffect(() => {
+        // Round count has already been set, maybe in a previous session.
+        // If the round count is different from the recommended one and hasn't been overridden yet, set the override.
+        if (roundCount > 0 && roundCountOverride == null) {
+            const recommended = calculateNumberOfRounds(playerCount);
+            if (roundCount !== recommended) {
+                setRoundCountOverride(roundCount);
+            }
+        }
+    }, []);
+
+    const effectiveRoundCount = roundCountOverride ?? roundCountRecommended;
 
     return (
         <span className="float-end">
             <Select
                 value={roundCountOverride}
+                disabled={disabled}
                 onChange={(value) => setRoundCountOverride(value)}
             >
                 {getOptions(roundCountRecommended)}
@@ -37,8 +51,8 @@ export function StartFirstRound({
             <Button
                 variant="success"
                 className="mt-3"
-                disabled={disabled || roundCount === 0}
-                onClick={() => startFirstRound(roundCount)}
+                disabled={disabled || effectiveRoundCount === 0}
+                onClick={() => startFirstRound(effectiveRoundCount)}
             >
                 Start round 1
             </Button>

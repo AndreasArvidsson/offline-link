@@ -7,6 +7,7 @@ import { StartFirstRound } from "./StartFirstRound";
 
 interface Props {
     disabled: boolean;
+    roundCount: number;
     players: Player[];
     onChange: (players: Player[]) => void;
     startFirstRound: (roundCount: number) => void;
@@ -14,6 +15,7 @@ interface Props {
 
 export function Players({
     disabled,
+    roundCount,
     players,
     onChange,
     startFirstRound,
@@ -71,6 +73,7 @@ export function Players({
                         playersMap.has("")
                     }
                     playerCount={players.length}
+                    roundCount={roundCount}
                     startFirstRound={startFirstRound}
                 />
             </div>
