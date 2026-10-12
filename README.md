@@ -54,15 +54,17 @@ First-round pairings and bye selection are random.
 
 ### Following rounds
 
-- Before the final round, pairings favor small match-point differences. Standings order can influence the choice between equally good pairings.
+- Before the final round, pairings favor small match-point gaps across the whole field. First, prefer the pairings with the smallest maximum gap in any single match. If that is tied, prefer the smallest total gap across all matches.
 - Rematches are avoided whenever complete pairings without them are possible. Otherwise, the tournament continues with the fewest rematches possible.
 - With an odd number of active players, prefer bye recipients with the fewest previous byes, then lowest standing, subject to minimizing rematches.
 
 ### Final round
 
-- Pair players in standings order, preferring the highest-ranked available opponent while avoiding rematches and preserving valid pairings for everyone else.
+- Pair players in standings order, start with the highest-ranked player and work down the standings, including tiebreakers. For each player, prefer the highest-ranked available opponent while avoiding rematches and preserving valid pairings for everyone else.
 - If rematches are unavoidable, minimize rematches and apply the bye preference, then pair in standings order. Try fresh opponents first, followed by previous opponents, choosing the highest-ranked opponent who preserves the minimum rematch count. This fallback is OfflineLink’s policy.
 - Bye selection follows the same rules as previous rounds.
+
+Rematch restrictions can make these two approaches produce different pairings even when every player has different match points.
 
 The final-round rank preference follows Wizards’ [EventLink power-pairing description](https://wpn.wizards.com/en/news/eventlink-release-notes-september-28-2021). That description does not specify what to do when rematches are unavoidable.
 
