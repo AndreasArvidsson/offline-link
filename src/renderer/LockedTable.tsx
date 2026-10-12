@@ -65,9 +65,8 @@ export function LockedTable({
                     disabled={disabled}
                     value={lockedTableInput}
                     invalid={!isValid}
-                    min={startingTableNumber}
                     isInteger
-                    onChange={setLockedTableInput}
+                    onChangeOpt={setLockedTableInput}
                     onBlur={() => {
                         if (isValid) {
                             onChange(lockedTableInput);

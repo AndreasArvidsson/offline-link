@@ -156,7 +156,7 @@ export function TimerModal({
                                     min={0}
                                     max={MAX_MINUTES}
                                     formatValue={formatValue}
-                                    onChange={(value) => setMinutes(value ?? 0)}
+                                    onChange={setMinutes}
                                 />
                                 <span aria-hidden="true">:</span>
                                 <InputNumber
@@ -167,7 +167,7 @@ export function TimerModal({
                                     min={0}
                                     max={MAX_SECONDS}
                                     formatValue={formatValue}
-                                    onChange={(value) => setSeconds(value ?? 0)}
+                                    onChange={setSeconds}
                                 />
                             </div>
                             {subtitle != null && (

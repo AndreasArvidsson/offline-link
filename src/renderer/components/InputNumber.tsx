@@ -3,85 +3,125 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { InputTextProps } from "./InputText";
 import { InputText } from "./InputText";
 
-interface Props extends Omit<
+type Props = Omit<
     InputTextProps,
-    "value" | "onChange" | "onChangeOpt"
-> {
+    "value" | "onChange" | "onChangeOpt" | "min" | "max"
+> & {
     isInteger?: boolean;
+    invalid?: boolean;
     value?: number;
-    onChange?: (value: number | undefined) => void;
+    min?: number;
+    max?: number;
     formatValue?: (value: number) => string;
-}
+} & (
+        | {
+              onChange?: (value: number) => void;
+              onChangeOpt?: never;
+          }
+        | {
+              onChange?: never;
+              // onChangeOpt is an alternative to onChange that allows the value to be undefined if the input is empty or only whitespace.
+              onChangeOpt?: (value: number | undefined) => void;
+          }
+    );
 
 export function InputNumber({
     isInteger,
+    invalid = false,
     value,
+    min,
+    max,
     onChange,
+    onChangeOpt,
     onBlur,
     formatValue,
     ...rest
 }: Props): JSX.Element {
-    const [currentText, setCurrentText] = useState(value?.toString());
+    const [currentText, setCurrentText] = useState("");
+    const [isValid, setIsValid] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const updateCurrentText = (val: number | undefined) => {
-        if (val != null && formatValue != null) {
-            setCurrentText(formatValue(val));
-        } else {
-            setCurrentText(val?.toString());
+    const updateCurrentText = (newText: string) => {
+        // Keep the input synchronized even when the state value is unchanged.
+        if (
+            inputRef.current != null &&
+            inputRef.current.value !== newText &&
+            currentText === newText
+        ) {
+            inputRef.current.value = newText;
         }
+
+        setCurrentText(newText);
+    };
+
+    const updateCurrentTextValue = (val: number | undefined) => {
+        updateCurrentText(
+            val != null && formatValue != null
+                ? formatValue(val)
+                : (val?.toString() ?? ""),
+        );
     };
 
     useEffect(() => {
-        updateCurrentText(value);
+        updateCurrentTextValue(value);
     }, [value]);
 
     const commitValue = (newValue: number | undefined) => {
         if (newValue !== value) {
-            onChange?.(newValue);
+            if (newValue != null) {
+                onChange?.(newValue);
+            }
+            onChangeOpt?.(newValue);
         }
     };
 
-    const onInputChange = (inputValue: string) => {
-        const newText = sanitizeInputValue(isInteger, inputValue);
+    const myOnChange = (inputValue: string) => {
+        const sanitizedInput = sanitizeInputValue(isInteger, inputValue);
 
-        // The component will not re render if the text is the same, but we
-        // still want to update the input field if the sanitized text differs
-        // from the current text.
-        if (inputValue !== newText && inputRef.current != null) {
-            inputRef.current.value = newText;
-        }
-
-        // If the text is empty, clear the value and notify parent
-        if (newText === "") {
-            updateCurrentText(undefined);
-            commitValue(undefined);
+        // If the text is empty, clear the value and notify the parent
+        if (sanitizedInput === "") {
+            updateCurrentText("");
+            // Empty input is only valid if onChangeOpt is provided
+            const valid = onChangeOpt != null;
+            setIsValid(valid);
+            if (valid) {
+                commitValue(undefined);
+            }
             return;
         }
 
-        // If the text is not a parseable number, just update the text without changing the value
-        const newValue = parseInputValue(newText);
+        const inputNumber = parseNumber(sanitizedInput);
 
-        if (newValue != null) {
-            updateCurrentText(newValue);
-            commitValue(newValue);
-        } else {
-            setCurrentText(newText);
+        if (inputNumber != null) {
+            updateCurrentTextValue(inputNumber);
+            const valid =
+                (min == null || inputNumber >= min) &&
+                (max == null || inputNumber <= max);
+            setIsValid(valid);
+            if (valid) {
+                commitValue(inputNumber);
+            }
+        }
+        // If the text is not a parseable number, just update the text without notifying the parent
+        else {
+            updateCurrentText(sanitizedInput);
+            setIsValid(false);
         }
     };
 
     const myOnBlur = (e: TargetedFocusEvent<HTMLInputElement>) => {
-        const parsedValue =
-            currentText == null ? undefined : parseInputValue(currentText);
+        const inputNumber = parseNumber(currentText);
 
-        if (parsedValue == null) {
-            updateCurrentText(value);
+        if (inputNumber == null || !isValid) {
+            updateCurrentTextValue(value);
+            setIsValid(true);
             onBlur?.(e);
             return;
         }
 
-        updateCurrentText(parsedValue);
-        commitValue(parsedValue);
+        updateCurrentTextValue(inputNumber);
+        setIsValid(true);
+        commitValue(inputNumber);
         onBlur?.(e);
     };
 
@@ -91,7 +131,8 @@ export function InputNumber({
             {...rest}
             ref={inputRef}
             value={currentText}
-            onChange={onInputChange}
+            invalid={invalid || !isValid}
+            onChange={myOnChange}
             onBlur={myOnBlur}
         />
     );
@@ -118,10 +159,10 @@ function sanitizeInputValue(
     return result;
 }
 
-function parseInputValue(inputValue: string): number | undefined {
+function parseNumber(inputValue: string): number | undefined {
     if (inputValue === "") {
         return undefined;
     }
     const num = Number(inputValue);
-    return Number.isNaN(num) ? undefined : num;
+    return Number.isFinite(num) ? num : undefined;
 }

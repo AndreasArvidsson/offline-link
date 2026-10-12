@@ -232,9 +232,9 @@ export function TournamentView({
                                     value={tournament.name}
                                     disabled={disabled}
                                     invalid={invalidName}
-                                    onChange={(name) => {
-                                        updateTournament({ name });
-                                    }}
+                                    onChange={(name) =>
+                                        updateTournament({ name })
+                                    }
                                 />
                             </td>
                         </tr>
@@ -245,11 +245,12 @@ export function TournamentView({
                                     value={tournament.startingTableNumber}
                                     disabled={disabled}
                                     isInteger
-                                    onChange={(value) => {
+                                    min={0}
+                                    onChange={(startingTableNumber) =>
                                         updateTournament({
-                                            startingTableNumber: value ?? 1,
-                                        });
-                                    }}
+                                            startingTableNumber,
+                                        })
+                                    }
                                 />
                             </td>
                         </tr>

@@ -1,22 +1,36 @@
-import type { InputHTMLAttributes, JSX, Ref, TargetedEvent } from "preact";
+import type {
+    FunctionalComponent,
+    InputHTMLAttributes,
+    JSX,
+    Ref,
+    TargetedEvent,
+} from "preact";
 import { forwardRef } from "preact/compat";
 import { classNames } from "../utils/classNames";
 
-export interface InputTextProps extends Omit<
+export type InputTextProps = Omit<
     InputHTMLAttributes,
     "type" | "onChange" | "role"
-> {
+> & {
     value?: string;
     className?: string;
     small?: boolean;
     invalid?: boolean;
     warning?: boolean;
-    onChange?: (value: string) => void;
-    // onChangeOpt is an alternative to onChange that allows the value to be undefined if the input is empty or only whitespace.
-    onChangeOpt?: (value: string | undefined) => void;
-}
+} & (
+        | {
+              onChange?: (value: string) => void;
+              onChangeOpt?: never;
+          }
+        | {
+              onChange?: never;
+              // onChangeOpt is an alternative to onChange that allows the value to be undefined if the input is empty or only whitespace.
+              onChangeOpt?: (value: string | undefined) => void;
+          }
+    );
 
-export const InputText = forwardRef(
+// Preserve the props union, which forwardRef's return type would flatten.
+export const InputText: FunctionalComponent<InputTextProps> = forwardRef(
     // oxlint-disable-next-line react/function-component-definition
     (
         {
@@ -58,12 +72,6 @@ function getOnChange(
     onChangeOpt?: (value: string | undefined) => void,
 ) {
     if (onChange != null) {
-        if (onChangeOpt != null) {
-            throw new Error(
-                `InputText: Cannot specify both onChange and onChangeOpt`,
-            );
-        }
-
         return (e: TargetedEvent<HTMLInputElement>) => {
             onChange(e.currentTarget.value);
         };
