@@ -78,9 +78,10 @@ export function InputNumber({
     const myOnChange = (inputValue: string) => {
         const sanitizedInput = sanitizeInputValue(isInteger, inputValue);
 
+        updateCurrentText(sanitizedInput);
+
         // If the text is empty, clear the value and notify the parent
         if (sanitizedInput === "") {
-            updateCurrentText("");
             // Empty input is only valid if onChangeOpt is provided
             const valid = onChangeOpt != null;
             setIsValid(valid);
@@ -92,8 +93,10 @@ export function InputNumber({
 
         const inputNumber = parseNumber(sanitizedInput);
 
-        if (inputNumber != null) {
-            updateCurrentTextValue(inputNumber);
+        // If the text is not a parseable number, just update the text without notifying the parent
+        if (inputNumber == null) {
+            setIsValid(false);
+        } else {
             const valid =
                 (min == null || inputNumber >= min) &&
                 (max == null || inputNumber <= max);
@@ -101,11 +104,6 @@ export function InputNumber({
             if (valid) {
                 commitValue(inputNumber);
             }
-        }
-        // If the text is not a parseable number, just update the text without notifying the parent
-        else {
-            updateCurrentText(sanitizedInput);
-            setIsValid(false);
         }
     };
 
