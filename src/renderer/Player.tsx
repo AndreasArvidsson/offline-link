@@ -1,4 +1,5 @@
 import type { JSX } from "preact";
+import { useLayoutEffect, useRef } from "preact/hooks";
 import { Trash3 } from "react-bootstrap-icons";
 import type { Player } from "../common/models";
 import { Button } from "./components/Button";
@@ -6,29 +7,43 @@ import { Confirm } from "./components/Confirm";
 import { InputText } from "./components/InputText";
 import { LockedTable } from "./LockedTable";
 import { normalizeName } from "./utils/normalizeName";
+import { parseKeyboardEvent } from "./utils/parseKeyboardEvent";
 
 interface Props {
     disabled: boolean;
     startingTableNumber: number;
     player: Player;
+    autoFocus: boolean;
     normalizedPlayerNames: Map<string, Set<number>>;
     lockedTables: Set<number>;
     onChange: (player: Player) => void;
     onRemove: (player: Player) => void;
+    onEnter: () => void;
 }
 
 export function PlayerComponent({
+    onEnter,
     disabled,
     startingTableNumber,
     player,
+    autoFocus,
     normalizedPlayerNames,
     lockedTables,
     onChange,
     onRemove,
 }: Props): JSX.Element {
+    const ref = useRef<HTMLInputElement>(null);
+
+    useLayoutEffect(() => {
+        if (autoFocus) {
+            ref.current?.focus();
+        }
+    }, [autoFocus]);
+
     return (
         <div key={player.id} className="input-group mb-2">
             <InputText
+                ref={ref}
                 placeholder="Player name"
                 value={player.name}
                 disabled={disabled}
@@ -38,6 +53,12 @@ export function PlayerComponent({
                 onChange={(name) => {
                     onChange({ ...player, name });
                 }}
+                onKeyDown={(e) => {
+                    if (!e.repeat && parseKeyboardEvent(e) === "Enter") {
+                        e.preventDefault();
+                        onEnter();
+                    }
+                }}
             />
 
             <LockedTable
@@ -45,9 +66,10 @@ export function PlayerComponent({
                 startingTableNumber={startingTableNumber}
                 lockedTableNumber={player.lockedTableNumber}
                 lockedTables={lockedTables}
-                onChange={(lockedTableNumber) => {
-                    onChange({ ...player, lockedTableNumber });
-                }}
+                onEnter={onEnter}
+                onChange={(lockedTableNumber) =>
+                    onChange({ ...player, lockedTableNumber })
+                }
             />
 
             <span className="input-group-text" />

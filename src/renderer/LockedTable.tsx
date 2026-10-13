@@ -4,6 +4,7 @@ import { Lock } from "react-bootstrap-icons";
 import { Button } from "./components/Button";
 import { InputNumber } from "./components/InputNumber";
 import "./LockedTable.css";
+import { parseKeyboardEvent } from "./utils/parseKeyboardEvent";
 
 interface Props {
     disabled: boolean;
@@ -11,6 +12,7 @@ interface Props {
     lockedTableNumber?: number;
     lockedTables: Set<number>;
     onChange: (lockedTableNumber?: number) => void;
+    onEnter: () => void;
 }
 
 export function LockedTable({
@@ -19,6 +21,7 @@ export function LockedTable({
     lockedTableNumber,
     lockedTables,
     onChange,
+    onEnter,
 }: Props): JSX.Element {
     const [lockedTableInput, setLockedTableInput] = useState<number>();
     const isTableLocked = lockedTableNumber != null;
@@ -60,7 +63,10 @@ export function LockedTable({
             {isTableLocked && (
                 <InputNumber
                     placeholder="Table #"
-                    title={validationError ?? "Locked table number"}
+                    title={
+                        validationError ??
+                        "Locked table number. Clear to unlock."
+                    }
                     className="locked-table-number"
                     disabled={disabled}
                     value={lockedTableInput}
@@ -75,9 +81,9 @@ export function LockedTable({
                         }
                     }}
                     onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.currentTarget.blur();
+                        if (!e.repeat && parseKeyboardEvent(e) === "Enter") {
                             e.preventDefault();
+                            onEnter();
                         }
                     }}
                 />

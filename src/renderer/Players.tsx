@@ -1,4 +1,5 @@
 import type { JSX } from "preact";
+import { useState } from "preact/hooks";
 import { PlusCircle } from "react-bootstrap-icons";
 import type { Player } from "../common/models";
 import { Button } from "./components/Button";
@@ -23,6 +24,7 @@ export function Players({
     onChange,
     startFirstRound,
 }: Props): JSX.Element {
+    const [focusPlayerId, setFocusPlayerId] = useState<number>();
     const normalizedPlayerNames = getNormalizedPlayerNames(players);
 
     const lockedTables = new Set(
@@ -30,6 +32,19 @@ export function Players({
             .map((player) => player.lockedTableNumber)
             .filter((tableNumber) => tableNumber != null),
     );
+
+    const addNewPlayer = () => {
+        const highest = players.reduce(
+            (max, player) => Math.max(max, player.id),
+            0,
+        );
+        const newPlayer: Player = {
+            id: highest + 1,
+            name: "",
+        };
+        setFocusPlayerId(newPlayer.id);
+        onChange([...players, newPlayer]);
+    };
 
     return (
         <>
@@ -39,8 +54,10 @@ export function Players({
                     disabled={disabled}
                     startingTableNumber={startingTableNumber}
                     player={player}
+                    autoFocus={player.id === focusPlayerId}
                     normalizedPlayerNames={normalizedPlayerNames}
                     lockedTables={lockedTables}
+                    onEnter={addNewPlayer}
                     onChange={(updatedPlayer) => {
                         onChange(
                             players.map((p) =>
@@ -58,17 +75,7 @@ export function Players({
                 <Button
                     variant="primary"
                     disabled={disabled}
-                    onClick={() => {
-                        const highest = players.reduce(
-                            (max, player) => Math.max(max, player.id),
-                            0,
-                        );
-                        const newPlayer: Player = {
-                            id: highest + 1,
-                            name: "",
-                        };
-                        onChange([...players, newPlayer]);
-                    }}
+                    onClick={addNewPlayer}
                 >
                     <PlusCircle /> Add Player
                 </Button>

@@ -2,6 +2,7 @@ import type { JSX } from "preact";
 import { useCallback, useEffect } from "preact/hooks";
 import { ArrowLeft } from "react-bootstrap-icons";
 import type { View } from "../types.ts";
+import { parseKeyboardEvent } from "../utils/parseKeyboardEvent.ts";
 import { Button } from "./Button.tsx";
 
 export function GoBackButton({
@@ -20,15 +21,9 @@ export function GoBackButton({
     }, [navigate]);
 
     useEffect(() => {
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (
-                event.key === "ArrowLeft" &&
-                event.altKey &&
-                !event.ctrlKey &&
-                !event.metaKey &&
-                !event.shiftKey
-            ) {
-                event.preventDefault();
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (!e.repeat && parseKeyboardEvent(e) === "Alt+ArrowLeft") {
+                e.preventDefault();
                 goBack();
             }
         };

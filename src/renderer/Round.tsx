@@ -21,6 +21,7 @@ import { classNames } from "./utils/classNames";
 import { formatMatchResult } from "./utils/formatMatchResult";
 import { formatPlayerRecord } from "./utils/formatRecord";
 import { Lookup } from "./utils/Lookup";
+import { parseKeyboardEvent } from "./utils/parseKeyboardEvent";
 
 interface Props {
     disabled: boolean;
@@ -130,7 +131,8 @@ export function RoundComponent({
         }
     };
 
-    const matchOnKey = (selected: SelectedMatch, key: string) => {
+    const matchOnKey = (selected: SelectedMatch, e: KeyboardEvent) => {
+        const key = parseKeyboardEvent(e);
         switch (key) {
             case "0":
             case "1":
@@ -142,6 +144,9 @@ export function RoundComponent({
             case "7":
             case "8":
             case "9": {
+                if (e.repeat) {
+                    break;
+                }
                 const score = Number(key);
                 const scores =
                     selected.scores.length === 3
@@ -155,12 +160,15 @@ export function RoundComponent({
                 break;
             }
             case "Enter": {
-                if (selected.scores.length > 1) {
+                if (!e.repeat && selected.scores.length > 1) {
                     applySelected(selected);
                 }
                 break;
             }
             case "Delete": {
+                if (e.repeat) {
+                    break;
+                }
                 selectMatch(undefined);
                 updateRound({
                     pairings: round.pairings.map((p) =>
@@ -207,8 +215,8 @@ export function RoundComponent({
                     className="selected-match pointer"
                     tabIndex={0}
                     onKeyDown={(e) => {
-                        matchOnKey(selectedMatch, e.key);
                         e.preventDefault();
+                        matchOnKey(selectedMatch, e);
                     }}
                     onBlur={() => {
                         const selected = activeSelectionRef.current;
