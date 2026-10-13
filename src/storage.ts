@@ -8,30 +8,18 @@ import { showErrorNotification } from "./util/notifications.ts";
 
 const directoryPath = path.join(app.getPath("documents"), APP_NAME);
 
-interface Storage {
-    tournaments: Tournament[];
-    usedIds: Set<string>;
-}
-
-let _storage: Storage = {
-    tournaments: [],
-    usedIds: new Set(),
-};
+let tournaments: Tournament[] = [];
 
 let writeQueue: Promise<void> = Promise.resolve();
 
 export const storage = {
     async init(): Promise<void> {
         await mkdir(directoryPath, { recursive: true });
-        const tournaments = await readItemsFromDisk();
-        _storage = {
-            tournaments,
-            usedIds: new Set(tournaments.map((t) => t.id)),
-        };
+        tournaments = await readItemsFromDisk();
     },
 
     getTournaments(): Tournament[] {
-        return _storage.tournaments;
+        return tournaments;
     },
 
     async saveTournament(tournament: Tournament): Promise<void> {
@@ -44,24 +32,12 @@ export const storage = {
             await previousSave;
             await writeItemToDisk(tournament);
 
-            if (_storage.usedIds.has(tournament.id)) {
-                // Tournament is already at the start of the list, just update it.
-                if (_storage.tournaments[0].id === tournament.id) {
-                    Object.assign(_storage.tournaments[0], tournament);
-                }
-                // Tournament already exists, but it's not at the start of the list.
-                else {
-                    const index = _storage.tournaments.findIndex(
-                        (t) => t.id === tournament.id,
-                    );
-                    _storage.tournaments.splice(index, 1);
-                    _storage.tournaments.unshift(tournament);
-                }
-            }
-            // Tournament does not exist yet, add it to the start of the list.
-            else {
-                _storage.usedIds.add(tournament.id);
-                _storage.tournaments.unshift(tournament);
+            const index = tournaments.findIndex((t) => t.id === tournament.id);
+
+            if (index === -1) {
+                tournaments.push(tournament);
+            } else {
+                tournaments[index] = tournament;
             }
         } finally {
             resolve();
@@ -84,9 +60,6 @@ async function readItemsFromDisk(): Promise<Tournament[]> {
             items.push(item);
         }
     }
-
-    // Sort tournaments by update date in descending order
-    items.sort((a, b) => b.updatedAt - a.updatedAt);
 
     return items;
 }

@@ -9,6 +9,7 @@ import { Timers } from "./Timers.tsx";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
+import { getRecentTournaments } from "./utils/getRecentTournaments.ts";
 
 const RECENT_LIMIT = 10;
 
@@ -22,21 +23,7 @@ export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
     const { addError } = useMessages();
 
     useEffect(() => {
-        window.api
-            .getRecentTournaments()
-            .then((list) =>
-                setTournaments(
-                    list.toSorted(
-                        (a, b) =>
-                            // Prioritize tournaments that are in progress
-                            Number(b.status === "IN_PROGRESS") -
-                                Number(a.status === "IN_PROGRESS") ||
-                            // Then sort by most recently updated
-                            b.updatedAt - a.updatedAt,
-                    ),
-                ),
-            )
-            .catch(addError);
+        getRecentTournaments().then(setTournaments).catch(addError);
     }, [addError]);
 
     return (

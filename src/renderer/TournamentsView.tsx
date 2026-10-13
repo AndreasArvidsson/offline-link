@@ -8,6 +8,7 @@ import { useMessages } from "./Messages.tsx";
 import { TournamentList } from "./TournamentList.tsx";
 import type { View } from "./types.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
+import { getRecentTournaments } from "./utils/getRecentTournaments.ts";
 
 interface Props {
     dateFormatter: DateFormatter;
@@ -22,7 +23,7 @@ export function TournamentsView({
     const { addError } = useMessages();
 
     useEffect(() => {
-        window.api.getRecentTournaments().then(setTournaments).catch(addError);
+        getRecentTournaments().then(setTournaments).catch(addError);
     }, [addError]);
 
     if (tournaments == null) {
