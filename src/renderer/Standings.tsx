@@ -32,7 +32,7 @@ export function Standings({ tournament }: Props): JSX.Element {
                         <th>Player</th>
                         <th
                             title={title(
-                                "Match Points: 3 points for a win, 1 point for a draw, 0 points for a loss.",
+                                "Match points: 3 points for a win, 1 point for a draw, 0 points for a loss.",
                                 "Higher is better; this is the primary criteria for ranking.",
                             )}
                         >

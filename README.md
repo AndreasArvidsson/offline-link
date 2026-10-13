@@ -12,13 +12,112 @@ An unofficial, offline desktop tournament notebook for Magic: The Gathering orga
 3. Run the OfflineLink executable (e.g. `OfflineLink.exe`).
 4. If asked whether you want to run this unrecognized application, choose Run/Continue.
 
+## User guide
+
+### Home screen
+
+- `New tournament` button - Open the tournament view with a new empty tournament.
+- `All tournaments` button - Open the tournament's view showing a list of all tournaments.
+- `Active timers` section - Show active (running and paused) timers, if any.
+- `Recent tournaments` section. Show the top 10 tournaments from the tournament's list.
+
+![home.png](./images/home.png)
+
+### Tournaments
+
+- Shows all tournaments saved in `Documents/OfflineLink`.
+- Tournaments are saved automatically as JSON files.
+- In-progress tournaments appear first, with the most recently updated first.
+- Each entry shows the title, last updated timestamp, player count, round count and status.
+- Click on a tournament to open it.
+
+![Tournaments](./images/tournaments.png)
+
+### Create new tournament
+
+- `Created` - Timestamp when the tournament was created.
+- `Updated` - Timestamp when the tournament was last updated.
+- `Pairing method` - Which method is used to pair players. Only `Swiss` is currently available.
+- `Match length` - How many games is a match. Only `Best of 3` is currently available.
+- `Tournament title` - The name of the tournament.
+- `Starting table #` - The number of the starting/first table. Can be used to run multiple tournaments in parallel.
+
+![New_tournament](./images/new_tournament.png)
+
+### Add players
+
+- Add name of participating players.
+- Press enter when inserting a player name to jump to a new player.
+- Requires at least 2 players.
+- Recommended number of rounds is calculated on the player count.
+- Manual override of number of rounds is available.
+
+### Table locking
+
+- Players can be locked to a table. That player will always be paired at the same table. A match between two table locked players will use the lower table number.
+- Press padlock icon to lock the player to a table.
+- Delete table number and press enter or click outside to remove table lock.
+
+![Add players](./images/players.png)
+
+### First round
+
+- Players have been paired and assigned a table.
+- With an odd number of players, one player receives a bye and an automatic win.
+- Click on row to select a match, use number keys to insert match score.
+- Score order is Player #1 wins, Player #2 wins, then draws. For example, `120` records a 1-2-0 result.
+- Either insert two numbers and hit enter or insert three numbers to advance to next match.
+- All matches must be reported before starting the next round.
+- Use `Complete tournament` after the final round, or `End tournament early` to finish sooner.
+
+![First round](./images/round.png)
+
+### Player participation
+
+![Player participation](./images/round_player_participation.png)
+
+- Player participation is the way to report changes in player participation.
+- Players can be reported as `Dropped` or `Disqualified`.
+- Dropped players will be marked with a black "- person" icon.
+- Disqualified players will be marked with a red "x person" icon.
+- Neither will be paired in following rounds.
+- Dropped players keep their rank in standings. Disqualified players have no rank.
+
+### Standings
+
+- Standings are calculated from completed rounds.
+- `Rank` - The player's place in the tournament.
+- `Points` - Match points. 3 for a win, 1 for a draw, 0 for a loss.
+- `W-L-D` - Match wins, losses and draws.
+- `OMW%` - Opponents' match win percentage.
+- `GW%` - The player's game win percentage.
+- `OGW%` - Opponents' game win percentage.
+- Players are ranked by points, then [tiebreaks](#tiebreaks).
+
+![Standings](./images/standings.png)
+
+### Timer
+
+- Click on the timer to open its controls. Default duration is 50 minutes.
+- When stopped, change minutes and seconds directly or use the `+` and `-` buttons.
+- Play button - Start or resume the timer.
+- Pause button - Pause the timer.
+- Green checkmark button - Save the duration without starting the timer.
+- Red stop button - Stop and reset the timer.
+- `x` button - Close the controls without saving duration changes.
+- Running timers are green and count down. Overtime timers are yellow and count up.
+- Starting the next round stops and resets the timer.
+
+![Timer](./images/timer.png)
+![Running timer](./images/timer_running.png)
+
+## Developer tools
+
+Press `F12` to open or hide the developer tools.
+
 ## Rule definitions
 
 OfflineLink is based on the [Magic Tournament Rules (MTR) - Feb 27, 2026](https://media.wizards.com/ContentResources/WPN/MTG_MTR_2026_Feb27_EN.pdf).
-
-## Best of 3
-
-OfflineLink uses best of 3 (BO3) rounds.
 
 ## Swiss pairing algorithm
 
@@ -81,7 +180,3 @@ Players are ranked using the following criteria, in order:
 4. Opponents’ game-win percentage
 
 Disqualified players appear below all other players and receive no rank, regardless of their match points or tiebreakers.
-
-## Developer tools
-
-Press `F12` to open or hide the developer tools.

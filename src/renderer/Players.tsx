@@ -77,7 +77,7 @@ export function Players({
                     disabled={disabled}
                     onClick={addNewPlayer}
                 >
-                    <PlusCircle /> Add Player
+                    <PlusCircle /> Add player
                 </Button>
 
                 <StartFirstRound
