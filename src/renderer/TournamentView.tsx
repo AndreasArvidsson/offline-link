@@ -244,7 +244,7 @@ export function TournamentView({
                             </td>
                         </tr>
                         <tr>
-                            <td title="Tournament title">Title</td>
+                            <td>Tournament title</td>
                             <td colSpan={3}>
                                 <InputText
                                     placeholder="Tournament title"

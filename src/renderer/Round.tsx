@@ -20,6 +20,7 @@ import "./Round.css";
 import { classNames } from "./utils/classNames";
 import { formatMatchResult } from "./utils/formatMatchResult";
 import { formatPlayerRecord } from "./utils/formatRecord";
+import { inputHasFocus } from "./utils/inputHasFocus";
 import { Lookup } from "./utils/Lookup";
 import { parseKeyboardEvent } from "./utils/parseKeyboardEvent";
 
@@ -52,11 +53,25 @@ export function RoundComponent({
     const [selectedMatch, setSelectedMatch] = useState<SelectedMatch>();
     const activeSelectionRef = useRef<SelectedMatch | undefined>(undefined);
     const selectedMatchRef = useRef<HTMLTableRowElement>(null);
+    const matches = round.pairings.filter((p) => p.type === "MATCH");
 
     const selectMatch = (selected: SelectedMatch | undefined) => {
         activeSelectionRef.current = selected;
         setSelectedMatch(selected);
     };
+
+    // Initialize when opening a round, without resetting selection during editing.
+    useLayoutEffect(() => {
+        const firstUnreported =
+            disabled || inputHasFocus()
+                ? undefined
+                : matches.find((match) => match.result == null);
+        selectMatch(
+            firstUnreported == null
+                ? undefined
+                : matchToSelected(firstUnreported),
+        );
+    }, [round.number, disabled]);
 
     useLayoutEffect(() => {
         if (!disabled) {
@@ -64,7 +79,6 @@ export function RoundComponent({
         }
     }, [selectedMatch?.id, disabled]);
 
-    const matches = round.pairings.filter((p) => p.type === "MATCH");
     const countResult = matches.filter((p) => p.result != null).length;
     const actionsDisabled = disabled || countResult !== matches.length;
     const byes = round.pairings.filter((p) => p.type === "BYE");
@@ -256,21 +270,19 @@ export function RoundComponent({
         return (
             <tr
                 key={match.id}
-                className={isSelectedMatch ? "table-primary" : undefined}
+                className={classNames(
+                    isSelectedMatch && "table-primary",
+                    !disabled && "pointer",
+                )}
+                onClick={
+                    disabled
+                        ? undefined
+                        : () => selectMatch(matchToSelected(match))
+                }
             >
                 <td className="table-number">{match.table}</td>
                 <td className="player-1">{renderPlayer(match.player1Id)}</td>
-                <td
-                    className={classNames(
-                        "match-results",
-                        !disabled && "pointer",
-                    )}
-                    onClick={
-                        disabled
-                            ? undefined
-                            : () => selectMatch(matchToSelected(match))
-                    }
-                >
+                <td className={classNames("match-results")}>
                     {getResult(match.result)}
                 </td>
                 <td>{renderPlayer(match.player2Id)}</td>

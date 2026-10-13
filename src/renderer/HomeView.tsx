@@ -40,7 +40,7 @@ export function HomeView({ dateFormatter, navigate }: Props): JSX.Element {
                         navigate({ type: "tournamentNew" });
                     }}
                 >
-                    <PlusCircle /> New Tournament
+                    <PlusCircle /> New tournament
                 </Button>
 
                 <Button
