@@ -4,6 +4,7 @@ import { Button } from "./components/Button.tsx";
 import type { View } from "./types.ts";
 import type { DateFormatter } from "./utils/DateFormatter.ts";
 import { statusToString } from "./utils/statusToString.ts";
+import "./TournamentList.css";
 
 interface Props {
     tournaments: RecentTournament[];
@@ -26,28 +27,31 @@ export function TournamentList({
                 <div key={tournament.id} className="mb-2">
                     <Button
                         variant="outline-secondary"
+                        className="tournament-list-item"
                         onClick={() => {
                             navigate({ type: "tournament", id: tournament.id });
                         }}
                     >
                         <strong>{tournament.name}</strong>
-                        {getText(tournament, dateFormatter)}
+                        {" · "}
+                        {dateFormatter.format(tournament.updatedAt)}
+                        {" · "}
+                        {tournament.playerCount} players
+                        {" · "}
+                        {tournament.roundCount} rounds
+                        {" · "}
+                        <span
+                            className={
+                                tournament.status === "IN_PROGRESS"
+                                    ? "tournament-in-progress"
+                                    : undefined
+                            }
+                        >
+                            {statusToString(tournament.status)}
+                        </span>
                     </Button>
                 </div>
             ))}
         </section>
     );
-}
-
-function getText(
-    tournament: RecentTournament,
-    dateFormatter: DateFormatter,
-): string {
-    return [
-        "",
-        dateFormatter.format(tournament.updatedAt),
-        `${tournament.playerCount} players`,
-        `${tournament.roundCount} rounds`,
-        statusToString(tournament.status),
-    ].join(" · ");
 }

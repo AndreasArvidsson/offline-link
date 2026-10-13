@@ -1,0 +1,8 @@
+.tournament-list-item .tournament-in-progress {
+    font-weight: bold;
+}
+
+.tournament-list-item:not(:hover, :focus-visible, :active, .active, .show)
+    .tournament-in-progress {
+    color: var(--bs-success);
+}

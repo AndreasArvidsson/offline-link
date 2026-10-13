@@ -71,7 +71,7 @@ export function Timers({ tournaments, navigate }: Props): JSX.Element | null {
 
     return (
         <>
-            <h2>Active Timers</h2>
+            <h2>Active timers</h2>
 
             {withTimers.map((tournament) => {
                 const remainingTime = remaining[tournament.id] ?? 0;
