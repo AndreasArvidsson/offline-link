@@ -2,9 +2,11 @@ export interface Tournament {
     version: 1;
     // ISO timestamp. Also used as the filename.
     id: string;
-    name: string;
+    title: string;
     createdAt: number;
     updatedAt: number;
+    pairingMethod: PairingMethod;
+    gameWinsPerMatch: GameWinsPerMatch;
     startingTableNumber: number;
     roundCount: number;
     timer?: Timer;
@@ -12,6 +14,9 @@ export interface Tournament {
     players: Player[];
     rounds: Round[];
 }
+
+export type PairingMethod = "SWISS";
+export type GameWinsPerMatch = "BO3";
 
 interface StoppedTimer {
     type: "STOPPED";

@@ -14,9 +14,11 @@ function tournament(playerCount: number, rounds: Round[] = []): Tournament {
     return {
         version: 1,
         id: "test",
-        name: "Test",
+        title: "Test",
         createdAt: 0,
         updatedAt: 0,
+        pairingMethod: "SWISS",
+        gameWinsPerMatch: "BO3",
         startingTableNumber: 1,
         roundCount: 5,
         status: "IN_PROGRESS",

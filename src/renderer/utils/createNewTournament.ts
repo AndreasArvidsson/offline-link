@@ -5,9 +5,11 @@ export function createNewTournament(): Tournament {
     return {
         version: 1,
         id: createTournamentId(timestamp),
-        name: "",
+        title: "",
         createdAt: timestamp,
         updatedAt: timestamp,
+        pairingMethod: "SWISS",
+        gameWinsPerMatch: "BO3",
         startingTableNumber: 1,
         roundCount: 0,
         status: "NOT_STARTED",

@@ -9,7 +9,7 @@ export function getRecentTournaments(): RecentTournament[] {
 function toRecentTournament(tournament: Tournament): RecentTournament {
     return {
         id: tournament.id,
-        name: tournament.name,
+        name: tournament.title,
         updatedAt: tournament.updatedAt,
         playerCount: tournament.players.length,
         roundCount: tournament.roundCount,

@@ -19,7 +19,12 @@ import { generateFirstRound } from "./utils/generateFirstRound.ts";
 import { generateNextRound } from "./utils/generateNextRound.ts";
 import { getRoundsText } from "./utils/getRoundsText.ts";
 import { isEmptyString } from "./utils/isEmptyString.ts";
-import { statusToString } from "./utils/statusToString.ts";
+import {
+    gameWinsPerMatchToString,
+    pairingMethodToDescription,
+    pairingMethodToTitle,
+    statusToString,
+} from "./utils/statusToString.ts";
 
 interface Props {
     id: string | null;
@@ -80,7 +85,7 @@ export function TournamentView({
     };
 
     const disabled = tournament.status === "COMPLETED";
-    const invalidName = !disabled && isEmptyString(tournament.name);
+    const invalidTitle = !disabled && isEmptyString(tournament.title);
 
     const startFirstRound = (roundCount: number) => {
         const firstRound = generateFirstRound(
@@ -133,7 +138,7 @@ export function TournamentView({
     };
 
     const renderTab = () => {
-        if (invalidName) {
+        if (invalidTitle) {
             return null;
         }
 
@@ -217,23 +222,37 @@ export function TournamentView({
                             <td>
                                 {dateFormatter.format(tournament.createdAt)}
                             </td>
-                        </tr>
-                        <tr>
                             <td>Updated</td>
                             <td>
                                 {dateFormatter.format(tournament.updatedAt)}
                             </td>
                         </tr>
                         <tr>
-                            <td>Name</td>
+                            <td>Pairing method</td>
+                            <td
+                                title={pairingMethodToDescription(
+                                    tournament.pairingMethod,
+                                )}
+                            >
+                                {pairingMethodToTitle(tournament.pairingMethod)}
+                            </td>
+                            <td title="Game wins per match">Match length</td>
                             <td>
+                                {gameWinsPerMatchToString(
+                                    tournament.gameWinsPerMatch,
+                                )}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td title="Tournament title">Title</td>
+                            <td colSpan={3}>
                                 <InputText
-                                    placeholder="Tournament name"
-                                    value={tournament.name}
+                                    placeholder="Tournament title"
+                                    value={tournament.title}
                                     disabled={disabled}
-                                    invalid={invalidName}
-                                    onChange={(name) =>
-                                        updateTournament({ name })
+                                    invalid={invalidTitle}
+                                    onChange={(title) =>
+                                        updateTournament({ title })
                                     }
                                 />
                             </td>
@@ -253,6 +272,7 @@ export function TournamentView({
                                     }
                                 />
                             </td>
+                            <td colSpan={2} />
                         </tr>
                     </tbody>
                 </table>
@@ -270,7 +290,7 @@ export function TournamentView({
                     </span>
                 </div>
 
-                {!invalidName && (
+                {!invalidTitle && (
                     <ul className="nav nav-tabs mb-3">
                         <NavItem
                             active={tab.type === "players"}
