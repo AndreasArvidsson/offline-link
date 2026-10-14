@@ -19,6 +19,7 @@ export function createWindow(): BrowserWindow {
 
         webPreferences: {
             preload: path.resolve(__dirname, "preload.js"),
+            spellcheck: false,
         },
     });
 
