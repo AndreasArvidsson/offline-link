@@ -13,7 +13,7 @@ await packager({
     icon: "images/icon",
     appBundleId: APP_ID,
     ignore: [
-        whitelistToIgnore(["out", "node_modules", "package.json"]),
+        whitelistToIgnore(["out", "node_modules", "package.json", "LICENSE"]),
         ".map$",
     ],
 });
