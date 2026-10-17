@@ -12,11 +12,9 @@ For more details read the [installation and uninstallation instructions](./INSTA
 
 ## Privacy policy
 
-Read the [privacy policy](./POLICIES.md#privacy).
+OfflineLink stores tournament data, including player names and match results, in JSON files in `Documents/OfflineLink` on your computer. It does not upload this data or include analytics, telemetry, or automatic crash reporting. The released application loads its interface and assets locally and does not require an internet connection.
 
-## Code signing policy
-
-Read the [code signing policy](./POLICIES.md#code-signing-policy).
+If your Documents folder is managed by a cloud synchronization service, that service may synchronize these files according to your settings and its privacy policy.
 
 ## User guide
 
