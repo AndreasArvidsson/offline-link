@@ -15,6 +15,8 @@ await packager({
     // Use ad-hoc code signing for macOS
     osxSign: {
         identity: "-",
+        identityValidation: false,
+        continueOnError: false,
     },
     ignore: [
         // Include whitelisted files and directories only
