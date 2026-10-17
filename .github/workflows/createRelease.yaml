@@ -85,8 +85,8 @@ jobs:
 
       - name: Verify code signing (macOS)
         run: |
-          codesign --verify --deep --strict --verbose=2 "dist/OfflineLink-darwin-arm64/OfflineLink.app"
-          codesign -d --verbose=4 "dist/OfflineLink-darwin-arm64/OfflineLink.app"
+          codesign --verify --deep --strict "dist/OfflineLink-darwin-arm64/OfflineLink.app"
+          codesign --display "dist/OfflineLink-darwin-arm64/OfflineLink.app"
         if: runner.os == 'macOS'
 
       - name: Compress artifact (Windows)
