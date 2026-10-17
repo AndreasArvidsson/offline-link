@@ -3,7 +3,7 @@
     "displayName": "OfflineLink",
     "productName": "OfflineLink",
     "description": "An unofficial, offline tournament notebook for Magic organizers",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "author": "AndreasArvidsson",
     "license": "MIT",
     "main": "out/main.js",
