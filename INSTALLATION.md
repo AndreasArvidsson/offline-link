@@ -8,6 +8,14 @@
 3. Run the OfflineLink executable (e.g. `OfflineLink.exe`).
 4. If asked whether you want to run this unrecognized application, choose Run/Continue.
 
+## SHA-256 checksums
+
+Use these checksums to verify that your downloaded ZIP file matches the release.
+
+- [Windows](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-Windows.zip.sha256)
+- [Linux](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-Linux.zip.sha256)
+- [macOS](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-macOS.zip.sha256)
+
 ## Uninstallation
 
 1. Close OfflineLink.
