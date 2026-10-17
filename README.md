@@ -10,6 +10,14 @@ An unofficial, offline desktop tournament notebook for Magic: The Gathering orga
 
 For more details read the [installation and uninstallation instructions](./INSTALLATION.md).
 
+## Privacy policy
+
+Read the [privacy policy](./POLICIES.md#privacy).
+
+## Code signing policy
+
+Read the [code signing policy](./POLICIES.md#code-signing-policy).
+
 ## User guide
 
 ### Home screen
