@@ -6,7 +6,27 @@
     - [macOS](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/OfflineLink-macOS.zip)
 2. Extract the ZIP file.
 3. Run the OfflineLink executable (e.g. `OfflineLink.exe`).
-4. If asked whether you want to run this unrecognized application, choose Run/Continue.
+
+## Opening OfflineLink on Windows
+
+Windows may show a **Windows protected your PC** warning because Microsoft Defender SmartScreen does not recognize OfflineLink. If you trust the download:
+
+1. Open the extracted application folder and double-click `OfflineLink.exe`.
+2. If the **Windows protected your PC** warning appears, click **More info**.
+3. Check that the app shown is `OfflineLink.exe`, then click **Run anyway**.
+
+If **Run anyway** is unavailable, your device's security settings may prevent you from allowing the app. On a managed device, contact your administrator. See [Microsoft's SmartScreen documentation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation) for more information.
+
+## Opening OfflineLink on macOS
+
+OfflineLink is not notarized by Apple, so macOS may block it on first launch. If you trust the download, you can allow OfflineLink using [Apple's instructions](https://support.apple.com/en-au/102445):
+
+1. Try opening `OfflineLink.app` once, then dismiss the warning.
+2. Open **System Settings → Privacy & Security**.
+3. Scroll down to the message about OfflineLink and click **Open Anyway**.
+4. Click **Open** when the confirmation appears.
+
+macOS saves an exception for OfflineLink, so you can open it normally afterward. If macOS reports that the app is damaged or will harm your computer, see the separate guidance for those alerts in Apple's article.
 
 ## SHA-256 checksums
 
