@@ -17,6 +17,8 @@ await packager({
         identity: "-",
         identityValidation: false,
         continueOnError: false,
+        // Ad-hoc signatures have no Team ID for library validation.
+        optionsForFile: () => ({ hardenedRuntime: false }),
     },
     ignore: [
         // Include whitelisted files and directories only
