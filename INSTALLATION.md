@@ -32,10 +32,18 @@ macOS saves an exception for OfflineLink, so you can open it normally afterward.
 
 Download [SHA256SUMS](https://github.com/AndreasArvidsson/offline-link/releases/latest/download/SHA256SUMS), which contains the SHA-256 checksums for all platforms, to verify that your downloaded ZIP file matches the release.
 
+## Reinstallation
+
+1. Exit OfflineLink.
+2. Delete the application folder extracted from the ZIP file. On macOS, delete `OfflineLink.app` if you moved it to Applications.
+3. [Install OfflineLink again](#installation).
+
+Reinstallation preserves your stored tournaments.
+
 ## Uninstallation
 
-1. Close OfflineLink.
-2. Delete the application folder that you extracted from the ZIP file. On macOS, delete `OfflineLink.app` if you moved it to Applications.
+1. Exit OfflineLink.
+2. Delete the application folder extracted from the ZIP file. On macOS, delete `OfflineLink.app` if you moved it to Applications.
 3. Keep `Documents/OfflineLink` to preserve your tournaments. To remove your tournament data as well, back up any files you want to keep, then delete this folder.
 4. Optionally remove OfflineLink's cache and settings folder:
     - Windows: `%APPDATA%\OfflineLink`.
